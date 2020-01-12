@@ -3,6 +3,8 @@
 	<name>oppnet</name>
 	<comment></comment>
 	<projects>
+		<project>inet4</project>
+		<project>slaw</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
