@@ -1,3 +1,12 @@
+INETDIR = $(HOME)/inet4
+SLAWDIR = $(HOME)/slaw
+
+BUILD_OPTIONS = -f --deep -I$(INETDIR)/src/inet/applications/base \
+                 -I$(INETDIR)/src/inet/transportlayer/contract \
+                 -I$(INETDIR)/src/inet/common \
+                 -I$(SLAWDIR)/src/common \
+                 -I$(SLAWDIR)/contract -I$(SLAWDIR)/src/observer
+
 all: checkmakefiles
 	cd src && $(MAKE)
 
