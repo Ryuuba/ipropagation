@@ -20,4 +20,5 @@ package oppnet.observer;
 //
 simple ConnectivityObserver
 {
+    @display("i=observer/connectivity_observer");
 }

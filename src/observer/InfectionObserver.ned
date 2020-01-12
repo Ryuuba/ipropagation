@@ -18,6 +18,8 @@ package oppnet.observer;
 //
 // TODO auto-generated type
 //
-simple ConnectiviyObserver
+simple InfectionObserver
 {
+    @display("i=observer/infection_observer");
 }
+
