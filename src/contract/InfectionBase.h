@@ -37,8 +37,10 @@ protected:
   double recovery_probability;
   /** @brief The probability of getting infected after receiving a msg (eta) */
   double infection_probability;
-  /** @brief The rate at which messages are sent per second */
+  /** @brief The rate at which infectious packets are sent per second */
   omnetpp::simtime_t broadcast_interval;
+  /** @brief The rate at which infectious packets are sent per second */
+  omnetpp::simtime_t recovery_interval;
   /** @brief Timer to set the next broadcast */
   omnetpp::cMessage* broadcast_timer;
   /** @brief The duration of the infection period */
@@ -47,15 +49,16 @@ protected:
   long sent_messages;
   /** @brief The number of received messages */
   long received_messages;
+protected:
+  /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
+   *  broadcast_rate per broadcast_timer (in seconds) */
+  virtual void broadcast() = 0;
 public:
   /** @brief Default constructor, initializes all attributes */
   InfectionBase();
   /** @brief Default destructor, derived classes must cancel and delete 
    *  self-messages */
   virtual ~InfectionBase();
-  /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
-   *  broadcast_rate per broadcast_timer (in seconds) */
-  virtual void broadcast() = 0;
 };
 
 #endif /* INFECTION_BASE_H */

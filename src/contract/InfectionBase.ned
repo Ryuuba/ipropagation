@@ -19,6 +19,7 @@ moduleinterface InfectionBase {
     parameters:
         @display("i=block/cogwheel"); //TODO: Update this icon
         volatile double broadcastInterval @unit(s); //Time between two consecutive broadcasts
+        volatile double recoveryInterval @unit(s); //Time between two consecutive recovery attemps
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta
         @signal[sentMessage](type=long);
@@ -33,7 +34,7 @@ moduleinterface InfectionBase {
         );
         @signal[infectionTime](type=long);
         @statistic[infectionTime](
-          title="Number of received messages";
+          title="Duration of infection periods";
           record=histogram,vector;
           unit=s
         );
