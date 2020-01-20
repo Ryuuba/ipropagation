@@ -47,11 +47,27 @@
                             							
                             <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.330098766" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
                                 								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1887154190" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="/home/geo/inet4/src/inet"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="/home/geo/slaw/src"/>
+                                    								
+                                </option>
+                                								
                                 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.655303009" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
                                 							
                             </tool>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1771728961" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1819274674" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/home/geo/inet4/src/inet}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="/home/geo/slaw/src"/>
+                                    								
+                                </option>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.501608184" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
@@ -72,6 +88,14 @@
                             </tool>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.assembler.base.2003928340" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.497566296" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/home/geo/inet4/src/inet}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="/home/geo/slaw/src"/>
+                                    								
+                                </option>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1377621460" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
                                 							
@@ -141,11 +165,27 @@
                             							
                             <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.633141351" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
                                 								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.449883524" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/home/geo/inet4/src/inet}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="/home/geo/slaw/src"/>
+                                    								
+                                </option>
+                                								
                                 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.513295645" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
                                 							
                             </tool>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.c.compiler.base.536127563" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.563807106" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/home/geo/inet4/src/inet}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="/home/geo/slaw/src"/>
+                                    								
+                                </option>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.142412406" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
@@ -166,6 +206,14 @@
                             </tool>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.assembler.base.21789768" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.1405554732" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${workspace_loc:/home/geo/inet4/src/inet}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="/home/geo/slaw/src"/>
+                                    								
+                                </option>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1110880454" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
                                 							

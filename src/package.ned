@@ -1,3 +1,3 @@
-package oppnet;
+package infection;
 
 @license(LGPL);
