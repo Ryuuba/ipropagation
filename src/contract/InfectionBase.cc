@@ -24,6 +24,7 @@ InfectionBase::InfectionBase() :
   infection_probability(0.0),
   broadcast_interval(0.0),
   broadcast_timer(nullptr),
+  recovery_timer(nullptr),
   infection_time(0.0),
   sent_messages(0),
   received_messages(0)

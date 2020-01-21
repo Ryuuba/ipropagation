@@ -50,7 +50,7 @@ simple Infection like InfectionBase
         string destAddresses = default(""); // list of IP addresses, separated by spaces ("": don't send)
         string localAddress = default("");
         string packetName = default("UdpInfectionPacket");
-        volatile int packetLength @unit(B); // length in bytes
+        volatile int packetSize @unit(B); // length in bytes
 
         //UDP socket settings
         int localPort = default(-1);  // local port (-1: use ephemeral port)

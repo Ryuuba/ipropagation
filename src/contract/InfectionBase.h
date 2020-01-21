@@ -43,6 +43,8 @@ protected:
   omnetpp::simtime_t recovery_interval;
   /** @brief Timer to set the next broadcast */
   omnetpp::cMessage* broadcast_timer;
+  /** @brief Timer to set the next recovery attempt */
+  omnetpp::cMessage* recovery_timer;
   /** @brief The duration of the infection period */
   long infection_time;
   /** @brief The number of sent messages */

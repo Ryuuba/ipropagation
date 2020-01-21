@@ -31,7 +31,7 @@ class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
 {
   protected: //App attributes
     /** @brief A UDP socket to send infectious packets */
-    inet::UdpSocket socket;
+    inet::UdpSocket udp_socket;
     /** @brief List of IPs of hosts in N(x), separated by spaces */
     std::string neighbor_ip;
     /** @brief The IP address of this host */
@@ -39,7 +39,7 @@ class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
     /** @brief The name of the infectious packet */
     std::string packet_name;
     /** @brief The length in bytes of the infectious packet */
-    int packet_length;
+    int packet_size;
     /** @brief the sort of timers this app reacts */
     enum timer_kind {
       RECOVERY = 100, //Indicates the node will try to recover from an infection
@@ -51,9 +51,9 @@ class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
    *         2) Signal carrying the number of received messages
    *         3) Signal carrying the duration of an infection period
    */
-  omnetpp::simsignal_t sent_message_signal, 
-                       received_message_signal, 
-                       infection_time_signal;
+  static omnetpp::simsignal_t sent_message_signal, 
+                              received_message_signal, 
+                              infection_time_signal;
   /** @brief Signal carrying the number of received messages */
   protected: //App member functions
     /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
