@@ -25,10 +25,16 @@ void InfectionApp::initialize(int stage)
     WATCH(received_messages);
     WATCH(infection_time);
     packet_size = par("packetSize");
-    unicast_timer = new omnetpp::cMessage("unicast", InfectionApp::BROADCAST);
+    unicast_timer = new omnetpp::cMessage("unicast", InfectionApp::UNICAST);
     recovery_timer = new omnetpp::cMessage("recovery", InfectionApp::RECOVERY);
     //TODO: Get access to the observer that computes N(x)
+
     //TODO: Get the initial operational status from network
     status = static_cast<Status>(par("initialStatus").intValue());
     //TODO: Schedule self-messages
+    if (status == InfectionBase::INFECTED)
+        scheduleAt(unicast_timer, omnetpp::simTime() + par("unicastInterval"));
+  }
 }
+
+

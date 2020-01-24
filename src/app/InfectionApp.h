@@ -21,7 +21,7 @@
 
 #include "../contract/InfectionBase.h"
 
-#include "inet/common/INETDefs.h"
+#include "INETDefs.h"
 
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
@@ -43,7 +43,7 @@ class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
     /** @brief the sort of timers this app reacts */
     enum timer_kind {
       RECOVERY = 100, //Indicates the node will try to recover from an infection
-      BROADCAST,      //Indicates the host will broadcast a packet
+      UNICAST,      //Indicates the host will broadcast a packet
       EXPERIMENTAL    //Use this enum element to extend this timer
     };
   protected: //App member functions
