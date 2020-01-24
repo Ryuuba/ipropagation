@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package oppnet.node;
+package infection.node;
 import inet.node.inet.INetworkNode;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
@@ -26,7 +26,7 @@ import inet.applications.contract.IApp;
 //
 // TODO auto-generated type
 //
-module WirelessBroadcastNode like INetworkNode
+module WirelessUnicastNode like INetworkNode
 {
     parameters:
         @display("i=device/palm2,,4");

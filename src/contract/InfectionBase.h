@@ -30,19 +30,22 @@ protected:
     EXTRA_STATUS        //First element from an extended status equals this
   };
   /** @brief The current status of nodes running the infection app */
-  Status operational_status;
+  Status status;
   /** @brief The time of the last change of status */
   omnetpp::simtime_t last_change;
   /** @brief The probability of recovery of infection (mu) */
   double recovery_probability;
   /** @brief The probability of getting infected after receiving a msg (eta) */
   double infection_probability;
-  /** @brief The rate at which infectious packets are sent per second */
-  omnetpp::simtime_t broadcast_interval;
+  /** @brief The rate at which infectious packets are sent per second 
+   *  on a unicast comunication. This time could be drawn from a 
+   *  probability distribution. By default, this time is constant.
+   *  */
+  omnetpp::simtime_t unicast_interval;
   /** @brief The rate at which infectious packets are sent per second */
   omnetpp::simtime_t recovery_interval;
   /** @brief Timer to set the next broadcast */
-  omnetpp::cMessage* broadcast_timer;
+  omnetpp::cMessage* unicast_timer;
   /** @brief Timer to set the next recovery attempt */
   omnetpp::cMessage* recovery_timer;
   /** @brief The duration of the infection period */
@@ -51,10 +54,19 @@ protected:
   long sent_messages;
   /** @brief The number of received messages */
   long received_messages;
+protected: //App signals that carry statistics
+  /** @brief 1) Signal carrying the number of sent messages 
+   *         2) Signal carrying the number of received messages
+   *         3) Signal carrying the duration of an infection period
+   */
+  static omnetpp::simsignal_t sent_message_signal, 
+                              received_message_signal, 
+                              infection_time_signal;
 protected:
-  /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
-   *  broadcast_rate per broadcast_timer (in seconds) */
-  virtual void broadcast() = 0;
+  /** @brief Unicasts infectious messages to a node in N(x) at a rate of 
+   *  unicast_rate per unicast_timer (in seconds). Destination is
+   *  randomly selected */
+  virtual void unicast() = 0;
 public:
   /** @brief Default constructor, initializes all attributes */
   InfectionBase();

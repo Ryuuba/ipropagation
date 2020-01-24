@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package oppnet.observer;
+package infection.observer;
 
 //
 // TODO auto-generated type

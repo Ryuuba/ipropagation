@@ -14,7 +14,7 @@
 // 
 
 package infection.app;
-import inet.applications.contract.IApp;
+import infection.contract.InfectionBase;
 
 //
 // Infected nodes using this app broadcast infectious messages to neighboring 
@@ -41,7 +41,7 @@ simple Infection like InfectionBase
     parameters:
         //Parameters from InfectionBase interface
         @display("i=block/app"); //Ugly icon
-        volatile double broadcastInterval @unit(s); //set it in the config file
+        volatile double unicastInterval @unit(s); //set it in the config file
         volatile double recoveryInterval @unit(s);  //set it in the config file
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta

@@ -46,20 +46,11 @@ class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
       BROADCAST,      //Indicates the host will broadcast a packet
       EXPERIMENTAL    //Use this enum element to extend this timer
     };
-  protected: //App signals to carry statistics
-  /** @brief 1) Signal carrying the number of sent messages 
-   *         2) Signal carrying the number of received messages
-   *         3) Signal carrying the duration of an infection period
-   */
-  static omnetpp::simsignal_t sent_message_signal, 
-                              received_message_signal, 
-                              infection_time_signal;
-  /** @brief Signal carrying the number of received messages */
   protected: //App member functions
     /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
      *  broadcast_rate per broadcast_timer (in seconds), overriden from 
      *  InfectionBase class */
-    virtual void broadcast() override;
+    virtual void unicast() override;
     /** @brief choose random destination address */
 
     /** @brief Handle the timers of this application */

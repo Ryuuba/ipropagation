@@ -18,10 +18,11 @@ package infection.contract;
 moduleinterface InfectionBase {
     parameters:
         @display("i=block/cogwheel"); //TODO: Update this icon
-        volatile double broadcastInterval @unit(s); //Time between two consecutive broadcasts
+        volatile double unicastInterval @unit(s); //Time between two consecutive broadcasts
         volatile double recoveryInterval @unit(s); //Time between two consecutive recovery attemps
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta
+        int initialStatus @enum(staringOperation=1, infected, notInfected);
         @signal[sentMessage](type=long);
         @statistic[sentMessage](
           title="Number of sent messages";

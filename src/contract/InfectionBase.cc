@@ -22,8 +22,8 @@ InfectionBase::InfectionBase() :
   last_change(0.0),
   recovery_probability(0.0),
   infection_probability(0.0),
-  broadcast_interval(0.0),
-  broadcast_timer(nullptr),
+  unicast_interval(0.0),
+  unicast_timer(nullptr),
   recovery_timer(nullptr),
   infection_time(0.0),
   sent_messages(0),
@@ -34,6 +34,7 @@ InfectionBase::InfectionBase() :
 
 InfectionBase::~InfectionBase()
 {
-  // TODO Auto-generated destructor stub
+  cancelAndDelete(unicast_timer);
+  cancelAndDelete(recovery_timer);
 }
 
