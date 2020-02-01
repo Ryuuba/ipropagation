@@ -22,7 +22,7 @@ moduleinterface IApp
 {
     parameters:
         //TODO: Change icon to infection app
-        @display("i=block/app");
+        @display("i=block/infection_app");
     gates:
         input in @labels(to NetworkLayerDispatcher);
         output out @labels(from NetworkLayerDispatcher);

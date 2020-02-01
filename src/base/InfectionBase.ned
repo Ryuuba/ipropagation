@@ -13,16 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.contract;
+package infection.base;
+import infection.contract.IApp;
 
-moduleinterface InfectionBase {
+moduleinterface InfectionBase like IApp{
     parameters:
-        @display("i=block/cogwheel"); //TODO: Update this icon
-        volatile double unicastInterval @unit(s); //Time between two consecutive broadcasts
-        volatile double recoveryInterval @unit(s); //Time between two consecutive recovery attemps
+        @display("i=block/app");
+        volatile double sentInterval @unit(s);
+        volatile double recoveryInterval @unit(s);
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta
-        int initialStatus @enum(staringOperation=1, infected, notInfected);
+        int initialStatus @enum(infected, notInfected);
         @signal[sentMessage](type=long);
         @statistic[sentMessage](
           title="Number of sent messages";
@@ -39,4 +40,7 @@ moduleinterface InfectionBase {
           record=histogram,vector;
           unit=s
         );
+    gates:
+        input in @labels(to NetworkLayerDispatcher);
+        output out @labels(from NetworkLayerDispatcher);
 }

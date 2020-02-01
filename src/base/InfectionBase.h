@@ -23,9 +23,9 @@ class InfectionBase : public omnetpp::cSimpleModule
 {
 protected:
   /** @brief The possible node status for this infection app. This enum could 
-   *  be extended if the first new status equals EXTRA_STATUS */
+   *  be extended if the first you override it */
   enum Status {
-    INFECTED,           //Nodes broadcasted infectious messages to its neighbors
+    INFECTED,          //Nodes broadcasted infectious messages to its neighbors
     NOT_INFECTED       //Nodes listen to the wireless channel
   };
   /** @brief The current status of nodes running the infection app */
@@ -36,15 +36,14 @@ protected:
   double recovery_probability;
   /** @brief The probability of getting infected after receiving a msg (eta) */
   double infection_probability;
-  /** @brief The rate at which infectious packets are sent per second 
-   *  on a unicast comunication. This time could be drawn from a 
-   *  probability distribution. By default, this time is constant.
-   *  */
-  omnetpp::simtime_t unicast_interval;
+  /** @brief The rate at which infectious packets are sent per second. This 
+   *  time interval could be drawn from a probability distribution. By default, 
+   *  this time is constant */
+  omnetpp::simtime_t sent_interval;
   /** @brief The rate at which infectious packets are sent per second */
   omnetpp::simtime_t recovery_interval;
-  /** @brief Timer to set the next broadcast */
-  omnetpp::cMessage* unicast_timer;
+  /** @brief Timer to set the next message */
+  omnetpp::cMessage* message_timer;
   /** @brief Timer to set the next recovery attempt */
   omnetpp::cMessage* recovery_timer;
   /** @brief The duration of the infection period */
@@ -62,10 +61,10 @@ protected: //App signals that carry statistics
                               received_message_signal, 
                               infection_time_signal;
 protected:
-  /** @brief Unicasts infectious messages to a node in N(x) at a rate of 
-   *  unicast_rate per unicast_timer (in seconds). Destination is
-   *  randomly selected */
-  virtual void unicast() = 0;
+  /** @brief Sends infectious messages to nodes in N(x) following a 
+   *  transferring communication methos (unicast, broadcast, multicast, anycast)
+   * */
+  virtual void emit_message() = 0;
 public:
   /** @brief Default constructor, initializes all attributes */
   InfectionBase();
