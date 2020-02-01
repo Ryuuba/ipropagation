@@ -18,16 +18,15 @@
 
 #include <omnetpp.h>
 
+
 class InfectionBase : public omnetpp::cSimpleModule
 {
 protected:
   /** @brief The possible node status for this infection app. This enum could 
    *  be extended if the first new status equals EXTRA_STATUS */
   enum Status {
-    STARTING_OPERATION, //Nodes are performing initialization tasks, e.g., obtaining N(x)
     INFECTED,           //Nodes broadcasted infectious messages to its neighbors
-    NOT_INFECTED,       //Nodes listen to the wireless channel
-    EXTRA_STATUS        //First element from an extended status equals this
+    NOT_INFECTED       //Nodes listen to the wireless channel
   };
   /** @brief The current status of nodes running the infection app */
   Status status;

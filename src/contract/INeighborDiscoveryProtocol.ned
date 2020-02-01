@@ -13,28 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "InfectionBase.h"
+package infection.contract;
 
-Register_Abstract_Class(InfectionBase);
-
-InfectionBase::InfectionBase() : 
-  operational_status(InfectionBase::Status::STARTING_OPERATION),
-  last_change(0.0),
-  recovery_probability(0.0),
-  infection_probability(0.0),
-  unicast_interval(0.0),
-  unicast_timer(nullptr),
-  recovery_timer(nullptr),
-  infection_time(0.0),
-  sent_messages(0),
-  received_messages(0)
+//
+// TODO auto-generated type
+//
+moduleinterface INeighborDiscoveryProtocol
 {
-  // TODO Auto-generated constructor stub
+    parameters:
+        @display("i=block/network");
+    gates:
+        input in @labels(from NetworkLayerDispatcher);
+        output out @labels(to NetworkLayerDispatcher);
 }
-
-InfectionBase::~InfectionBase()
-{
-  cancelAndDelete(unicast_timer);
-  cancelAndDelete(recovery_timer);
-}
-

@@ -19,13 +19,12 @@
 #include <string>
 #include <omnetpp.h>
 
-#include "../contract/InfectionBase.h"
-
 #include "INETDefs.h"
 
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "../base/InfectionBase.h"
 
 class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
 {
