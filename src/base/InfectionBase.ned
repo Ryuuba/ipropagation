@@ -13,34 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.base;
-import infection.contract.IApp;
+package informationpropagation.base;
+import informationpropagation.contract.IApp;
 
-moduleinterface InfectionBase like IApp{
+simple InfectionBase like IApp{
     parameters:
-        @display("i=block/app");
+        @display("i=block/infection_app");
         volatile double sentInterval @unit(s);
         volatile double recoveryInterval @unit(s);
+        double statusReportInterval @unit(s) = default (1s);
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta
         int initialStatus @enum(infected, notInfected);
-        @signal[sentMessage](type=long);
-        @statistic[sentMessage](
-          title="Number of sent messages";
-          record=histogram,vector
-        );
-        @signal[receivedMessage](type=long);
-        @statistic[receivedMessage](
-          title="Number of received messages";
-          record=histogram,vector
-        );
-        @signal[infectionTime](type=long);
-        @statistic[infectionTime](
-          title="Duration of infection periods";
-          record=histogram,vector;
-          unit=s
-        );
     gates:
-        input in @labels(to NetworkLayerDispatcher);
-        output out @labels(from NetworkLayerDispatcher);
+        input inputPort @labels(to/NetworkLayerDispatcher);
+        output outputPort @labels(from/NetworkLayerDispatcher);
 }

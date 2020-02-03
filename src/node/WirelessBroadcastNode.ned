@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.node;
+package informationpropagation.node;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.common.MessageDispatcher;
-import infection.networklayer.ExtendedNetworkLayer;
-import infection.contract.IApp;
+import informationpropagation.networklayer.ExtendedNetworkLayer;
+import informationpropagation.contract.IApp;
 
 //
 // TODO auto-generated type
@@ -76,6 +76,6 @@ module WirelessBroadcastNode
         nl.out++ --> net.ifIn;
         net.transportOut --> al.in++;
         al.out++ --> net.transportIn;
-        app.out --> al.in++;
-        al.out++ --> app.in;
+        app.outputPort --> al.in++;
+        al.out++ --> app.inputPort;
 }

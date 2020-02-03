@@ -13,12 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package informationpropagation.observer;
-
 //
-// TODO auto-generated type
+// TODO generated message class
 //
-simple ConnectivityObserver
-{
-    @display("i=observer/connectivity_observer");
+packet Info {
+    int host_id;
 }

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.networklayer;
-import infection.contract.INeighborCache;
+package informationpropagation.networklayer;
+import informationpropagation.contract.INeighborCache;
 
 //
 // TODO auto-generated type

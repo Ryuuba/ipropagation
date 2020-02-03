@@ -13,10 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.networklayer;
+package informationpropagation.networklayer;
 import inet.networklayer.common.SimpleNetworkLayer;
-import infection.contract.INeighborDiscoveryProtocol;
-import infection.contract.INeighborCache;
+import informationpropagation.contract.INeighborDiscoveryProtocol;
+import informationpropagation.contract.INeighborCache;
 
 //
 // TODO auto-generated type

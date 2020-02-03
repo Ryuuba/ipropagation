@@ -25,33 +25,39 @@
 #include "inet/networklayer/common/FragmentationTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "../base/InfectionBase.h"
+#include "Info_m.h"
 
-class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
+class BroadcastInfectionApp : public InfectionBase
 {
   protected: //App attributes
-    /** @brief A UDP socket to send infectious packets */
-    inet::UdpSocket udp_socket;
-    /** @brief List of IPs of hosts in N(x), separated by spaces */
-    std::string neighbor_ip;
-    /** @brief The IP address of this host */
-    std::string ip;
+    /** @brief The ID of the gate where broadcast messages arrive */
+    int input_gate_id;
+    /** @brief The ID of the gate where broadcast messages are sent */
+    int output_gate_id;
+    /** @brief The simulation ID of the host */
+    int host_id;
+    Info* pkt;
     /** @brief The name of the infectious packet */
-    std::string packet_name;
+    const char* packet_name = "infection";
     /** @brief The length in bytes of the infectious packet */
     int packet_size;
     /** @brief the sort of timers this app reacts */
     enum timer_kind {
-      RECOVERY = 100, //Indicates the node will try to recover from an infection
-      UNICAST,      //Indicates the host will broadcast a packet
-      EXPERIMENTAL    //Use this enum element to extend this timer
+      RECOVERY = 100, //Triggers an attempt to recover from an infection
+      BROADCAST,      //Triggers the broadcasting of a packet
+      STATUS          //Triggers the emition of the host status
     };
   protected: //App member functions
     /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
      *  broadcast_rate per broadcast_timer (in seconds), overriden from 
      *  InfectionBase class */
-    virtual void unicast() override;
-    /** @brief choose random destination address */
-
+    virtual void send_message(omnetpp::cMessage*) override;
+    /** @brief Tries to recovery from an infection */
+    virtual void try_recovery(omnetpp::cMessage*) override;
+    /** @brief Emits the host status */
+    virtual void emit_status(omnetpp::cMessage*) override;
+    /** @brief Process the received packet */
+    virtual void process_packet(omnetpp::cMessage*) override;
     /** @brief Handle the timers of this application */
     virtual void handleMessage(omnetpp::cMessage*) override;
     /** @brief INET applications need 12 states to initialize all simulation 
@@ -62,25 +68,11 @@ class InfectionApp : public InfectionBase, public inet::UdpSocket::ICallback
     virtual void initialize(int stage) override;
     /** @brief Changes the icon of the app to indicate the host status */
     virtual void refreshDisplay() const override;
-  protected: //Member functions overridden from the ICallBack abstract class
-    /** @brief Notifies about data arrival, packet ownership is transferred to 
-     *  the callee */
-    virtual void socketDataArrived(
-      inet::UdpSocket* socket, inet::Packet* packet
-    ) override;
-    /** @brief Notifies about error indication arrival, indication ownership 
-     *  is transferred to the callee. */
-    virtual void socketErrorArrived(
-      inet::UdpSocket* socket, inet::Indication* indication
-    ) override;
-    /** @brief Notifies about socket closed, indication ownership is 
-     *  transferred to the callee. */
-    virtual void socketClosed(inet::UdpSocket* socket) override;
   public:
     /** @brief Default constructor initializing the class parameters */
-    InfectionApp();
+    BroadcastInfectionApp();
     /** @brief Cancels self-messages (timers) when destructing *this */
-    virtual ~InfectionApp();
+    virtual ~BroadcastInfectionApp();
 
 };
 

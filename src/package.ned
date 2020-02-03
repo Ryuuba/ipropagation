@@ -1,3 +1,3 @@
-package infection;
+package informationpropagation;
 
 @license(LGPL);

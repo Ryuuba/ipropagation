@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.node;
+package informationpropagation.node;
 import inet.node.inet.INetworkNode;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;

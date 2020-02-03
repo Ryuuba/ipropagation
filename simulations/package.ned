@@ -1,3 +1,3 @@
-package oppnet.simulations;
+package informationpropagation.simulations;
 
 @license(LGPL);

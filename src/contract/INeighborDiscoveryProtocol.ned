@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.contract;
+package informationpropagation.contract;
 
 //
 // TODO auto-generated type

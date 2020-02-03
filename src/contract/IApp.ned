@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package infection.contract;
+package informationpropagation.contract;
 
 //
 // TODO auto-generated type
@@ -24,6 +24,6 @@ moduleinterface IApp
         //TODO: Change icon to infection app
         @display("i=block/infection_app");
     gates:
-        input in @labels(to NetworkLayerDispatcher);
-        output out @labels(from NetworkLayerDispatcher);
+        input inputPort @labels(to NetworkLayerDispatcher);
+        output outputPort @labels(from NetworkLayerDispatcher);
 }

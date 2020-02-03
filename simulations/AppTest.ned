@@ -13,12 +13,30 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package informationpropagation.observer;
-
+package informationpropagation.simulations;
+import informationpropagation.contract.IApp;
+import inet.common.MessageDispatcher;
 //
 // TODO auto-generated type
 //
-simple ConnectivityObserver
+network AppTest
 {
-    @display("i=observer/connectivity_observer");
+    parameters:
+        @display("bgb=400,400");
+        string appKind = "BroadcastInfectionApp";
+        int appNumber = default(100);
+    submodules:
+        app[appNumber]: <appKind> like IApp {
+            parameters:
+                @display("p=144,44");
+        }
+        bus: MessageDispatcher {
+            parameters:
+                @display("p=144,163;b=200,5,,,,1");
+        }
+    connections:
+        for i=0..appNumer-1 {
+            app[i].outputPort --> bus.in++;
+            app[i].inputPort  <-- bus.out++;
+        }
 }

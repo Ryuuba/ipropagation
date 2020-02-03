@@ -30,8 +30,8 @@ protected:
   };
   /** @brief The current status of nodes running the infection app */
   Status status;
-  /** @brief The time of the last change of status */
-  omnetpp::simtime_t last_change;
+  /** @brief The rate at which hosts report their status */
+  omnetpp::simtime_t status_report_interval;
   /** @brief The probability of recovery of infection (mu) */
   double recovery_probability;
   /** @brief The probability of getting infected after receiving a msg (eta) */
@@ -47,7 +47,9 @@ protected:
   /** @brief Timer to set the next recovery attempt */
   omnetpp::cMessage* recovery_timer;
   /** @brief The duration of the infection period */
-  long infection_time;
+  omnetpp::cMessage* status_timer;
+  /** @brief The duration of the infection period */
+  omnetpp::simtime_t infection_time;
   /** @brief The number of sent messages */
   long sent_messages;
   /** @brief The number of received messages */
@@ -55,16 +57,22 @@ protected:
 protected: //App signals that carry statistics
   /** @brief 1) Signal carrying the number of sent messages 
    *         2) Signal carrying the number of received messages
-   *         3) Signal carrying the duration of an infection period
+   *         3) Signal carrying the host status
    */
   static omnetpp::simsignal_t sent_message_signal, 
-                              received_message_signal, 
-                              infection_time_signal;
+                              received_message_signal,
+                              status_signal;
 protected:
   /** @brief Sends infectious messages to nodes in N(x) following a 
    *  transferring communication methos (unicast, broadcast, multicast, anycast)
    * */
-  virtual void emit_message() = 0;
+  virtual void send_message(omnetpp::cMessage*) = 0;
+  /** @brief Tries to recovery from an infection */
+  virtual void try_recovery(omnetpp::cMessage*) = 0;
+  /** @brief Process the received packet */
+  virtual void process_packet(omnetpp::cMessage*) = 0;
+  /** @brief Emits the host status */
+  virtual void emit_status(omnetpp::cMessage*) = 0;
 public:
   /** @brief Default constructor, initializes all attributes */
   InfectionBase();
