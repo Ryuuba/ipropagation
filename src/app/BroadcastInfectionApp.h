@@ -20,12 +20,8 @@
 #include <omnetpp.h>
 
 #include "INETDefs.h"
-
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/networklayer/common/FragmentationTag_m.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
 #include "../base/InfectionBase.h"
-#include "Info_m.h"
+#include "../msg/Info_m.h"
 
 class BroadcastInfectionApp : public InfectionBase
 {

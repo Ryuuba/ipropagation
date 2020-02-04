@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.5 from Info.msg.
+// Generated file, do not edit! Created by nedtool 5.5 from msg/Info.msg.
 //
 
 #ifndef __INFO_M_H
@@ -19,7 +19,7 @@
 
 
 /**
- * Class generated from <tt>Info.msg:19</tt> by nedtool.
+ * Class generated from <tt>msg/Info.msg:19</tt> by nedtool.
  * <pre>
  * //
  * // TODO generated message class

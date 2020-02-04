@@ -1,11 +1,14 @@
 INETDIR = $(HOME)/inet4
 SLAWDIR = $(HOME)/slaw
-
-BUILD_OPTIONS = -f --deep -I$(INETDIR)/src/inet/applications/base \
-                 -I$(INETDIR)/src/inet/transportlayer/contract \
-                 -I$(INETDIR)/src/inet/common \
-                 -I$(SLAWDIR)/src/common \
-                 -I$(SLAWDIR)/contract -I$(SLAWDIR)/src/observer
+BUILD_OPTIONS = -f --deep \
+								-I$(INETDIR)/src/ \
+                -I$(INETDIR)/src/inet/common/ \
+								-L$(INETDIR)/out/gcc-release/src/ \
+                -I$(SLAWDIR)/src/common/ \
+                -I$(SLAWDIR)/contract/ \
+								-I$(SLAWDIR)/src/observer/ \
+								-lINET \
+								-o info_propg
 
 all: checkmakefiles
 	cd src && $(MAKE)
@@ -19,7 +22,7 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake -f --deep
+	cd src && opp_makemake $(BUILD_OPTIONS)
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
