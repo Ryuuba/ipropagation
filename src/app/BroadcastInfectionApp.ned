@@ -43,7 +43,11 @@ simple BroadcastInfectionApp extends InfectionBase
         //App settings
         volatile int packetSize @unit(B); // length in bytes
         //probability that node start infected
-        double initialInfectionProbability = default(0.5); 
-        double recoveryProbability  = default(0.1); //a.k.a. mu
-        double infectionProbability = default(0.1); //a.k.a eta
+        double initialInfectionProbability;
+        @signal[sentMessage](type = long);
+        @statistic[sentMessage](record=histogram,vector);
+        @signal[receivedMessage](type = long);
+        @statistic[receivedMessage](record=histogram,vector);
+        @signal[infectionTime](type = long);
+        @statistic[infectionTime](record=histogram,vector);
 }

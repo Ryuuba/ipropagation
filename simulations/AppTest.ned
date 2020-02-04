@@ -22,21 +22,21 @@ import inet.common.MessageDispatcher;
 network AppTest
 {
     parameters:
-        @display("bgb=400,400");
+        @display("bgb=250,250");
         string appKind = "BroadcastInfectionApp";
         int appNumber = default(100);
     submodules:
         app[appNumber]: <appKind> like IApp {
             parameters:
-                @display("p=144,44");
+                @display("p=129,47");
         }
         bus: MessageDispatcher {
             parameters:
-                @display("p=144,163;b=200,5,,,,1");
+                @display("p=129,197;b=200,5,,,,1");
         }
     connections:
         for i=0..appNumer-1 {
             app[i].outputPort --> bus.in++;
-            app[i].inputPort  <-- bus.out++;
+            app[i].inputPort <-- bus.out++;
         }
 }

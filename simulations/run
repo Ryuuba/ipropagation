@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 cd `dirname $0`
-../src/oppnet -n .:../src $*
+../src/info_propg -n .:../src $*
 # for shared lib, use: opp_run -l ../src/oppnet -n .:../src $*
