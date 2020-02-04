@@ -26,9 +26,6 @@ void BroadcastInfectionApp::initialize(int stage)
     host_id = getParentModule()->getIndex();
     input_gate_id = gate("inputPort")->getId();
     output_gate_id = gate("outputPort")->getId();
-    WATCH(sent_messages);
-    WATCH(received_messages);
-    WATCH(status);
     packet_size = par("packetSize");
     status_report_interval = par("statusReportInterval");
     recovery_probability = par("recoveryProbabily");
@@ -39,15 +36,22 @@ void BroadcastInfectionApp::initialize(int stage)
     message_timer->setSchedulingPriority(1);
     recovery_timer = new omnetpp::cMessage("recovery", BroadcastInfectionApp::RECOVERY);
     recovery_timer->setSchedulingPriority(1);
-    //TODO: Get the initial operational status from network
-    status = static_cast<Status>(par("initialStatus").intValue());
-    //TODO: Schedule self-messages
+    if (
+      uniform(0.0, 1.0) < 
+      par("initialInfectionProbability").doubleValue()
+    )
+      status = InfectionBase::INFECTED;
+    else
+      status = InfectionBase::NOT_INFECTED;
     if (status == InfectionBase::INFECTED)
       scheduleAt(
         omnetpp::simTime() + par("sentInterval"), 
         message_timer
       );
     scheduleAt(omnetpp::simTime() + status_report_interval, status_timer);
+    WATCH(sent_messages);
+    WATCH(received_messages);
+    WATCH(status);
   }
 }
 

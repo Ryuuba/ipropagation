@@ -24,7 +24,6 @@ simple InfectionBase like IApp{
         double statusReportInterval @unit(s) = default (1s);
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta
-        int initialStatus @enum(infected, notInfected);
     gates:
         input inputPort @labels(to/NetworkLayerDispatcher);
         output outputPort @labels(from/NetworkLayerDispatcher);
