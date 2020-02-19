@@ -16,6 +16,21 @@
 //
 // TODO generated message class
 //
-packet Info {
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+
+namespace inet;
+
+enum InfoType
+{
+    VIRUS = 0;
+    DATA = 1;
+    OTHER = 2;
+}
+
+class Info extends FieldsChunk
+{
+    InfoType type;
+    int identifer;
     int host_id;
 }

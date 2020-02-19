@@ -13,13 +13,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if !defined(INFECTION_APP_H)
-#define INFECTION_APP_H
+#if !defined(BROADCAST_INFECTION_APP_H)
+#define BROADCAST_INFECTION_APP_H
 
 #include <string>
 #include <omnetpp.h>
 
-#include "INETDefs.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "../base/InfectionBase.h"
 #include "../msg/Info_m.h"
 
@@ -32,7 +33,6 @@ class BroadcastInfectionApp : public InfectionBase
     int output_gate_id;
     /** @brief The simulation ID of the host */
     int host_id;
-    Info* pkt;
     /** @brief The name of the infectious packet */
     const char* packet_name = "infection";
     /** @brief The length in bytes of the infectious packet */
@@ -41,11 +41,11 @@ class BroadcastInfectionApp : public InfectionBase
     enum timer_kind {
       RECOVERY = 100, //Triggers an attempt to recover from an infection
       BROADCAST,      //Triggers the broadcasting of a packet
-      STATUS          //Triggers the emition of the host status
+      STATUS          //Triggers the emittion of the host status
     };
   protected: //App member functions
     /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
-     *  broadcast_rate per broadcast_timer (in seconds), overriden from 
+     *  broadcast_rate per broadcast_timer (in seconds), overridden from
      *  InfectionBase class */
     virtual void send_message(omnetpp::cMessage*) override;
     /** @brief Tries to recovery from an infection */
@@ -60,7 +60,7 @@ class BroadcastInfectionApp : public InfectionBase
      *  modules. TODO: check this whether this condition is needed or not */
     virtual int numInitStages() const override {return inet::NUM_INIT_STAGES;}
     /** @brief Initializes the app state getting N(x), the initial node 
-     *  status, probability distributuions, etc.  */
+     *  status, probability distributions, etc.  */
     virtual void initialize(int stage) override;
     /** @brief Changes the icon of the app to indicate the host status */
     virtual void refreshDisplay() const override;
@@ -72,4 +72,4 @@ class BroadcastInfectionApp : public InfectionBase
 
 };
 
-#endif // INFECTION_APP_H
+#endif // BROADCAST_INFECTION_APP_H

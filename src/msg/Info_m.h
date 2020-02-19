@@ -2,8 +2,8 @@
 // Generated file, do not edit! Created by nedtool 5.5 from msg/Info.msg.
 //
 
-#ifndef __INFO_M_H
-#define __INFO_M_H
+#ifndef __INET_INFO_M_H
+#define __INET_INFO_M_H
 
 #if defined(__clang__)
 #  pragma clang diagnostic ignored "-Wreserved-id-macro"
@@ -17,23 +17,52 @@
 #endif
 
 
+namespace inet {
+
+class Info;
+} // namespace inet
+
+#include "inet/common/INETDefs_m.h" // import inet.common.INETDefs
+
+#include "inet/common/packet/chunk/Chunk_m.h" // import inet.common.packet.chunk.Chunk
+
+
+namespace inet {
 
 /**
- * Class generated from <tt>msg/Info.msg:19</tt> by nedtool.
+ * Enum generated from <tt>msg/Info.msg:25</tt> by nedtool.
  * <pre>
- * //
- * // TODO generated message class
- * //
- * packet Info
+ * enum InfoType
  * {
+ *     VIRUS = 0;
+ *     DATA = 1;
+ *     OTHER = 2;
+ * }
+ * </pre>
+ */
+enum InfoType {
+    VIRUS = 0,
+    DATA = 1,
+    OTHER = 2
+};
+
+/**
+ * Class generated from <tt>msg/Info.msg:32</tt> by nedtool.
+ * <pre>
+ * class Info extends FieldsChunk
+ * {
+ *     InfoType type;
+ *     int identifer;
  *     int host_id;
  * }
  * </pre>
  */
-class Info : public ::omnetpp::cPacket
+class Info : public ::inet::FieldsChunk
 {
   protected:
-    int host_id;
+    inet::InfoType type = static_cast<inet::InfoType>(-1);
+    int identifer = 0;
+    int host_id = 0;
 
   private:
     void copy(const Info& other);
@@ -43,7 +72,7 @@ class Info : public ::omnetpp::cPacket
     bool operator==(const Info&);
 
   public:
-    Info(const char *name=nullptr, short kind=0);
+    Info();
     Info(const Info& other);
     virtual ~Info();
     Info& operator=(const Info& other);
@@ -52,6 +81,10 @@ class Info : public ::omnetpp::cPacket
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
     // field getter/setter methods
+    virtual inet::InfoType getType() const;
+    virtual void setType(inet::InfoType type);
+    virtual int getIdentifer() const;
+    virtual void setIdentifer(int identifer);
     virtual int getHost_id() const;
     virtual void setHost_id(int host_id);
 };
@@ -59,6 +92,7 @@ class Info : public ::omnetpp::cPacket
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Info& obj) {obj.parsimPack(b);}
 inline void doParsimUnpacking(omnetpp::cCommBuffer *b, Info& obj) {obj.parsimUnpack(b);}
 
+} // namespace inet
 
-#endif // ifndef __INFO_M_H
+#endif // ifndef __INET_INFO_M_H
 

@@ -46,14 +46,10 @@ module WirelessBroadcastNode
                 @display("p=65,90;is=s");
         }
         app: <> like IApp {
-            @display("p=226,40");
-        }
-        al: MessageDispatcher {
-            parameters:
-                @display("p=226,125;b=200,5,,,,1");
+            @display("p=226,98");
         }
         net: ExtendedNetworkLayer {
-            @display("p=226,193");
+            @display("p=226,188");
         }
         nl: MessageDispatcher {
             parameters:
@@ -74,8 +70,6 @@ module WirelessBroadcastNode
         nl.out++ --> wlan[0].upperLayerIn;
         net.ifOut --> nl.in++;
         nl.out++ --> net.ifIn;
-        net.transportOut --> al.in++;
-        al.out++ --> net.transportIn;
-        app.outputPort --> al.in++;
-        al.out++ --> app.inputPort;
+        app.outputPort --> net.transportIn;
+        net.transportOut --> app.inputPort;
 }

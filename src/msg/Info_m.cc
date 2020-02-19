@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include "Info_m.h"
 
 namespace omnetpp {
@@ -67,7 +68,7 @@ void doParsimUnpacking(omnetpp::cCommBuffer *buffer, std::list<T,A>& l)
 {
     int n;
     doParsimUnpacking(buffer, n);
-    for (int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
         l.push_back(T());
         doParsimUnpacking(buffer, l.back());
     }
@@ -87,7 +88,7 @@ void doParsimUnpacking(omnetpp::cCommBuffer *buffer, std::set<T,Tr,A>& s)
 {
     int n;
     doParsimUnpacking(buffer, n);
-    for (int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
         T x;
         doParsimUnpacking(buffer, x);
         s.insert(x);
@@ -110,7 +111,7 @@ void doParsimUnpacking(omnetpp::cCommBuffer *buffer, std::map<K,V,Tr,A>& m)
 {
     int n;
     doParsimUnpacking(buffer, n);
-    for (int i=0; i<n; i++) {
+    for (int i = 0; i < n; i++) {
         K k; V v;
         doParsimUnpacking(buffer, k);
         doParsimUnpacking(buffer, v);
@@ -148,10 +149,39 @@ void doParsimUnpacking(omnetpp::cCommBuffer *, T& t)
 
 }  // namespace omnetpp
 
+namespace {
+template <class T> inline
+typename std::enable_if<std::is_polymorphic<T>::value && std::is_base_of<omnetpp::cObject,T>::value, void *>::type
+toVoidPtr(T* t)
+{
+    return (void *)(static_cast<const omnetpp::cObject *>(t));
+}
+
+template <class T> inline
+typename std::enable_if<std::is_polymorphic<T>::value && !std::is_base_of<omnetpp::cObject,T>::value, void *>::type
+toVoidPtr(T* t)
+{
+    return (void *)dynamic_cast<const void *>(t);
+}
+
+template <class T> inline
+typename std::enable_if<!std::is_polymorphic<T>::value, void *>::type
+toVoidPtr(T* t)
+{
+    return (void *)static_cast<const void *>(t);
+}
+
+}
+
+namespace inet {
 
 // forward
 template<typename T, typename A>
 std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec);
+
+// Template rule to generate operator<< for shared_ptr<T>
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out,const std::shared_ptr<T>& t) { return out << t.get(); }
 
 // Template rule which fires if a struct or class doesn't have operator<<
 template<typename T>
@@ -170,21 +200,28 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
         out << *it;
     }
     out.put('}');
-    
+
     char buf[32];
     sprintf(buf, " (size=%u)", (unsigned int)vec.size());
     out.write(buf, strlen(buf));
     return out;
 }
 
+EXECUTE_ON_STARTUP(
+    omnetpp::cEnum *e = omnetpp::cEnum::find("inet::InfoType");
+    if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::InfoType"));
+    e->insert(VIRUS, "VIRUS");
+    e->insert(DATA, "DATA");
+    e->insert(OTHER, "OTHER");
+)
+
 Register_Class(Info)
 
-Info::Info(const char *name, short kind) : ::omnetpp::cPacket(name,kind)
+Info::Info() : ::inet::FieldsChunk()
 {
-    this->host_id = 0;
 }
 
-Info::Info(const Info& other) : ::omnetpp::cPacket(other)
+Info::Info(const Info& other) : ::inet::FieldsChunk(other)
 {
     copy(other);
 }
@@ -195,27 +232,55 @@ Info::~Info()
 
 Info& Info::operator=(const Info& other)
 {
-    if (this==&other) return *this;
-    ::omnetpp::cPacket::operator=(other);
+    if (this == &other) return *this;
+    ::inet::FieldsChunk::operator=(other);
     copy(other);
     return *this;
 }
 
 void Info::copy(const Info& other)
 {
+    this->type = other.type;
+    this->identifer = other.identifer;
     this->host_id = other.host_id;
 }
 
 void Info::parsimPack(omnetpp::cCommBuffer *b) const
 {
-    ::omnetpp::cPacket::parsimPack(b);
+    ::inet::FieldsChunk::parsimPack(b);
+    doParsimPacking(b,this->type);
+    doParsimPacking(b,this->identifer);
     doParsimPacking(b,this->host_id);
 }
 
 void Info::parsimUnpack(omnetpp::cCommBuffer *b)
 {
-    ::omnetpp::cPacket::parsimUnpack(b);
+    ::inet::FieldsChunk::parsimUnpack(b);
+    doParsimUnpacking(b,this->type);
+    doParsimUnpacking(b,this->identifer);
     doParsimUnpacking(b,this->host_id);
+}
+
+inet::InfoType Info::getType() const
+{
+    return this->type;
+}
+
+void Info::setType(inet::InfoType type)
+{
+    handleChange();
+    this->type = type;
+}
+
+int Info::getIdentifer() const
+{
+    return this->identifer;
+}
+
+void Info::setIdentifer(int identifer)
+{
+    handleChange();
+    this->identifer = identifer;
 }
 
 int Info::getHost_id() const
@@ -225,6 +290,7 @@ int Info::getHost_id() const
 
 void Info::setHost_id(int host_id)
 {
+    handleChange();
     this->host_id = host_id;
 }
 
@@ -232,6 +298,11 @@ class InfoDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertynames;
+    enum FieldConstants {
+        FIELD_type,
+        FIELD_identifer,
+        FIELD_host_id,
+    };
   public:
     InfoDescriptor();
     virtual ~InfoDescriptor();
@@ -258,7 +329,7 @@ class InfoDescriptor : public omnetpp::cClassDescriptor
 
 Register_ClassDescriptor(InfoDescriptor)
 
-InfoDescriptor::InfoDescriptor() : omnetpp::cClassDescriptor("Info", "omnetpp::cPacket")
+InfoDescriptor::InfoDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::Info)), "inet::FieldsChunk")
 {
     propertynames = nullptr;
 }
@@ -293,7 +364,7 @@ const char *InfoDescriptor::getProperty(const char *propertyname) const
 int InfoDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount() : 1;
+    return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
 unsigned int InfoDescriptor::getFieldTypeFlags(int field) const
@@ -305,9 +376,11 @@ unsigned int InfoDescriptor::getFieldTypeFlags(int field) const
         field -= basedesc->getFieldCount();
     }
     static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,
+        0,    // FIELD_type
+        FD_ISEDITABLE,    // FIELD_identifer
+        FD_ISEDITABLE,    // FIELD_host_id
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *InfoDescriptor::getFieldName(int field) const
@@ -319,16 +392,20 @@ const char *InfoDescriptor::getFieldName(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldNames[] = {
+        "type",
+        "identifer",
         "host_id",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 3) ? fieldNames[field] : nullptr;
 }
 
 int InfoDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
-    if (fieldName[0]=='h' && strcmp(fieldName, "host_id")==0) return base+0;
+    if (fieldName[0] == 't' && strcmp(fieldName, "type") == 0) return base+0;
+    if (fieldName[0] == 'i' && strcmp(fieldName, "identifer") == 0) return base+1;
+    if (fieldName[0] == 'h' && strcmp(fieldName, "host_id") == 0) return base+2;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -341,9 +418,11 @@ const char *InfoDescriptor::getFieldTypeString(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldTypeStrings[] = {
-        "int",
+        "inet::InfoType",    // FIELD_type
+        "int",    // FIELD_identifer
+        "int",    // FIELD_host_id
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 3) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **InfoDescriptor::getFieldPropertyNames(int field) const
@@ -355,6 +434,10 @@ const char **InfoDescriptor::getFieldPropertyNames(int field) const
         field -= basedesc->getFieldCount();
     }
     switch (field) {
+        case FIELD_type: {
+            static const char *names[] = { "enum",  nullptr };
+            return names;
+        }
         default: return nullptr;
     }
 }
@@ -368,6 +451,9 @@ const char *InfoDescriptor::getFieldProperty(int field, const char *propertyname
         field -= basedesc->getFieldCount();
     }
     switch (field) {
+        case FIELD_type:
+            if (!strcmp(propertyname, "enum")) return "inet::InfoType";
+            return nullptr;
         default: return nullptr;
     }
 }
@@ -410,7 +496,9 @@ std::string InfoDescriptor::getFieldValueAsString(void *object, int field, int i
     }
     Info *pp = (Info *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getHost_id());
+        case FIELD_type: return enum2string(pp->getType(), "inet::InfoType");
+        case FIELD_identifer: return long2string(pp->getIdentifer());
+        case FIELD_host_id: return long2string(pp->getHost_id());
         default: return "";
     }
 }
@@ -425,7 +513,8 @@ bool InfoDescriptor::setFieldValueAsString(void *object, int field, int i, const
     }
     Info *pp = (Info *)object; (void)pp;
     switch (field) {
-        case 0: pp->setHost_id(string2long(value)); return true;
+        case FIELD_identifer: pp->setIdentifer(string2long(value)); return true;
+        case FIELD_host_id: pp->setHost_id(string2long(value)); return true;
         default: return false;
     }
 }
@@ -457,4 +546,5 @@ void *InfoDescriptor::getFieldStructValuePointer(void *object, int field, int i)
     }
 }
 
+} // namespace inet
 
