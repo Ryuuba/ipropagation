@@ -26,7 +26,7 @@ BroadcastInfectionApp::~BroadcastInfectionApp()
 void BroadcastInfectionApp::initialize(int stage)
 {
   if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
-    host_id = getIndex();
+    host_id = getIndex(); //TODO Update this value with the getSimulation()
     inet::registerService(inet::Protocol::information, gate("inputPort"), nullptr);
     inet::registerProtocol(inet::Protocol::information, gate("outputPort"), nullptr);
     input_gate_id = gate("inputPort")->getId();
@@ -129,7 +129,7 @@ void BroadcastInfectionApp::process_packet(omnetpp::cMessage* msg)
   if (status == InfectionBase::NOT_INFECTED) {
     auto pkt = dynamic_cast<inet::Packet*>(msg);
     const auto& infection_pkt = pkt->popAtFront<inet::InfoPacket>();
-    if (uniform(0.0, 1.0) < infection_probability) {
+    if (bernoulli(infection_probability)) {
       EV_INFO << "Host " << host_id << " received an infectious message from " 
       << infection_pkt->getIdentifer() << "\n";
       scheduleAt(omnetpp::simTime() + par("sentInterval"), message_timer);
@@ -151,5 +151,5 @@ void BroadcastInfectionApp::emit_status(omnetpp::cMessage* msg) {
 
 void BroadcastInfectionApp::refreshDisplay() const
 {
-  
+
 }

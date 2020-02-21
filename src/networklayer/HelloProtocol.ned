@@ -23,6 +23,9 @@ simple HelloProtocol like INeighborDiscoveryProtocol
 {
     parameters:
         @display("i=block/network");
+        @signal[neighborhoodSize](type=int);
+        @statistic[neighborhoodSize](record=stats?,vector?);
+        
     gates:
         input in @labels(from NetworkLayerDispatcher);
         output out @labels(to NetworkLayerDispatcher);
