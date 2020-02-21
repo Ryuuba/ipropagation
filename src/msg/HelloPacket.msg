@@ -13,17 +13,25 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package informationpropagation.networklayer;
-import informationpropagation.contract.INeighborDiscoveryProtocol;
+//
+// TODO generated message class
+//
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MacAddress;
 
-//
-// TODO auto-generated type
-//
-simple HelloProtocol like INeighborDiscoveryProtocol
+namespace inet;
+
+enum HelloMessageType
 {
-    parameters:
-        @display("i=block/network");
-    gates:
-        input in @labels(from NetworkLayerDispatcher);
-        output out @labels(to NetworkLayerDispatcher);
+    REQ = 0;
+    REP = 1;
+}
+
+class HelloMessage extends FieldsChunk
+{
+    HelloMessageType type;
+    int host_id;
+    int sequence_num;
+    MacAddress srcMacAddress;
 }

@@ -23,4 +23,6 @@ simple NeighborCache like INeighborCache
 {
     parameters:
         @display("i=block/table");
+        @signal[neighborhoodSize](type=int);
+        @statistic[neighborhoodSize](record=stats?,vector?);
 }
