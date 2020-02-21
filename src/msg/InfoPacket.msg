@@ -28,7 +28,7 @@ enum InfoType
     OTHER = 2;
 }
 
-class Info extends FieldsChunk
+class InfoPacket extends FieldsChunk
 {
     InfoType type;
     int identifer;

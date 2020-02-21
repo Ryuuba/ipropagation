@@ -22,7 +22,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "../base/InfectionBase.h"
-#include "../msg/Info_m.h"
+#include "../msg/InfoPacket_m.h"
 
 class BroadcastInfectionApp : public InfectionBase
 {

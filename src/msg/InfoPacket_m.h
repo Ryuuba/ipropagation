@@ -1,9 +1,9 @@
 //
-// Generated file, do not edit! Created by nedtool 5.5 from msg/Info.msg.
+// Generated file, do not edit! Created by nedtool 5.5 from InfoPacket.msg.
 //
 
-#ifndef __INET_INFO_M_H
-#define __INET_INFO_M_H
+#ifndef __INET_INFOPACKET_M_H
+#define __INET_INFOPACKET_M_H
 
 #if defined(__clang__)
 #  pragma clang diagnostic ignored "-Wreserved-id-macro"
@@ -19,7 +19,7 @@
 
 namespace inet {
 
-class Info;
+class InfoPacket;
 } // namespace inet
 
 #include "inet/common/INETDefs_m.h" // import inet.common.INETDefs
@@ -30,7 +30,7 @@ class Info;
 namespace inet {
 
 /**
- * Enum generated from <tt>msg/Info.msg:25</tt> by nedtool.
+ * Enum generated from <tt>InfoPacket.msg:25</tt> by nedtool.
  * <pre>
  * enum InfoType
  * {
@@ -47,9 +47,9 @@ enum InfoType {
 };
 
 /**
- * Class generated from <tt>msg/Info.msg:32</tt> by nedtool.
+ * Class generated from <tt>InfoPacket.msg:32</tt> by nedtool.
  * <pre>
- * class Info extends FieldsChunk
+ * class InfoPacket extends FieldsChunk
  * {
  *     InfoType type;
  *     int identifer;
@@ -57,7 +57,7 @@ enum InfoType {
  * }
  * </pre>
  */
-class Info : public ::inet::FieldsChunk
+class InfoPacket : public ::inet::FieldsChunk
 {
   protected:
     inet::InfoType type = static_cast<inet::InfoType>(-1);
@@ -65,18 +65,18 @@ class Info : public ::inet::FieldsChunk
     int host_id = 0;
 
   private:
-    void copy(const Info& other);
+    void copy(const InfoPacket& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const Info&);
+    bool operator==(const InfoPacket&);
 
   public:
-    Info();
-    Info(const Info& other);
-    virtual ~Info();
-    Info& operator=(const Info& other);
-    virtual Info *dup() const override {return new Info(*this);}
+    InfoPacket();
+    InfoPacket(const InfoPacket& other);
+    virtual ~InfoPacket();
+    InfoPacket& operator=(const InfoPacket& other);
+    virtual InfoPacket *dup() const override {return new InfoPacket(*this);}
     virtual void parsimPack(omnetpp::cCommBuffer *b) const override;
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
@@ -89,10 +89,10 @@ class Info : public ::inet::FieldsChunk
     virtual void setHost_id(int host_id);
 };
 
-inline void doParsimPacking(omnetpp::cCommBuffer *b, const Info& obj) {obj.parsimPack(b);}
-inline void doParsimUnpacking(omnetpp::cCommBuffer *b, Info& obj) {obj.parsimUnpack(b);}
+inline void doParsimPacking(omnetpp::cCommBuffer *b, const InfoPacket& obj) {obj.parsimPack(b);}
+inline void doParsimUnpacking(omnetpp::cCommBuffer *b, InfoPacket& obj) {obj.parsimUnpack(b);}
 
 } // namespace inet
 
-#endif // ifndef __INET_INFO_M_H
+#endif // ifndef __INET_INFOPACKET_M_H
 

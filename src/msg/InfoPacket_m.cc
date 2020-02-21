@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.5 from msg/Info.msg.
+// Generated file, do not edit! Created by nedtool 5.5 from InfoPacket.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -27,7 +27,7 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
-#include "Info_m.h"
+#include "InfoPacket_m.h"
 
 namespace omnetpp {
 
@@ -215,22 +215,22 @@ EXECUTE_ON_STARTUP(
     e->insert(OTHER, "OTHER");
 )
 
-Register_Class(Info)
+Register_Class(InfoPacket)
 
-Info::Info() : ::inet::FieldsChunk()
+InfoPacket::InfoPacket() : ::inet::FieldsChunk()
 {
 }
 
-Info::Info(const Info& other) : ::inet::FieldsChunk(other)
+InfoPacket::InfoPacket(const InfoPacket& other) : ::inet::FieldsChunk(other)
 {
     copy(other);
 }
 
-Info::~Info()
+InfoPacket::~InfoPacket()
 {
 }
 
-Info& Info::operator=(const Info& other)
+InfoPacket& InfoPacket::operator=(const InfoPacket& other)
 {
     if (this == &other) return *this;
     ::inet::FieldsChunk::operator=(other);
@@ -238,14 +238,14 @@ Info& Info::operator=(const Info& other)
     return *this;
 }
 
-void Info::copy(const Info& other)
+void InfoPacket::copy(const InfoPacket& other)
 {
     this->type = other.type;
     this->identifer = other.identifer;
     this->host_id = other.host_id;
 }
 
-void Info::parsimPack(omnetpp::cCommBuffer *b) const
+void InfoPacket::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::inet::FieldsChunk::parsimPack(b);
     doParsimPacking(b,this->type);
@@ -253,7 +253,7 @@ void Info::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->host_id);
 }
 
-void Info::parsimUnpack(omnetpp::cCommBuffer *b)
+void InfoPacket::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::inet::FieldsChunk::parsimUnpack(b);
     doParsimUnpacking(b,this->type);
@@ -261,40 +261,40 @@ void Info::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->host_id);
 }
 
-inet::InfoType Info::getType() const
+inet::InfoType InfoPacket::getType() const
 {
     return this->type;
 }
 
-void Info::setType(inet::InfoType type)
+void InfoPacket::setType(inet::InfoType type)
 {
     handleChange();
     this->type = type;
 }
 
-int Info::getIdentifer() const
+int InfoPacket::getIdentifer() const
 {
     return this->identifer;
 }
 
-void Info::setIdentifer(int identifer)
+void InfoPacket::setIdentifer(int identifer)
 {
     handleChange();
     this->identifer = identifer;
 }
 
-int Info::getHost_id() const
+int InfoPacket::getHost_id() const
 {
     return this->host_id;
 }
 
-void Info::setHost_id(int host_id)
+void InfoPacket::setHost_id(int host_id)
 {
     handleChange();
     this->host_id = host_id;
 }
 
-class InfoDescriptor : public omnetpp::cClassDescriptor
+class InfoPacketDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertynames;
@@ -304,8 +304,8 @@ class InfoDescriptor : public omnetpp::cClassDescriptor
         FIELD_host_id,
     };
   public:
-    InfoDescriptor();
-    virtual ~InfoDescriptor();
+    InfoPacketDescriptor();
+    virtual ~InfoPacketDescriptor();
 
     virtual bool doesSupport(omnetpp::cObject *obj) const override;
     virtual const char **getPropertyNames() const override;
@@ -327,24 +327,24 @@ class InfoDescriptor : public omnetpp::cClassDescriptor
     virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
 };
 
-Register_ClassDescriptor(InfoDescriptor)
+Register_ClassDescriptor(InfoPacketDescriptor)
 
-InfoDescriptor::InfoDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::Info)), "inet::FieldsChunk")
+InfoPacketDescriptor::InfoPacketDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::InfoPacket)), "inet::FieldsChunk")
 {
     propertynames = nullptr;
 }
 
-InfoDescriptor::~InfoDescriptor()
+InfoPacketDescriptor::~InfoPacketDescriptor()
 {
     delete[] propertynames;
 }
 
-bool InfoDescriptor::doesSupport(omnetpp::cObject *obj) const
+bool InfoPacketDescriptor::doesSupport(omnetpp::cObject *obj) const
 {
-    return dynamic_cast<Info *>(obj)!=nullptr;
+    return dynamic_cast<InfoPacket *>(obj)!=nullptr;
 }
 
-const char **InfoDescriptor::getPropertyNames() const
+const char **InfoPacketDescriptor::getPropertyNames() const
 {
     if (!propertynames) {
         static const char *names[] = {  nullptr };
@@ -355,19 +355,19 @@ const char **InfoDescriptor::getPropertyNames() const
     return propertynames;
 }
 
-const char *InfoDescriptor::getProperty(const char *propertyname) const
+const char *InfoPacketDescriptor::getProperty(const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : nullptr;
 }
 
-int InfoDescriptor::getFieldCount() const
+int InfoPacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
-unsigned int InfoDescriptor::getFieldTypeFlags(int field) const
+unsigned int InfoPacketDescriptor::getFieldTypeFlags(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -383,7 +383,7 @@ unsigned int InfoDescriptor::getFieldTypeFlags(int field) const
     return (field >= 0 && field < 3) ? fieldTypeFlags[field] : 0;
 }
 
-const char *InfoDescriptor::getFieldName(int field) const
+const char *InfoPacketDescriptor::getFieldName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -399,7 +399,7 @@ const char *InfoDescriptor::getFieldName(int field) const
     return (field >= 0 && field < 3) ? fieldNames[field] : nullptr;
 }
 
-int InfoDescriptor::findField(const char *fieldName) const
+int InfoPacketDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
@@ -409,7 +409,7 @@ int InfoDescriptor::findField(const char *fieldName) const
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
-const char *InfoDescriptor::getFieldTypeString(int field) const
+const char *InfoPacketDescriptor::getFieldTypeString(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -425,7 +425,7 @@ const char *InfoDescriptor::getFieldTypeString(int field) const
     return (field >= 0 && field < 3) ? fieldTypeStrings[field] : nullptr;
 }
 
-const char **InfoDescriptor::getFieldPropertyNames(int field) const
+const char **InfoPacketDescriptor::getFieldPropertyNames(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -442,7 +442,7 @@ const char **InfoDescriptor::getFieldPropertyNames(int field) const
     }
 }
 
-const char *InfoDescriptor::getFieldProperty(int field, const char *propertyname) const
+const char *InfoPacketDescriptor::getFieldProperty(int field, const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -458,7 +458,7 @@ const char *InfoDescriptor::getFieldProperty(int field, const char *propertyname
     }
 }
 
-int InfoDescriptor::getFieldArraySize(void *object, int field) const
+int InfoPacketDescriptor::getFieldArraySize(void *object, int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -466,13 +466,13 @@ int InfoDescriptor::getFieldArraySize(void *object, int field) const
             return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount();
     }
-    Info *pp = (Info *)object; (void)pp;
+    InfoPacket *pp = (InfoPacket *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-const char *InfoDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+const char *InfoPacketDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -480,13 +480,13 @@ const char *InfoDescriptor::getFieldDynamicTypeString(void *object, int field, i
             return basedesc->getFieldDynamicTypeString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    Info *pp = (Info *)object; (void)pp;
+    InfoPacket *pp = (InfoPacket *)object; (void)pp;
     switch (field) {
         default: return nullptr;
     }
 }
 
-std::string InfoDescriptor::getFieldValueAsString(void *object, int field, int i) const
+std::string InfoPacketDescriptor::getFieldValueAsString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -494,7 +494,7 @@ std::string InfoDescriptor::getFieldValueAsString(void *object, int field, int i
             return basedesc->getFieldValueAsString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    Info *pp = (Info *)object; (void)pp;
+    InfoPacket *pp = (InfoPacket *)object; (void)pp;
     switch (field) {
         case FIELD_type: return enum2string(pp->getType(), "inet::InfoType");
         case FIELD_identifer: return long2string(pp->getIdentifer());
@@ -503,7 +503,7 @@ std::string InfoDescriptor::getFieldValueAsString(void *object, int field, int i
     }
 }
 
-bool InfoDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+bool InfoPacketDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -511,7 +511,7 @@ bool InfoDescriptor::setFieldValueAsString(void *object, int field, int i, const
             return basedesc->setFieldValueAsString(object,field,i,value);
         field -= basedesc->getFieldCount();
     }
-    Info *pp = (Info *)object; (void)pp;
+    InfoPacket *pp = (InfoPacket *)object; (void)pp;
     switch (field) {
         case FIELD_identifer: pp->setIdentifer(string2long(value)); return true;
         case FIELD_host_id: pp->setHost_id(string2long(value)); return true;
@@ -519,7 +519,7 @@ bool InfoDescriptor::setFieldValueAsString(void *object, int field, int i, const
     }
 }
 
-const char *InfoDescriptor::getFieldStructName(int field) const
+const char *InfoPacketDescriptor::getFieldStructName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -532,7 +532,7 @@ const char *InfoDescriptor::getFieldStructName(int field) const
     };
 }
 
-void *InfoDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+void *InfoPacketDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -540,7 +540,7 @@ void *InfoDescriptor::getFieldStructValuePointer(void *object, int field, int i)
             return basedesc->getFieldStructValuePointer(object, field, i);
         field -= basedesc->getFieldCount();
     }
-    Info *pp = (Info *)object; (void)pp;
+    InfoPacket *pp = (InfoPacket *)object; (void)pp;
     switch (field) {
         default: return nullptr;
     }
