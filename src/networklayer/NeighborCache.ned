@@ -22,7 +22,9 @@ import informationpropagation.contract.INeighborCache;
 simple NeighborCache like INeighborCache
 {
     parameters:
+        //TODO: implement an algorithm to erase the cache
+        //double removeNeighborTimer
         @display("i=block/table");
-        @signal[neighborhoodSize](type=int);
-        @statistic[neighborhoodSize](record=stats?,vector?);
+        //@signal[neighborhoodSize](type=int);
+        //@statistic[neighborhoodSize](record=stats?,vector?);
 }

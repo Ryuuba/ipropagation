@@ -18,15 +18,25 @@
 
 
 #include <list>
+#include <utility>
+#include <ostream>
 #include <omnetpp.h>
 #include "inet/linklayer/common/MacAddress.h"
 
 class NeighborCache : public omnetpp::cSimpleModule {
 protected:
-  std::list<inet::MacAddress> cache;
+  /** @brief A pair (host_id, macaddress) makes up a cache entry */
+  typedef struct {
+    int host_id;
+    inet::MacAddress mac_address;
+  } cache_entry;
+  typedef std::list<cache_entry>::iterator cache_it;
+  typedef std::list<cache_entry>::const_iterator cache_const_it;
+  /** @brief Data structure storing the one-hop neighborhood N(x) of a node x*/
+  std::list<cache_entry> cache;
 public:
   NeighborCache() {}
-  ~NeighborCache() {}
+  virtual ~NeighborCache() {}
   /**
    * @brief This module does not receive messages
    * */
@@ -41,7 +51,39 @@ public:
   }
   /** @brief Initializes the module parameters from the NED file */
   virtual void initialize(int) override;
+  /** @brief Returns a const pointer to access the neighbor cache */
+  virtual const std::list<cache_entry>* get_neighbor_cache() {
+    const std::list<cache_entry>* ptr = &cache;
+    return ptr;
+  }
+  /** @brief inserts a neighbor in cache */
+  virtual void insert_neighbor(cache_entry&);
+  /** @brief Returns the begin of the cache for loop-range iteration */
+  cache_it begin() {
+    return cache.begin();
+  }
+  /** @brief Returns the end of the cache for loop-range iteration */
+  cache_it end() {
+    return cache.end();
+  }
+  /** @brief Returns the begin of the cache for loop-range iteration */
+  cache_const_it begin() const{
+    return cache.begin();
+  }
+  /** @brief Returns the end of the cache for loop-range iteration */
+  cache_const_it end() const {
+    return cache.end();
+  }
+  /** @brief Allows a WATCH macro to display the neighbor cache of a node */
+  friend std::ostream& operator<<(std::ostream&, const NeighborCache&);
 };
+
+Define_Module(NeighborCache);
+
+std::ostream& operator<<(std::ostream& os, const NeighborCache& cache) {
+  for (auto &&neighbor : cache)
+    std::cout << neighbor.host_id << ' ' << neighbor.mac_address << '\n';
+}
 
 #endif // NEIGHBOR_CACHE_H
 

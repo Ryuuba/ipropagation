@@ -23,6 +23,8 @@ simple HelloProtocol extends NeighborDiscoveryProtocolBase
 {
     parameters:
         @display("i=block/network");
+        //Number of times a node must perform to consider a neighbor is out of range
+        int attemptNumber;
     gates:
         input in @labels(from NetworkLayerDispatcher);
         output out @labels(to NetworkLayerDispatcher);
