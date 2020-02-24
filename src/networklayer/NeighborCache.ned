@@ -24,7 +24,8 @@ simple NeighborCache like INeighborCache
     parameters:
         //TODO: implement an algorithm to erase the cache
         //double removeNeighborTimer
+        //The time to emit the cache to a global observer
+        double signalingTime;
         @display("i=block/table");
-        //@signal[neighborhoodSize](type=int);
-        //@statistic[neighborhoodSize](record=stats?,vector?);
+        @signal[neighborhood](type=neighbor_cache?);
 }

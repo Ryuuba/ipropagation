@@ -16,7 +16,7 @@
 #if !defined(NEIGHBOR_CACHE_H)
 #define NEIGHBOR_CACHE_H
 
-
+#include <algorithm>
 #include <list>
 #include <utility>
 #include <ostream>
@@ -24,25 +24,37 @@
 #include "inet/linklayer/common/MacAddress.h"
 
 class NeighborCache : public omnetpp::cSimpleModule {
-protected:
+public:
   /** @brief A pair (host_id, macaddress) makes up a cache entry */
   typedef struct {
     int host_id;
     inet::MacAddress mac_address;
+    omnetpp::simtime_t last_contact_time;
   } cache_entry;
+  /** @brief An iterator */
   typedef std::list<cache_entry>::iterator cache_it;
   typedef std::list<cache_entry>::const_iterator cache_const_it;
+protected:
   /** @brief Data structure storing the one-hop neighborhood N(x) of a node x*/
   std::list<cache_entry> cache;
-public:
-  NeighborCache() {}
-  virtual ~NeighborCache() {}
-  /**
-   * @brief This module does not receive messages
+  /** @brief A timer to send the neighborhood to an observer that computes the
+   *  the adjacency matrix
    * */
-  virtual void handleMessage(omnetpp::cMessage* msg) {
-    throw omnetpp::cRuntimeError("NeighborCache: This module does not receive any message (name: %s)\n", msg->getName());
+  omnetpp::cMessage* timer;
+  /** @brief The time between signal transmissions that conveys the N(x) */
+  omnetpp::simtime_t signaling_time;
+  /** @brief Signal conveying N(x) */
+  static omnetpp::simsignal_t neighborhood_signal;
+public:
+  NeighborCache() : timer(nullptr) {}
+  virtual ~NeighborCache() {
+    cancelAndDelete(timer);
   }
+  /**
+   * @brief This module does not receive messages, but process a timer to
+   * emit the neighborhood to an observer module
+   * */
+  virtual void handleMessage(omnetpp::cMessage*);
   /**  
    * @brief Returns the number of stages needed to initalize an INET node
    */
@@ -56,8 +68,12 @@ public:
     const std::list<cache_entry>* ptr = &cache;
     return ptr;
   }
-  /** @brief inserts a neighbor in cache */
-  virtual void insert_neighbor(cache_entry&);
+  /** @brief Inserts a neighbor in cache, it is assumed that the entry will
+   *  not be used by the calle
+   */
+  virtual void push_register(cache_entry&&);
+  /** @brief Removes a neighbor from cache */
+  virtual void erase_register(cache_entry&);
   /** @brief Returns the begin of the cache for loop-range iteration */
   cache_it begin() {
     return cache.begin();
@@ -78,16 +94,15 @@ public:
   friend std::ostream& operator<<(std::ostream&, const NeighborCache&);
 };
 
-Define_Module(NeighborCache);
-
-std::ostream& operator<<(std::ostream& os, const NeighborCache& cache) {
-  for (auto &&neighbor : cache)
-    std::cout << neighbor.host_id << ' ' << neighbor.mac_address << '\n';
-}
+class NeighborhoodNotificacion : public omnetpp::cObject, omnetpp::noncopyable {
+public:
+  const std::list<NeighborCache::cache_entry>* neighborhood;
+public:
+  NeighborhoodNotificacion() : neighborhood(nullptr) {}
+  NeighborhoodNotificacion(const std::list<NeighborCache::cache_entry>* n_)
+    : neighborhood(n_)
+  { }
+  virtual ~NeighborhoodNotificacion();
+};
 
 #endif // NEIGHBOR_CACHE_H
-
-
-
-
-
