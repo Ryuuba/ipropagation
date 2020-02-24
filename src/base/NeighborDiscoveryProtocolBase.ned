@@ -13,16 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package informationpropagation.networklayer;
-import informationpropagation.base.NeighborDiscoveryProtocolBase;
+package informationpropagation.base;
+import informationpropagation.contract.INeighborDiscoveryProtocol;
 
 //
 // TODO auto-generated type
 //
-simple HelloProtocol extends NeighborDiscoveryProtocolBase
+simple NeighborDiscoveryProtocolBase like INeighborDiscoveryProtocol
 {
     parameters:
         @display("i=block/network");
+        int packetSize @unit(bytes);
     gates:
         input in @labels(from NetworkLayerDispatcher);
         output out @labels(to NetworkLayerDispatcher);

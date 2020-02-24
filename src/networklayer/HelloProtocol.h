@@ -16,39 +16,24 @@
 #if !defined(HELLO_PROTOCOL_H)
 #define HELLO_PROTOCOL_H
 
-#include <omnetpp.h>
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/Packet.h"
+#include "../base/NeighborDiscoveryProtocolBase.h"
 #include "../msg/HelloPacket_m.h"
+#include "NeighborCache.h"
 
-class HelloProtocol : public omnetpp::cSimpleModule {
+class HelloProtocol : public NeighborDiscoveryProtocolBase {
 protected:
-  /** @brief Timer to send hello messages */
-  omnetpp::cMessage* hello_timer;
-  /** @brief Time between two consecutive hello transmissions */
-  omnetpp::simtime_t hello_delay;
-  /** @brief The ID of the input gate of this module */
-  int input_gate_id;
-  /** @brief The ID of the output gate of this module */
-  int output_gate_id;
-  /** @brief The size of the packet in bytes */
-  int packet_size;
-  /** @brief The sequence number of the hello messages */
-  int sequence_number;
+  /** @brief A pointer to access the neighbor cache */
+  NeighborCache* neighbor_cache;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
   virtual void send_packet();
-  /** @briefModifies the neighbor cache with the hello information */
+  /** @brief Modifies the neighbor cache with the hello information */
   virtual void process_packet(omnetpp::cMessage*);
 public:
   /** @brief Default constructor */
-  HelloProtocol();
+  HelloProtocol() : neighbor_cache(nullptr) {}
   /** @brief Default desconstructor: cancels and deletes the hello timer */
-  virtual ~HelloProtocol();
-  /** @brief Returns the number of stages needed to initalize an INET node */
-  virtual int numInitStages() const override {
-    return inet::NUM_INIT_STAGES;
-  }
+  virtual ~HelloProtocol() {}
   /** @brief Initializes the module state from a NED file */
   virtual void initialize(int) override;
   /** @brief Handles simulation events (timers and msg) */
