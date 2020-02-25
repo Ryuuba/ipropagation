@@ -23,6 +23,7 @@ import inet.common.MessageDispatcher;
 import inet.networklayer.contract.INetworkLayer;
 import inet.transportlayer.contract.IUdp;
 import inet.applications.contract.IApp;
+import inet.networklayer.common.InterfaceTable;
 //
 // TODO auto-generated type
 //
@@ -48,6 +49,10 @@ module WirelessUnicastNode like INetworkNode
     gates:
         input radioIn[numWlanInterfaces] @directIn;
     submodules:
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=125,240;is=s");
+        }
         status: NodeStatus {
             parameters:
                 @display("p=65,32;is=s");

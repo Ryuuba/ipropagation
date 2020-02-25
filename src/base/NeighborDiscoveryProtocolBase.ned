@@ -24,7 +24,8 @@ simple NeighborDiscoveryProtocolBase like INeighborDiscoveryProtocol
     parameters:
         @display("i=block/network");
         int packetSize @unit(bytes);
+        double discoveryTime @unit(s);
     gates:
-        input in @labels(from NetworkLayerDispatcher);
-        output out @labels(to NetworkLayerDispatcher);
+        input inputPort @labels(from NetworkLayerDispatcher);
+        output outputPort @labels(to NetworkLayerDispatcher);
 }

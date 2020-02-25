@@ -30,9 +30,9 @@ protected:
   int output_gate_id;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
-  virtual void send_packet() = 0;
+  virtual void send_hello_packet() = 0;
   /** @briefModifies the neighbor cache with the hello information */
-  virtual void process_packet(omnetpp::cMessage*) = 0;
+  virtual void process_hello_packet(omnetpp::cMessage*) = 0;
 public:
   INeighborDiscoveryProtocol() : 
     discovery_timer(nullptr),

@@ -22,16 +22,17 @@ import inet.linklayer.common.MacAddress;
 
 namespace inet;
 
-enum HelloMessageType
+enum HelloPacketType
 {
     REQ = 0;
     REP = 1;
 }
 
-class HelloMessage extends FieldsChunk
+class HelloPacket extends FieldsChunk
 {
-    HelloMessageType type;
-    int host_id;
-    int sequence_num;
+    HelloPacketType type;
+    int hostId;
+    int sequenceNum;
     MacAddress srcMacAddress;
+    MacAddress dstMacAddress;
 }

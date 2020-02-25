@@ -19,7 +19,7 @@
 
 namespace inet {
 
-class HelloMessage;
+class HelloPacket;
 } // namespace inet
 
 #include "inet/common/INETDefs_m.h" // import inet.common.INETDefs
@@ -34,14 +34,14 @@ namespace inet {
 /**
  * Enum generated from <tt>HelloPacket.msg:26</tt> by nedtool.
  * <pre>
- * enum HelloMessageType
+ * enum HelloPacketType
  * {
  *     REQ = 0;
  *     REP = 1;
  * }
  * </pre>
  */
-enum HelloMessageType {
+enum HelloPacketType {
     REQ = 0,
     REP = 1
 };
@@ -49,53 +49,58 @@ enum HelloMessageType {
 /**
  * Class generated from <tt>HelloPacket.msg:32</tt> by nedtool.
  * <pre>
- * class HelloMessage extends FieldsChunk
+ * class HelloPacket extends FieldsChunk
  * {
- *     HelloMessageType type;
- *     int host_id;
- *     int sequence_num;
+ *     HelloPacketType type;
+ *     int hostId;
+ *     int sequenceNum;
  *     MacAddress srcMacAddress;
+ *     MacAddress dstMacAddress;
  * }
  * </pre>
  */
-class HelloMessage : public ::inet::FieldsChunk
+class HelloPacket : public ::inet::FieldsChunk
 {
   protected:
-    inet::HelloMessageType type = static_cast<inet::HelloMessageType>(-1);
-    int host_id = 0;
-    int sequence_num = 0;
+    inet::HelloPacketType type = static_cast<inet::HelloPacketType>(-1);
+    int hostId = 0;
+    int sequenceNum = 0;
     MacAddress srcMacAddress;
+    MacAddress dstMacAddress;
 
   private:
-    void copy(const HelloMessage& other);
+    void copy(const HelloPacket& other);
 
   protected:
     // protected and unimplemented operator==(), to prevent accidental usage
-    bool operator==(const HelloMessage&);
+    bool operator==(const HelloPacket&);
 
   public:
-    HelloMessage();
-    HelloMessage(const HelloMessage& other);
-    virtual ~HelloMessage();
-    HelloMessage& operator=(const HelloMessage& other);
-    virtual HelloMessage *dup() const override {return new HelloMessage(*this);}
+    HelloPacket();
+    HelloPacket(const HelloPacket& other);
+    virtual ~HelloPacket();
+    HelloPacket& operator=(const HelloPacket& other);
+    virtual HelloPacket *dup() const override {return new HelloPacket(*this);}
     virtual void parsimPack(omnetpp::cCommBuffer *b) const override;
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual inet::HelloMessageType getType() const;
-    virtual void setType(inet::HelloMessageType type);
-    virtual int getHost_id() const;
-    virtual void setHost_id(int host_id);
-    virtual int getSequence_num() const;
-    virtual void setSequence_num(int sequence_num);
+    virtual inet::HelloPacketType getType() const;
+    virtual void setType(inet::HelloPacketType type);
+    virtual int getHostId() const;
+    virtual void setHostId(int hostId);
+    virtual int getSequenceNum() const;
+    virtual void setSequenceNum(int sequenceNum);
     virtual const MacAddress& getSrcMacAddress() const;
-    virtual MacAddress& getSrcMacAddressForUpdate() { handleChange();return const_cast<MacAddress&>(const_cast<HelloMessage*>(this)->getSrcMacAddress());}
+    virtual MacAddress& getSrcMacAddressForUpdate() { handleChange();return const_cast<MacAddress&>(const_cast<HelloPacket*>(this)->getSrcMacAddress());}
     virtual void setSrcMacAddress(const MacAddress& srcMacAddress);
+    virtual const MacAddress& getDstMacAddress() const;
+    virtual MacAddress& getDstMacAddressForUpdate() { handleChange();return const_cast<MacAddress&>(const_cast<HelloPacket*>(this)->getDstMacAddress());}
+    virtual void setDstMacAddress(const MacAddress& dstMacAddress);
 };
 
-inline void doParsimPacking(omnetpp::cCommBuffer *b, const HelloMessage& obj) {obj.parsimPack(b);}
-inline void doParsimUnpacking(omnetpp::cCommBuffer *b, HelloMessage& obj) {obj.parsimUnpack(b);}
+inline void doParsimPacking(omnetpp::cCommBuffer *b, const HelloPacket& obj) {obj.parsimPack(b);}
+inline void doParsimUnpacking(omnetpp::cCommBuffer *b, HelloPacket& obj) {obj.parsimUnpack(b);}
 
 } // namespace inet
 

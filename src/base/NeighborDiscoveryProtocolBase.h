@@ -18,7 +18,9 @@
 
 #include "../contract/INeighborDiscoveryProtocol.h"
 #include "inet/common/INETDefs.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 //TODO: Design an abstract class for NeighborDiscoveryProtocol packets
 
 class NeighborDiscoveryProtocolBase : public INeighborDiscoveryProtocol {
@@ -29,9 +31,9 @@ protected:
   int sequence_number;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
-  virtual void send_packet() = 0;
+  virtual void send_hello_packet() = 0;
   /** @briefModifies the neighbor cache with the hello information */
-  virtual void process_packet(omnetpp::cMessage*) = 0;
+  virtual void process_hello_packet(omnetpp::cMessage*) = 0;
 public:
   NeighborDiscoveryProtocolBase(): packet_size(0), sequence_number(0) { }
   virtual ~NeighborDiscoveryProtocolBase(){}
@@ -50,8 +52,16 @@ public:
 Register_Abstract_Class(NeighborDiscoveryProtocolBase);
 
 void NeighborDiscoveryProtocolBase::initialize(int stage) {
-  if (stage == inet::INITSTAGE_NETWORK_LAYER) {
+  if (stage == inet::INITSTAGE_LOCAL) {
+    input_gate_id = gate("inputPort")->getId();
+    output_gate_id = gate("outputPort")->getId();
     packet_size = par("packetSize").intValue();
+    discovery_time = par("discoveryTime");
+    discovery_timer = new omnetpp::cMessage("discovery timer");
+  }
+  else if (stage == inet::INITSTAGE_NETWORK_LAYER) {
+    inet::registerService(inet::Protocol::neighborDiscovery, nullptr, gate("inputPort"));
+    inet::registerProtocol(inet::Protocol::neighborDiscovery, gate("outputPort"), nullptr);
   }
 }
 

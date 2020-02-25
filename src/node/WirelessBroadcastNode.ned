@@ -20,7 +20,7 @@ import inet.linklayer.contract.IWirelessInterface;
 import inet.common.MessageDispatcher;
 import informationpropagation.networklayer.ExtendedNetworkLayer;
 import informationpropagation.contract.IApp;
-
+import inet.networklayer.common.InterfaceTable;
 //
 // TODO auto-generated type
 //
@@ -37,6 +37,10 @@ module WirelessBroadcastNode
     gates:
         input radioIn[numWlanInterfaces] @directIn;
     submodules:
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=65,148;is=s");
+        }
         status: NodeStatus {
             parameters:
                 @display("p=65,32;is=s");
@@ -46,18 +50,22 @@ module WirelessBroadcastNode
                 @display("p=65,90;is=s");
         }
         app: <> like IApp {
-            @display("p=226,98");
+            @display("p=226,40");
+        }
+        appl: MessageDispatcher {
+            parameters:
+                @display("p=226,103;b=200,5,,,,1");
         }
         net: ExtendedNetworkLayer {
-            @display("p=226,188");
+            @display("p=226,167");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("p=226,264;b=200,5,,,,1");
+                @display("p=226,229;b=200,5,,,,1");
         }
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             parameters:
-                @display("p=226,341,row,150;q=queue");
+                @display("p=226,296,row,150;q=queue");
         }
     connections allowunconnected:
         for i=0..sizeof(radioIn)-1 {
@@ -70,6 +78,8 @@ module WirelessBroadcastNode
         nl.out++ --> wlan[0].upperLayerIn;
         net.ifOut --> nl.in++;
         nl.out++ --> net.ifIn;
-        app.outputPort --> net.transportIn;
-        net.transportOut --> app.inputPort;
+        net.transportOut --> appl.in++;
+        appl.out++ --> net.transportIn;
+        app.outputPort --> appl.in++;
+        appl.out++ --> app.inputPort;
 }

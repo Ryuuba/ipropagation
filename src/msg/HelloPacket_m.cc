@@ -208,28 +208,28 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
 }
 
 EXECUTE_ON_STARTUP(
-    omnetpp::cEnum *e = omnetpp::cEnum::find("inet::HelloMessageType");
-    if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::HelloMessageType"));
+    omnetpp::cEnum *e = omnetpp::cEnum::find("inet::HelloPacketType");
+    if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::HelloPacketType"));
     e->insert(REQ, "REQ");
     e->insert(REP, "REP");
 )
 
-Register_Class(HelloMessage)
+Register_Class(HelloPacket)
 
-HelloMessage::HelloMessage() : ::inet::FieldsChunk()
+HelloPacket::HelloPacket() : ::inet::FieldsChunk()
 {
 }
 
-HelloMessage::HelloMessage(const HelloMessage& other) : ::inet::FieldsChunk(other)
+HelloPacket::HelloPacket(const HelloPacket& other) : ::inet::FieldsChunk(other)
 {
     copy(other);
 }
 
-HelloMessage::~HelloMessage()
+HelloPacket::~HelloPacket()
 {
 }
 
-HelloMessage& HelloMessage::operator=(const HelloMessage& other)
+HelloPacket& HelloPacket::operator=(const HelloPacket& other)
 {
     if (this == &other) return *this;
     ::inet::FieldsChunk::operator=(other);
@@ -237,89 +237,104 @@ HelloMessage& HelloMessage::operator=(const HelloMessage& other)
     return *this;
 }
 
-void HelloMessage::copy(const HelloMessage& other)
+void HelloPacket::copy(const HelloPacket& other)
 {
     this->type = other.type;
-    this->host_id = other.host_id;
-    this->sequence_num = other.sequence_num;
+    this->hostId = other.hostId;
+    this->sequenceNum = other.sequenceNum;
     this->srcMacAddress = other.srcMacAddress;
+    this->dstMacAddress = other.dstMacAddress;
 }
 
-void HelloMessage::parsimPack(omnetpp::cCommBuffer *b) const
+void HelloPacket::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::inet::FieldsChunk::parsimPack(b);
     doParsimPacking(b,this->type);
-    doParsimPacking(b,this->host_id);
-    doParsimPacking(b,this->sequence_num);
+    doParsimPacking(b,this->hostId);
+    doParsimPacking(b,this->sequenceNum);
     doParsimPacking(b,this->srcMacAddress);
+    doParsimPacking(b,this->dstMacAddress);
 }
 
-void HelloMessage::parsimUnpack(omnetpp::cCommBuffer *b)
+void HelloPacket::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::inet::FieldsChunk::parsimUnpack(b);
     doParsimUnpacking(b,this->type);
-    doParsimUnpacking(b,this->host_id);
-    doParsimUnpacking(b,this->sequence_num);
+    doParsimUnpacking(b,this->hostId);
+    doParsimUnpacking(b,this->sequenceNum);
     doParsimUnpacking(b,this->srcMacAddress);
+    doParsimUnpacking(b,this->dstMacAddress);
 }
 
-inet::HelloMessageType HelloMessage::getType() const
+inet::HelloPacketType HelloPacket::getType() const
 {
     return this->type;
 }
 
-void HelloMessage::setType(inet::HelloMessageType type)
+void HelloPacket::setType(inet::HelloPacketType type)
 {
     handleChange();
     this->type = type;
 }
 
-int HelloMessage::getHost_id() const
+int HelloPacket::getHostId() const
 {
-    return this->host_id;
+    return this->hostId;
 }
 
-void HelloMessage::setHost_id(int host_id)
-{
-    handleChange();
-    this->host_id = host_id;
-}
-
-int HelloMessage::getSequence_num() const
-{
-    return this->sequence_num;
-}
-
-void HelloMessage::setSequence_num(int sequence_num)
+void HelloPacket::setHostId(int hostId)
 {
     handleChange();
-    this->sequence_num = sequence_num;
+    this->hostId = hostId;
 }
 
-const MacAddress& HelloMessage::getSrcMacAddress() const
+int HelloPacket::getSequenceNum() const
+{
+    return this->sequenceNum;
+}
+
+void HelloPacket::setSequenceNum(int sequenceNum)
+{
+    handleChange();
+    this->sequenceNum = sequenceNum;
+}
+
+const MacAddress& HelloPacket::getSrcMacAddress() const
 {
     return this->srcMacAddress;
 }
 
-void HelloMessage::setSrcMacAddress(const MacAddress& srcMacAddress)
+void HelloPacket::setSrcMacAddress(const MacAddress& srcMacAddress)
 {
     handleChange();
     this->srcMacAddress = srcMacAddress;
 }
 
-class HelloMessageDescriptor : public omnetpp::cClassDescriptor
+const MacAddress& HelloPacket::getDstMacAddress() const
+{
+    return this->dstMacAddress;
+}
+
+void HelloPacket::setDstMacAddress(const MacAddress& dstMacAddress)
+{
+    handleChange();
+    this->dstMacAddress = dstMacAddress;
+}
+
+class HelloPacketDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertynames;
     enum FieldConstants {
         FIELD_type,
-        FIELD_host_id,
-        FIELD_sequence_num,
+        FIELD_hostId,
+        FIELD_sequenceNum,
         FIELD_srcMacAddress,
+        FIELD_dstMacAddress,
     };
   public:
-    HelloMessageDescriptor();
-    virtual ~HelloMessageDescriptor();
+    HelloPacketDescriptor();
+    virtual ~HelloPacketDescriptor();
 
     virtual bool doesSupport(omnetpp::cObject *obj) const override;
     virtual const char **getPropertyNames() const override;
@@ -341,24 +356,24 @@ class HelloMessageDescriptor : public omnetpp::cClassDescriptor
     virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
 };
 
-Register_ClassDescriptor(HelloMessageDescriptor)
+Register_ClassDescriptor(HelloPacketDescriptor)
 
-HelloMessageDescriptor::HelloMessageDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::HelloMessage)), "inet::FieldsChunk")
+HelloPacketDescriptor::HelloPacketDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::HelloPacket)), "inet::FieldsChunk")
 {
     propertynames = nullptr;
 }
 
-HelloMessageDescriptor::~HelloMessageDescriptor()
+HelloPacketDescriptor::~HelloPacketDescriptor()
 {
     delete[] propertynames;
 }
 
-bool HelloMessageDescriptor::doesSupport(omnetpp::cObject *obj) const
+bool HelloPacketDescriptor::doesSupport(omnetpp::cObject *obj) const
 {
-    return dynamic_cast<HelloMessage *>(obj)!=nullptr;
+    return dynamic_cast<HelloPacket *>(obj)!=nullptr;
 }
 
-const char **HelloMessageDescriptor::getPropertyNames() const
+const char **HelloPacketDescriptor::getPropertyNames() const
 {
     if (!propertynames) {
         static const char *names[] = {  nullptr };
@@ -369,19 +384,19 @@ const char **HelloMessageDescriptor::getPropertyNames() const
     return propertynames;
 }
 
-const char *HelloMessageDescriptor::getProperty(const char *propertyname) const
+const char *HelloPacketDescriptor::getProperty(const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : nullptr;
 }
 
-int HelloMessageDescriptor::getFieldCount() const
+int HelloPacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 5+basedesc->getFieldCount() : 5;
 }
 
-unsigned int HelloMessageDescriptor::getFieldTypeFlags(int field) const
+unsigned int HelloPacketDescriptor::getFieldTypeFlags(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -391,14 +406,15 @@ unsigned int HelloMessageDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         0,    // FIELD_type
-        FD_ISEDITABLE,    // FIELD_host_id
-        FD_ISEDITABLE,    // FIELD_sequence_num
+        FD_ISEDITABLE,    // FIELD_hostId
+        FD_ISEDITABLE,    // FIELD_sequenceNum
         0,    // FIELD_srcMacAddress
+        0,    // FIELD_dstMacAddress
     };
-    return (field >= 0 && field < 4) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 5) ? fieldTypeFlags[field] : 0;
 }
 
-const char *HelloMessageDescriptor::getFieldName(int field) const
+const char *HelloPacketDescriptor::getFieldName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -408,25 +424,27 @@ const char *HelloMessageDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "type",
-        "host_id",
-        "sequence_num",
+        "hostId",
+        "sequenceNum",
         "srcMacAddress",
+        "dstMacAddress",
     };
-    return (field >= 0 && field < 4) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 5) ? fieldNames[field] : nullptr;
 }
 
-int HelloMessageDescriptor::findField(const char *fieldName) const
+int HelloPacketDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0] == 't' && strcmp(fieldName, "type") == 0) return base+0;
-    if (fieldName[0] == 'h' && strcmp(fieldName, "host_id") == 0) return base+1;
-    if (fieldName[0] == 's' && strcmp(fieldName, "sequence_num") == 0) return base+2;
+    if (fieldName[0] == 'h' && strcmp(fieldName, "hostId") == 0) return base+1;
+    if (fieldName[0] == 's' && strcmp(fieldName, "sequenceNum") == 0) return base+2;
     if (fieldName[0] == 's' && strcmp(fieldName, "srcMacAddress") == 0) return base+3;
+    if (fieldName[0] == 'd' && strcmp(fieldName, "dstMacAddress") == 0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
-const char *HelloMessageDescriptor::getFieldTypeString(int field) const
+const char *HelloPacketDescriptor::getFieldTypeString(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -435,15 +453,16 @@ const char *HelloMessageDescriptor::getFieldTypeString(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldTypeStrings[] = {
-        "inet::HelloMessageType",    // FIELD_type
-        "int",    // FIELD_host_id
-        "int",    // FIELD_sequence_num
+        "inet::HelloPacketType",    // FIELD_type
+        "int",    // FIELD_hostId
+        "int",    // FIELD_sequenceNum
         "inet::MacAddress",    // FIELD_srcMacAddress
+        "inet::MacAddress",    // FIELD_dstMacAddress
     };
-    return (field >= 0 && field < 4) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 5) ? fieldTypeStrings[field] : nullptr;
 }
 
-const char **HelloMessageDescriptor::getFieldPropertyNames(int field) const
+const char **HelloPacketDescriptor::getFieldPropertyNames(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -460,7 +479,7 @@ const char **HelloMessageDescriptor::getFieldPropertyNames(int field) const
     }
 }
 
-const char *HelloMessageDescriptor::getFieldProperty(int field, const char *propertyname) const
+const char *HelloPacketDescriptor::getFieldProperty(int field, const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -470,13 +489,13 @@ const char *HelloMessageDescriptor::getFieldProperty(int field, const char *prop
     }
     switch (field) {
         case FIELD_type:
-            if (!strcmp(propertyname, "enum")) return "inet::HelloMessageType";
+            if (!strcmp(propertyname, "enum")) return "inet::HelloPacketType";
             return nullptr;
         default: return nullptr;
     }
 }
 
-int HelloMessageDescriptor::getFieldArraySize(void *object, int field) const
+int HelloPacketDescriptor::getFieldArraySize(void *object, int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -484,13 +503,13 @@ int HelloMessageDescriptor::getFieldArraySize(void *object, int field) const
             return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount();
     }
-    HelloMessage *pp = (HelloMessage *)object; (void)pp;
+    HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-const char *HelloMessageDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+const char *HelloPacketDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -498,13 +517,13 @@ const char *HelloMessageDescriptor::getFieldDynamicTypeString(void *object, int 
             return basedesc->getFieldDynamicTypeString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    HelloMessage *pp = (HelloMessage *)object; (void)pp;
+    HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
         default: return nullptr;
     }
 }
 
-std::string HelloMessageDescriptor::getFieldValueAsString(void *object, int field, int i) const
+std::string HelloPacketDescriptor::getFieldValueAsString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -512,17 +531,18 @@ std::string HelloMessageDescriptor::getFieldValueAsString(void *object, int fiel
             return basedesc->getFieldValueAsString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    HelloMessage *pp = (HelloMessage *)object; (void)pp;
+    HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
-        case FIELD_type: return enum2string(pp->getType(), "inet::HelloMessageType");
-        case FIELD_host_id: return long2string(pp->getHost_id());
-        case FIELD_sequence_num: return long2string(pp->getSequence_num());
+        case FIELD_type: return enum2string(pp->getType(), "inet::HelloPacketType");
+        case FIELD_hostId: return long2string(pp->getHostId());
+        case FIELD_sequenceNum: return long2string(pp->getSequenceNum());
         case FIELD_srcMacAddress: return pp->getSrcMacAddress().str();
+        case FIELD_dstMacAddress: return pp->getDstMacAddress().str();
         default: return "";
     }
 }
 
-bool HelloMessageDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+bool HelloPacketDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -530,15 +550,15 @@ bool HelloMessageDescriptor::setFieldValueAsString(void *object, int field, int 
             return basedesc->setFieldValueAsString(object,field,i,value);
         field -= basedesc->getFieldCount();
     }
-    HelloMessage *pp = (HelloMessage *)object; (void)pp;
+    HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
-        case FIELD_host_id: pp->setHost_id(string2long(value)); return true;
-        case FIELD_sequence_num: pp->setSequence_num(string2long(value)); return true;
+        case FIELD_hostId: pp->setHostId(string2long(value)); return true;
+        case FIELD_sequenceNum: pp->setSequenceNum(string2long(value)); return true;
         default: return false;
     }
 }
 
-const char *HelloMessageDescriptor::getFieldStructName(int field) const
+const char *HelloPacketDescriptor::getFieldStructName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -551,7 +571,7 @@ const char *HelloMessageDescriptor::getFieldStructName(int field) const
     };
 }
 
-void *HelloMessageDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+void *HelloPacketDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -559,9 +579,10 @@ void *HelloMessageDescriptor::getFieldStructValuePointer(void *object, int field
             return basedesc->getFieldStructValuePointer(object, field, i);
         field -= basedesc->getFieldCount();
     }
-    HelloMessage *pp = (HelloMessage *)object; (void)pp;
+    HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
         case FIELD_srcMacAddress: return toVoidPtr(&pp->getSrcMacAddress()); break;
+        case FIELD_dstMacAddress: return toVoidPtr(&pp->getDstMacAddress()); break;
         default: return nullptr;
     }
 }

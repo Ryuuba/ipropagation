@@ -63,7 +63,8 @@ public:
   }
   /** @brief Initializes the module parameters from the NED file */
   virtual void initialize(int) override;
-  /** @brief Returns a const pointer to access the neighbor cache */
+  /** 
+   * @brief Returns a const pointer to access the neighbor cache in const mode */
   virtual const std::list<cache_entry>* get_neighbor_cache() {
     const std::list<cache_entry>* ptr = &cache;
     return ptr;
