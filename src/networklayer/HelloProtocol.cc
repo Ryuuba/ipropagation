@@ -9,8 +9,6 @@ void HelloProtocol::initialize(int stage) {
     max_attemps = par("maxAttemptNumber").intValue();
     //gets pointer to the neighbor cache
     node_id = getSimulation()->getSystemModule()->getSubmodule("node")->getIndex();
-    auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node")->getSubmodule("net")->getSubmodule("cache");
-    neighbor_cache = static_cast<NeighborCache*>(cache_module);
     auto delay = bcast_delay < discovery_time ? 
                  uniform(0.0, bcast_delay) + discovery_time : 
                  discovery_time;
@@ -20,9 +18,8 @@ void HelloProtocol::initialize(int stage) {
 
 void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
   if (msg->isSelfMessage()) {
-    //Says hello
-    send_hello_packet();
-    //Mitigate somehow packet collisions
+    send_hello_packet(); //Says hello
+    //Schedule the next broadcast considering a backoff
     auto delay = bcast_delay < discovery_time ? 
                  uniform(0.0, bcast_delay) + discovery_time : 
                  discovery_time;
@@ -44,11 +41,26 @@ void HelloProtocol::send_hello_packet() {
   hello_info->setType = inet::HelloPacketType::REQ;
   hello_info->setSequenceNum(sequence_number++);
   hello_info->setHostId(node_id);
-  //hello_info->setSrcMacAddress();
+  hello_info->setSrcMacAddress(mac);
   hello_info->setDstMacAddress(inet::MacAddress::BROADCAST_ADDRESS);
-  hello_pkt->addTagIfAbsent<inet::DispatchProtocolReq>()->setProtocol(&inet::Protocol::neighborDiscovery);
+  hello_pkt->insertAtBack(hello_info);
+  auto mac_address_request = hello_pkt->addTag<inet::MacAddressReq>();
+  mac_address_request->setSrcAddress(mac);
+  mac_address_request->setDestAddress(inet::MacAddress::BROADCAST_ADDRESS);
+  auto interface_req = hello_pkt->addTag<inet::InterfaceReq>();
+  interface_req->setInterfaceId(interface_id);
+  auto pktProtocoloTag = hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>();
+  pktProtocoloTag->setProtocol(&inet::Protocol::neighborDiscovery);
+  send(hello_pkt, output_gate_id);
 }
 
 void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
-
+  auto hello_pkt = dynamic_cast<inet::Packet*>(msg);
+  auto hello_info = inet::dynamicPtrCast<inet::HelloPacket>(hello_pkt->popAtBack<inet::HelloPacket>()->dupShared());
+  hello_pkt->trim();
+  auto macAddressInd = hello_pkt->getTag<inet::MacAddressInd>();//???
+  delete hello_pkt->removeControlInfo(); //???
+  //Read data packet
+  //Determine action
+  delete msg;
 }

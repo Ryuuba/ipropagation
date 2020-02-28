@@ -21,21 +21,40 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
 //TODO: Design an abstract class for NeighborDiscoveryProtocol packets
 
 class NeighborDiscoveryProtocolBase : public INeighborDiscoveryProtocol {
 protected:
+  /** @brief The MAC address of this host */
+  inet::MacAddress mac;
+  /** @brief A pointer to access the neighbor cache */
+  NeighborCache* neighbor_cache;
   /** @brief The size of the packet in bytes */
   int packet_size;
   /** @brief The sequence number of the hello messages */
   int sequence_number;
+  /** @brief A pointer to access the interface table */
+  inet::IInterfaceTable *interface_table;
+  /** @brief The ID of the wlan interface */
+  int interface_id;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
   virtual void send_hello_packet() = 0;
   /** @briefModifies the neighbor cache with the hello information */
   virtual void process_hello_packet(omnetpp::cMessage*) = 0;
 public:
-  NeighborDiscoveryProtocolBase(): packet_size(0), sequence_number(0) { }
+  NeighborDiscoveryProtocolBase()
+    : packet_size(0)
+    , interface_id(0)
+    , sequence_number(0)
+    , mac( )
+    , neighbor_cache(nullptr)
+    , interface_table(nullptr)
+    { }
   virtual ~NeighborDiscoveryProtocolBase(){}
   /**  
    * @brief Returns the number of stages needed to initalize an INET node
@@ -58,8 +77,13 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     packet_size = par("packetSize").intValue();
     discovery_time = par("discoveryTime");
     discovery_timer = new omnetpp::cMessage("discovery timer");
+    auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node")->getSubmodule("net")->getSubmodule("cache");
+    neighbor_cache = static_cast<NeighborCache*>(cache_module);
   }
   else if (stage == inet::INITSTAGE_NETWORK_LAYER) {
+    interface_table = inet::getModuleFromPar<inet::IInterfaceTable>(par("interfaceTableModule"), this);
+    interface_id = interface_table->getInterfaceByName("wlan")->getId();
+    mac = interface_table->getInterfaceByName("wlan")->getMacAddress();
     inet::registerService(inet::Protocol::neighborDiscovery, nullptr, gate("inputPort"));
     inet::registerProtocol(inet::Protocol::neighborDiscovery, gate("outputPort"), nullptr);
   }

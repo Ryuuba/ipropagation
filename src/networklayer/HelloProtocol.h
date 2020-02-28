@@ -26,15 +26,11 @@ protected:
    *  simulation has a module vector of hosts 
    * */
   int node_id;
-  /** @brief A pointer to access the neighbor cache */
-  NeighborCache* neighbor_cache;
   /** @brief Maximum number of attempts a node must perform to consider a
    * a neighbor is out of range */
   int max_attemps;
   /** @brief Maximum delay before broadcasting a hello packet */
   omnetpp::simtime_t bcast_delay;
-  /** @brief A pointer to access the interface table */
-  inet::IInterfaceTable *interface_table;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
   virtual void send_hello_packet();
@@ -42,7 +38,9 @@ protected:
   virtual void process_hello_packet(omnetpp::cMessage*);
 public:
   /** @brief Default constructor */
-  HelloProtocol() : neighbor_cache(nullptr), interface_table(nullptr) {}
+  HelloProtocol()
+  : NeighborDiscoveryProtocolBase()
+  { }
   /** @brief Default desconstructor: cancels and deletes the hello timer */
   virtual ~HelloProtocol() {}
   /** @brief Initializes the module state from a NED file */
