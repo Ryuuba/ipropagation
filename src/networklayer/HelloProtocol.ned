@@ -22,6 +22,7 @@ import informationpropagation.base.NeighborDiscoveryProtocolBase;
 simple HelloProtocol extends NeighborDiscoveryProtocolBase
 {
     parameters:
+        @class(HelloProtocol);
         @display("i=block/network");
         //Maximum number of contact attempts a node must perform to consider a 
         //neighbor is out of range

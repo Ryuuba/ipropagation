@@ -21,6 +21,7 @@ import inet.common.MessageDispatcher;
 import informationpropagation.networklayer.ExtendedNetworkLayer;
 import informationpropagation.contract.IApp;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.probabilistic.ProbabilisticBroadcast;
 //
 // TODO auto-generated type
 //
@@ -29,25 +30,34 @@ module WirelessBroadcastNode
     parameters:
         @display("i=device/palm2,,4");
         @labels(node,ad-hoc-node);
+        @networkNode;
+        bool hasStatus = default(false);
         string canvasImage = default("");
         string canvasImageColor = default("");
+        string interfaceTableModule = "interfaceTable";
+        string mobilityModule = "mobility";
         mobility.typename = default("");
         status.initialStatus = "NOT_INFO";
         int numWlanInterfaces = default(1);
+        wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
+        wlan[*].agent.typename = default("");
+        wlan[*].interfaceTableModule = interfaceTableModule;
+        wlan[*].radio.antenna.mobilityModule = mobilityModule;
+        net.interfaceTableModule = interfaceTableModule;
     gates:
         input radioIn[numWlanInterfaces] @directIn;
     submodules:
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=65,148;is=s");
+                @display("p=65,150;is=s");
         }
-        status: NodeStatus {
+        status: NodeStatus if hasStatus {
             parameters:
-                @display("p=65,32;is=s");
+                @display("p=65,50;is=s");
         }
         mobility: <default("")> like IMobility if typename != "" {
             parameters:
-                @display("p=65,90;is=s");
+                @display("p=65,100;is=s");
         }
         app: <> like IApp {
             @display("p=226,40");
@@ -75,11 +85,10 @@ module WirelessBroadcastNode
             wlan[i].upperLayerOut --> nl.in++;
             wlan[i].upperLayerIn <-- nl.out++;
         }
-        nl.out++ --> wlan[0].upperLayerIn;
+        app.outputPort --> appl.in++;
+        appl.out++ --> app.inputPort;
         net.ifOut --> nl.in++;
         nl.out++ --> net.ifIn;
         net.transportOut --> appl.in++;
         appl.out++ --> net.transportIn;
-        app.outputPort --> appl.in++;
-        appl.out++ --> app.inputPort;
 }

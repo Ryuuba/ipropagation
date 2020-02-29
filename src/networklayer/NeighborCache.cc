@@ -39,16 +39,40 @@ void NeighborCache::push_register(NeighborCache::cache_entry&& entry) {
   cache.push_back(entry);
 }
 
-void NeighborCache::erase_register(NeighborCache::cache_entry& entry) {
-  cache_it it = std::find(cache.begin(), cache.end(), entry);
+void NeighborCache::erase_register(const inet::MacAddress& neighbor_mac) {
+  cache_it it = std::find_if(
+    cache.begin(),
+    cache.end(), 
+    [neighbor_mac](const cache_entry & entry) -> bool {
+      return entry.mac_address == neighbor_mac;
+    }
+  );
   if (it != cache.end()) {
+    EV_INFO <<  "NeighborCache: entry: <" << it->host_id << ", " 
+             << it->mac_address << ", "
+             << it->last_contact_time << "> is erased\n";
     cache.erase(it);
-    EV_INFO <<  "NeighborCache: entry: <" << entry.host_id << ", " 
-             << entry.mac_address << ", "
-             << entry.last_contact_time << "> is erased\n";
   }
   else
-    EV_ERROR << "NeighborCache: entry: <" << entry.host_id << ", " 
-             << entry.mac_address << ", "
-             << entry.last_contact_time << "> is not found\n";
+    EV_ERROR << "NeighborCache: there is not an entry that matches the MAC\
+     address " << neighbor_mac << '\n';
+}
+
+void NeighborCache::erase_register(int neighbor_id) {
+  cache_it it = std::find_if(
+    cache.begin(),
+    cache.end(), 
+    [neighbor_id](const cache_entry & entry) -> bool {
+      return entry.host_id == neighbor_id;
+    }
+  );
+  if (it != cache.end()) {
+    EV_INFO <<  "NeighborCache: entry: <" << it->host_id << ", " 
+             << it->mac_address << ", "
+             << it->last_contact_time << "> is erased\n";
+    cache.erase(it);
+  }
+  else
+    EV_ERROR << "NeighborCache: there is not an entry that matches the host ID\
+     address " << neighbor_id << '\n';
 }

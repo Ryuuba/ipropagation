@@ -13,19 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package informationpropagation.networklayer;
-import informationpropagation.contract.INeighborCache;
-
+package informationpropagation.simulations;
+import informationpropagation.node.WirelessBroadcastNode;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 //
-// TODO auto-generated type
+// TODO select a realistic radio medium
 //
-simple NeighborCache like INeighborCache
+network HelloTest
 {
     parameters:
-        //TODO: implement an algorithm to erase the cache
-        //double removeNeighborTimer
-        //The time between two consecutive emittion of signals
-        double signalingTime @unit(s);
-        @display("i=block/table");
-        @signal[neighborhood](type=NeighborhoodNotificacion?);
+        @display("bgb=200,200;bgg=,,grey10");
+    submodules:
+        radioMedium: UnitDiskRadioMedium {
+            parameters:
+                @display("p=53,24;is=s");
+        }
+        nodeA: WirelessBroadcastNode {
+            @display("p=100,100");
+        }
+        nodeB: WirelessBroadcastNode {
+            @display("p=100,130");
+        }
+    connections allowunconnected:
 }

@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.5 from InfoPacket.msg.
+// Generated file, do not edit! Created by nedtool 5.5 from msg/InfoPacket.msg.
 //
 
 #ifndef __INET_INFOPACKET_M_H
@@ -30,7 +30,7 @@ class InfoPacket;
 namespace inet {
 
 /**
- * Enum generated from <tt>InfoPacket.msg:25</tt> by nedtool.
+ * Enum generated from <tt>msg/InfoPacket.msg:25</tt> by nedtool.
  * <pre>
  * enum InfoType
  * {
@@ -47,7 +47,7 @@ enum InfoType {
 };
 
 /**
- * Class generated from <tt>InfoPacket.msg:32</tt> by nedtool.
+ * Class generated from <tt>msg/InfoPacket.msg:32</tt> by nedtool.
  * <pre>
  * class InfoPacket extends FieldsChunk
  * {

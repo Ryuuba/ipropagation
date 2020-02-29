@@ -38,7 +38,7 @@ void HelloProtocol::send_hello_packet() {
   inet::Packet* hello_pkt = new::inet::Packet("hello");
   const auto& hello_info = inet::makeShared<inet::HelloPacket>();
   hello_info->setChunkLength(inet::B(packet_size));
-  hello_info->setType = inet::HelloPacketType::REQ;
+  hello_info->setType(inet::HelloPacketType::REQ);
   hello_info->setSequenceNum(sequence_number++);
   hello_info->setHostId(node_id);
   hello_info->setSrcMacAddress(mac);
@@ -56,11 +56,15 @@ void HelloProtocol::send_hello_packet() {
 
 void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
   auto hello_pkt = dynamic_cast<inet::Packet*>(msg);
-  auto hello_info = inet::dynamicPtrCast<inet::HelloPacket>(hello_pkt->popAtBack<inet::HelloPacket>()->dupShared());
-  hello_pkt->trim();
+  auto hello_info = inet::dynamicPtrCast<inet::HelloPacket>(hello_pkt->popAtBack<inet::HelloPacket>()->dupShared());//???
+  hello_pkt->trim();//???
   auto macAddressInd = hello_pkt->getTag<inet::MacAddressInd>();//???
   delete hello_pkt->removeControlInfo(); //???
   //Read data packet
+  EV_INFO << "Receive hello packet from " 
+          << hello_info->getSrcMacAddress() << ' '
+          << hello_info->getHostId() << ' '
+          << '\n';
   //Determine action
   delete msg;
 }

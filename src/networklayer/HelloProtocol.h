@@ -18,7 +18,6 @@
 
 #include "../base/NeighborDiscoveryProtocolBase.h"
 #include "../msg/HelloPacket_m.h"
-#include "NeighborCache.h"
 
 class HelloProtocol : public NeighborDiscoveryProtocolBase {
 protected:

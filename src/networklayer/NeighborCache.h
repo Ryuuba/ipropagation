@@ -73,8 +73,10 @@ public:
    *  not be used by the calle
    */
   virtual void push_register(cache_entry&&);
-  /** @brief Removes a neighbor from cache */
-  virtual void erase_register(cache_entry&);
+  /** @brief Removes a neighbor from cache by mac_address */
+  virtual void erase_register(const inet::MacAddress&);
+  /** @brief Removes a neighbor from cache by host_id*/
+  virtual void erase_register(int);
   /** @brief Returns the begin of the cache for loop-range iteration */
   cache_it begin() {
     return cache.begin();
@@ -103,7 +105,6 @@ public:
   NeighborhoodNotificacion(const std::list<NeighborCache::cache_entry>* n_)
     : neighborhood(n_)
   { }
-  virtual ~NeighborhoodNotificacion();
 };
 
 #endif // NEIGHBOR_CACHE_H

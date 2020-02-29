@@ -33,7 +33,7 @@ module ExtendedNetworkLayer extends SimpleNetworkLayer
             @display("p=500,300");
         }
     connections allowunconnected:
-        dp.in <-- lp.out++ if exists(dp);
-        dp.out --> lp.in++ if exists(cache);
+        dp.inputPort <-- lp.out++ if exists(dp);
+        dp.outputPort --> lp.in++ if exists(cache);
         
 }

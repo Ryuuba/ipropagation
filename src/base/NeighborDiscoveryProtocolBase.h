@@ -17,6 +17,7 @@
 #define NEIGHBOR_DISCOVERY_PROTOCOL_BASE_H
 
 #include "../contract/INeighborDiscoveryProtocol.h"
+#include "../networklayer/NeighborCache.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
