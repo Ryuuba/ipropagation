@@ -23,16 +23,14 @@ network HelloTest
 {
     parameters:
         @display("bgb=200,200;bgg=,,grey10");
+        int hostNumber = default(2);
     submodules:
         radioMedium: UnitDiskRadioMedium {
             parameters:
                 @display("p=53,24;is=s");
         }
-        nodeA: WirelessBroadcastNode {
+        node[hostNumber]: WirelessBroadcastNode {
             @display("p=100,100");
-        }
-        nodeB: WirelessBroadcastNode {
-            @display("p=100,130");
         }
     connections allowunconnected:
 }

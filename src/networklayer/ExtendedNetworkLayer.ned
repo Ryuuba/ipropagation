@@ -19,21 +19,21 @@ import informationpropagation.contract.INeighborDiscoveryProtocol;
 import informationpropagation.contract.INeighborCache;
 
 //
-// TODO auto-generated type
+// This class extends the INET simple network layer with two modules:
+// a neighbor Discovery Protocol and a Neighbor Cache.
 //
 module ExtendedNetworkLayer extends SimpleNetworkLayer
 {
     parameters:
         @display("i=block/broadcast");
     submodules:
-        dp: <default("")> like INeighborDiscoveryProtocol if typename != "" {
-            @display("p=450,300");
-        }
+        // dp: <default("")> like INeighborDiscoveryProtocol if typename != "" { 
+        //     @display("p=450,300");
+        // }
         cache: <default("")> like INeighborCache if typename != "" {
             @display("p=500,300");
         }
     connections allowunconnected:
-        dp.inputPort <-- lp.out++ if exists(dp);
-        dp.outputPort --> lp.in++ if exists(cache);
-        
+        // dp.inputPort <-- lp.out++ if exists(dp);
+        // dp.outputPort --> lp.in++ if exists(cache);
 }

@@ -41,9 +41,8 @@ module WirelessBroadcastNode
         int numWlanInterfaces = default(1);
         wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
         wlan[*].agent.typename = default("");
-        wlan[*].interfaceTableModule = interfaceTableModule;
-        wlan[*].radio.antenna.mobilityModule = mobilityModule;
-        net.interfaceTableModule = interfaceTableModule;
+        wlan[*].radio.antenna.mobilityModule = default(absPath(".mobility"));
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn[numWlanInterfaces] @directIn;
     submodules:
@@ -59,13 +58,13 @@ module WirelessBroadcastNode
             parameters:
                 @display("p=65,100;is=s");
         }
-        app: <> like IApp {
-            @display("p=226,40");
-        }
-        appl: MessageDispatcher {
-            parameters:
-                @display("p=226,103;b=200,5,,,,1");
-        }
+        // app: <> like IApp {
+        //     @display("p=226,40");
+        // }
+        // appl: MessageDispatcher {
+        //     parameters:
+        //         @display("p=226,103;b=200,5,,,,1");
+        // }
         net: ExtendedNetworkLayer {
             @display("p=226,167");
         }
@@ -85,10 +84,10 @@ module WirelessBroadcastNode
             wlan[i].upperLayerOut --> nl.in++;
             wlan[i].upperLayerIn <-- nl.out++;
         }
-        app.outputPort --> appl.in++;
-        appl.out++ --> app.inputPort;
+        // app.outputPort --> appl.in++;
+        // appl.out++ --> app.inputPort;
         net.ifOut --> nl.in++;
         nl.out++ --> net.ifIn;
-        net.transportOut --> appl.in++;
-        appl.out++ --> net.transportIn;
+        //net.transportOut --> appl.in++;
+        // appl.out++ --> net.transportIn;
 }
