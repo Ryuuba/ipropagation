@@ -27,9 +27,9 @@ module ExtendedNetworkLayer extends SimpleNetworkLayer
     parameters:
         @display("i=block/broadcast");
     submodules:
-        // dp: <default("")> like INeighborDiscoveryProtocol if typename != "" { 
-        //     @display("p=450,300");
-        // }
+        dp: <default("")> like INeighborDiscoveryProtocol if typename != "" { 
+            @display("p=450,300");
+        }
         cache: <default("")> like INeighborCache if typename != "" {
             @display("p=500,300");
         }

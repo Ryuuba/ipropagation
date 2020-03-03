@@ -30,6 +30,11 @@
 
 class NeighborDiscoveryProtocolBase : public INeighborDiscoveryProtocol {
 protected:
+  /** 
+   * @brief The index of the host containg this module, it is assume the 
+   * simulation has a module vector of hosts 
+   * */
+  int node_index;
   /** @brief The MAC address of this host */
   inet::MacAddress mac;
   /** @brief A pointer to access the neighbor cache */
@@ -78,7 +83,8 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     packet_size = par("packetSize").intValue();
     discovery_time = par("discoveryTime");
     discovery_timer = new omnetpp::cMessage("discovery timer");
-    auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node")->getSubmodule("net")->getSubmodule("cache");
+    node_index = inet::getContainingNode(this)->getIndex();
+    auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node", node_index)->getSubmodule("net")->getSubmodule("cache");
     neighbor_cache = static_cast<NeighborCache*>(cache_module);
   }
   else if (stage == inet::INITSTAGE_NETWORK_LAYER) {

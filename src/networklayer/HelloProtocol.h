@@ -21,10 +21,6 @@
 
 class HelloProtocol : public NeighborDiscoveryProtocolBase {
 protected:
-  /** @brief The index of the host containg this module, it is assume the 
-   *  simulation has a module vector of hosts 
-   * */
-  int node_id;
   /** @brief Maximum number of attempts a node must perform to consider a
    * a neighbor is out of range */
   int max_attemps;

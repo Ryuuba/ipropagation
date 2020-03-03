@@ -35,11 +35,20 @@ void BroadcastInfectionApp::initialize(int stage)
     status_report_interval = par("statusReportInterval");
     recovery_probability = par("recoveryProbability");
     infection_probability = par("infectionProbability");
-    status_timer = new omnetpp::cMessage("status", BroadcastInfectionApp::STATUS);
+    status_timer = new omnetpp::cMessage(
+      "status", 
+      BroadcastInfectionApp::STATUS
+    );
     status_timer->setSchedulingPriority(1);
-    message_timer = new omnetpp::cMessage("broadcast", BroadcastInfectionApp::BROADCAST);
+    message_timer = new omnetpp::cMessage(
+      "broadcast",
+      BroadcastInfectionApp::BROADCAST
+    );
     message_timer->setSchedulingPriority(1);
-    recovery_timer = new omnetpp::cMessage("recovery", BroadcastInfectionApp::RECOVERY);
+    recovery_timer = new omnetpp::cMessage(
+      "recovery",
+      BroadcastInfectionApp::RECOVERY
+    );
     recovery_timer->setSchedulingPriority(1);
     auto coin = uniform(0.0, 1.0);
     EV_INFO << "Host " << host_id << " gets " << coin << '\n';

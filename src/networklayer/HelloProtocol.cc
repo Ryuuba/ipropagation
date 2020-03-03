@@ -7,8 +7,6 @@ void HelloProtocol::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     bcast_delay = par("broadcastDelay");
     max_attemps = par("maxAttemptNumber").intValue();
-    //gets pointer to the neighbor cache
-    node_id = getSimulation()->getSystemModule()->getSubmodule("node")->getIndex();
     auto delay = bcast_delay < discovery_time ? 
                  uniform(0.0, bcast_delay) + discovery_time : 
                  discovery_time;
@@ -40,7 +38,7 @@ void HelloProtocol::send_hello_packet() {
   hello_info->setChunkLength(inet::B(packet_size));
   hello_info->setType(inet::HelloPacketType::REQ);
   hello_info->setSequenceNum(sequence_number++);
-  hello_info->setHostId(node_id);
+  hello_info->setHostId(node_index);
   hello_info->setSrcMacAddress(mac);
   hello_info->setDstMacAddress(inet::MacAddress::BROADCAST_ADDRESS);
   hello_pkt->insertAtBack(hello_info);
