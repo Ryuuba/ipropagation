@@ -23,6 +23,7 @@ simple NeighborDiscoveryProtocolBase like INeighborDiscoveryProtocol
 {
     parameters:
         @display("i=block/network");
+        string interfaceTableModule;
         int packetSize @unit(bytes);
         double discoveryTime @unit(s);
     gates:

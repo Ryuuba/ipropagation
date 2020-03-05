@@ -27,13 +27,13 @@ module ExtendedNetworkLayer extends SimpleNetworkLayer
     parameters:
         @display("i=block/broadcast");
     submodules:
-        dp: <default("")> like INeighborDiscoveryProtocol if typename != "" { 
+        dp: <default("")> like INeighborDiscoveryProtocol if typename != "" {
             @display("p=450,300");
         }
         cache: <default("")> like INeighborCache if typename != "" {
             @display("p=500,300");
         }
     connections allowunconnected:
-        // dp.inputPort <-- lp.out++ if exists(dp);
-        // dp.outputPort --> lp.in++ if exists(cache);
+        dp.inputPort <-- lp.out++ if exists(dp);
+        dp.outputPort --> lp.in++ if exists(dp);
 }

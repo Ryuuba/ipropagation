@@ -85,14 +85,16 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     discovery_timer = new omnetpp::cMessage("discovery timer");
     node_index = inet::getContainingNode(this)->getIndex();
     auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node", node_index)->getSubmodule("net")->getSubmodule("cache");
-    neighbor_cache = static_cast<NeighborCache*>(cache_module);
+    neighbor_cache = static_cast<NeighborCache*>(cache_module);    
+    interface_table = inet::getModuleFromPar<inet::IInterfaceTable>(par("interfaceTableModule"), this);
   }
   else if (stage == inet::INITSTAGE_NETWORK_LAYER) {
-    interface_table = inet::getModuleFromPar<inet::IInterfaceTable>(par("interfaceTableModule"), this);
-    interface_id = interface_table->getInterfaceByName("wlan")->getId();
-    mac = interface_table->getInterfaceByName("wlan")->getMacAddress();
-    inet::registerService(inet::Protocol::neighborDiscovery, nullptr, gate("inputPort"));
-    inet::registerProtocol(inet::Protocol::neighborDiscovery, gate("outputPort"), nullptr);
+    interface_id = interface_table->getInterfaceByName("wlan0")->getInterfaceId();
+    std::cout << "NDP: the interface id is " << interface_id << '\n';
+    mac = interface_table->getInterfaceByName("wlan0")->getMacAddress();
+    std::cout << "NeighborDiscoveryProtocol: mac address is " << mac << '\n';
+    inet::registerService(inet::Protocol::neighborDiscovery, nullptr, gate(input_gate_id));
+    inet::registerProtocol(inet::Protocol::neighborDiscovery, gate(output_gate_id), nullptr);
   }
 }
 

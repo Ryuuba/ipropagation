@@ -34,7 +34,6 @@ module WirelessBroadcastNode
         bool hasStatus = default(false);
         string canvasImage = default("");
         string canvasImageColor = default("");
-        string interfaceTableModule = "interfaceTable";
         string mobilityModule = "mobility";
         mobility.typename = default("");
         status.initialStatus = "NOT_INFO";
