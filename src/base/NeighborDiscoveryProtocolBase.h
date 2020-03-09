@@ -45,8 +45,8 @@ protected:
   int sequence_number;
   /** @brief A pointer to access the interface table */
   inet::IInterfaceTable *interface_table;
-  /** @brief The ID of the wlan interface */
-  int interface_id;
+  /** @brief The index of the wlan interface */
+  int interface_index;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
   virtual void send_hello_packet() = 0;
@@ -55,7 +55,7 @@ protected:
 public:
   NeighborDiscoveryProtocolBase()
     : packet_size(0)
-    , interface_id(0)
+    , interface_index(0)
     , sequence_number(0)
     , mac( )
     , neighbor_cache(nullptr)
@@ -89,9 +89,9 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     interface_table = inet::getModuleFromPar<inet::IInterfaceTable>(par("interfaceTableModule"), this);
   }
   else if (stage == inet::INITSTAGE_NETWORK_LAYER) {
-    interface_id = interface_table->getInterfaceByName("wlan0")->getInterfaceId();
-    std::cout << "NDP: the interface id is " << interface_id << '\n';
-    mac = interface_table->getInterfaceByName("wlan0")->getMacAddress();
+    interface_index = interface_table->findInterfaceByName("wlan0")->getIndex();
+    std::cout << "NDP: the interface id is " << interface_index << '\n';
+    mac = interface_table->findInterfaceByName("wlan0")->getMacAddress();
     std::cout << "NeighborDiscoveryProtocol: mac address is " << mac << '\n';
     inet::registerService(inet::Protocol::neighborDiscovery, nullptr, gate(input_gate_id));
     inet::registerProtocol(inet::Protocol::neighborDiscovery, gate(output_gate_id), nullptr);

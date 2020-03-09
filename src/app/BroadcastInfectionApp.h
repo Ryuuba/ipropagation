@@ -16,7 +16,6 @@
 #if !defined(BROADCAST_INFECTION_APP_H)
 #define BROADCAST_INFECTION_APP_H
 
-#include <string>
 #include <omnetpp.h>
 
 #include "inet/common/INETDefs.h"

@@ -46,7 +46,7 @@ void HelloProtocol::send_hello_packet() {
   mac_address_request->setSrcAddress(mac);
   mac_address_request->setDestAddress(inet::MacAddress::BROADCAST_ADDRESS);
   auto interface_req = hello_pkt->addTag<inet::InterfaceReq>();
-  interface_req->setInterfaceId(interface_id);
+  interface_req->setInterfaceId(interface_index);
   auto pktProtocoloTag = hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>();
   pktProtocoloTag->setProtocol(&inet::Protocol::neighborDiscovery);
   send(hello_pkt, output_gate_id);
@@ -54,7 +54,7 @@ void HelloProtocol::send_hello_packet() {
 
 void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
   auto hello_pkt = dynamic_cast<inet::Packet*>(msg);
-  auto hello_info = inet::dynamicPtrCast<inet::HelloPacket>(hello_pkt->popAtBack<inet::HelloPacket>()->dupShared());//???
+  auto hello_info = inet::dynamicPtrCast<inet::HelloPacket>(hello_pkt->popAtFront<inet::HelloPacket>()->dupShared());//???
   hello_pkt->trim();//???
   auto macAddressInd = hello_pkt->getTag<inet::MacAddressInd>();//???
   delete hello_pkt->removeControlInfo(); //???

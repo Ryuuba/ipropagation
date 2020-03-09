@@ -1,14 +1,13 @@
 INETDIR = $(HOME)/inet4
-SLAWDIR = $(HOME)/slaw
+
 BUILD_OPTIONS = -f --deep \
 								-I$(INETDIR)/src/ \
                 -I$(INETDIR)/src/inet/common/ \
-								-L$(INETDIR)/out/gcc-release/src/ \
-                -I$(SLAWDIR)/src/common/ \
-                -I$(SLAWDIR)/contract/ \
-								-I$(SLAWDIR)/src/observer/ \
+								-L$(INETDIR)/src/ \
 								-lINET \
 								-o info_propg
+
+.PHONY: all clean cleanall makefiles checkmakefiles
 
 all: checkmakefiles
 	cd src && $(MAKE)

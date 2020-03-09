@@ -11,6 +11,7 @@ std::ostream& operator<<(std::ostream& os, const NeighborCache& cache) {
               << neighbor.mac_address
               << neighbor.last_contact_time
               << '\n';
+  return os;
 }
 
 void NeighborCache::initialize(int stage) {
