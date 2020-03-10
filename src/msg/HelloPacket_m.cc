@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.6 from msg/HelloPacket.msg.
+// Generated file, do not edit! Created by nedtool 5.6 from networklayer/../msg/HelloPacket.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -218,6 +218,8 @@ Register_Class(HelloPacket)
 
 HelloPacket::HelloPacket() : ::inet::FieldsChunk()
 {
+    this->setChunkLength(B(25));
+
 }
 
 HelloPacket::HelloPacket(const HelloPacket& other) : ::inet::FieldsChunk(other)

@@ -107,4 +107,6 @@ public:
   { }
 };
 
+Register_Class(NeighborhoodNotificacion);
+
 #endif // NEIGHBOR_CACHE_H

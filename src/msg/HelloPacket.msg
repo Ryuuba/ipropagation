@@ -30,6 +30,7 @@ enum HelloPacketType
 
 class HelloPacket extends FieldsChunk
 {
+    chunkLength = B(25);
     HelloPacketType type;
     int hostId;
     int sequenceNum;

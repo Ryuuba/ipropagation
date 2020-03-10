@@ -35,8 +35,8 @@ protected:
   virtual void process_hello_packet(omnetpp::cMessage*) = 0;
 public:
   INeighborDiscoveryProtocol()
-    : discovery_timer(nullptr)
-    , discovery_time(0.0)
+    : discovery_time(0.0)
+    , discovery_timer(nullptr)
     , input_gate_id(0)
     , output_gate_id(0)
     { }

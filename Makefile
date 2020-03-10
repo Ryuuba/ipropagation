@@ -4,7 +4,7 @@ BUILD_OPTIONS = -f --deep \
 								-I$(INETDIR)/src/ \
                 -I$(INETDIR)/src/inet/common/ \
 								-L$(INETDIR)/src/ \
-								-lINET \
+								-lINET_dbg \
 								-o info_propg
 
 .PHONY: all clean cleanall makefiles checkmakefiles

@@ -40,7 +40,7 @@ module WirelessBroadcastNode
         int numWlanInterfaces = default(1);
         wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
         wlan[*].agent.typename = default("");
-        wlan[*].radio.antenna.mobilityModule = default(absPath(".mobility"));
+        wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn[numWlanInterfaces] @directIn;

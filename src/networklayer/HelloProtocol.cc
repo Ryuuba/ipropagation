@@ -34,29 +34,29 @@ void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
 
 void HelloProtocol::send_hello_packet() {
   inet::Packet* hello_pkt = new::inet::Packet("hello");
-  const auto& hello_info = inet::makeShared<inet::HelloPacket>();
+  auto payload = inet::makeShared<inet::ByteCountChunk>(inet::B(packet_size));
+  auto hello_info = inet::makeShared<inet::HelloPacket>();
   hello_info->setChunkLength(inet::B(packet_size));
   hello_info->setType(inet::HelloPacketType::REQ);
   hello_info->setSequenceNum(sequence_number++);
   hello_info->setHostId(node_index);
   hello_info->setSrcMacAddress(mac);
   hello_info->setDstMacAddress(inet::MacAddress::BROADCAST_ADDRESS);
-  hello_pkt->insertAtBack(hello_info);
-  auto mac_address_request = hello_pkt->addTag<inet::MacAddressReq>();
-  mac_address_request->setSrcAddress(mac);
-  mac_address_request->setDestAddress(inet::MacAddress::BROADCAST_ADDRESS);
-  auto interface_req = hello_pkt->addTag<inet::InterfaceReq>();
-  interface_req->setInterfaceId(interface_index);
-  auto pktProtocoloTag = hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>();
-  pktProtocoloTag->setProtocol(&inet::Protocol::neighborDiscovery);
+  hello_pkt->insertAtBack(payload);
+  hello_pkt->insertAtFront(hello_info);
+  hello_pkt->addTagIfAbsent<inet::MacAddressReq>()->setSrcAddress(mac);
+  hello_pkt->addTagIfAbsent<inet::MacAddressReq>()->setDestAddress(inet::MacAddress::BROADCAST_ADDRESS);
+  hello_pkt->addTagIfAbsent<inet::InterfaceReq>()->setInterfaceId(interface_index);
+  hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>()->setProtocol(&inet::Protocol::neighborDiscovery);
   send(hello_pkt, output_gate_id);
+  std::cout << "Hello protocol: hello pkt has been sent\n";
 }
 
 void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
   auto hello_pkt = dynamic_cast<inet::Packet*>(msg);
   auto hello_info = inet::dynamicPtrCast<inet::HelloPacket>(hello_pkt->popAtFront<inet::HelloPacket>()->dupShared());//???
   hello_pkt->trim();//???
-  auto macAddressInd = hello_pkt->getTag<inet::MacAddressInd>();//???
+  //auto macAddressInd = hello_pkt->getTag<inet::MacAddressInd>();//???
   delete hello_pkt->removeControlInfo(); //???
   //Read data packet
   EV_INFO << "Receive hello packet from " 

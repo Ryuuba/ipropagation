@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "~/omnetpp-5.6.1/include/**",
                 "~/inet4/src/inet/**",
-                "~/inet4/src/**"
+                "~/inet4/src/**",
+                "/home/geo/inet4/src"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
