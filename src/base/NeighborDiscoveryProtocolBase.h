@@ -44,7 +44,7 @@ protected:
   /** @brief The sequence number of the hello messages */
   int sequence_number;
   /** @brief A pointer to access the interface table */
-  inet::IInterfaceTable *interface_table;
+  inet::IInterfaceTable* interface_table;
   /** @brief The index of the wlan interface */
   int interface_index;
 protected:
