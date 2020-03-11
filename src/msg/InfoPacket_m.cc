@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.6 from app/../msg/InfoPacket.msg.
+// Generated file, do not edit! Created by nedtool 5.5 from msg/InfoPacket.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -376,7 +376,7 @@ unsigned int InfoPacketDescriptor::getFieldTypeFlags(int field) const
         field -= basedesc->getFieldCount();
     }
     static unsigned int fieldTypeFlags[] = {
-        FD_ISEDITABLE,    // FIELD_type
+        0,    // FIELD_type
         FD_ISEDITABLE,    // FIELD_identifer
         FD_ISEDITABLE,    // FIELD_host_id
     };
@@ -513,7 +513,6 @@ bool InfoPacketDescriptor::setFieldValueAsString(void *object, int field, int i,
     }
     InfoPacket *pp = (InfoPacket *)object; (void)pp;
     switch (field) {
-        case FIELD_type: pp->setType((inet::InfoType)string2enum(value, "inet::InfoType")); return true;
         case FIELD_identifer: pp->setIdentifer(string2long(value)); return true;
         case FIELD_host_id: pp->setHost_id(string2long(value)); return true;
         default: return false;

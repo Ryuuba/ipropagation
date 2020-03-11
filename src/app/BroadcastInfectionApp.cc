@@ -70,7 +70,6 @@ void BroadcastInfectionApp::initialize(int stage)
     WATCH(received_messages);
     WATCH(status);
   }
-  std::cout << "Stage: " << stage << '\n';
 }
 
 void BroadcastInfectionApp::handleMessage(omnetpp::cMessage* msg)

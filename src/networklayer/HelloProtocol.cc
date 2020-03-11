@@ -1,4 +1,5 @@
 #include "HelloProtocol.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 
 Define_Module(HelloProtocol);
 
@@ -49,7 +50,7 @@ void HelloProtocol::send_hello_packet() {
   hello_pkt->addTagIfAbsent<inet::InterfaceReq>()->setInterfaceId(interface_index);
   hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>()->setProtocol(&inet::Protocol::neighborDiscovery);
   send(hello_pkt, output_gate_id);
-  std::cout << "Hello protocol: hello pkt has been sent\n";
+  EV_INFO << "Hello protocol: hello pkt has been sent\n";
 }
 
 void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {

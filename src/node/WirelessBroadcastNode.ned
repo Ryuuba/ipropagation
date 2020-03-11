@@ -34,47 +34,46 @@ module WirelessBroadcastNode
         bool hasStatus = default(false);
         string canvasImage = default("");
         string canvasImageColor = default("");
-        string mobilityModule = "mobility";
-        mobility.typename = default("");
         status.initialStatus = "NOT_INFO";
         int numWlanInterfaces = default(1);
+        mobility.subjectModule = default("^");
         wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
         wlan[*].agent.typename = default("");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
+        wlan[*].radio.antenna.mobility.typename = "";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn[numWlanInterfaces] @directIn;
     submodules:
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=65,150;is=s");
-        }
         status: NodeStatus if hasStatus {
             parameters:
                 @display("p=65,50;is=s");
         }
-        mobility: <default("")> like IMobility if typename != "" {
+        mobility: <default("StationaryMobility")> like IMobility {
             parameters:
                 @display("p=65,100;is=s");
         }
-        app: <> like IApp {
-            @display("p=226,40");
-        }
-        appl: MessageDispatcher {
+        interfaceTable: InterfaceTable {
             parameters:
-                @display("p=226,103;b=200,5,,,,1");
+                @display("p=65,150;is=s");
         }
-        //TODO: Fix the interface table initialization in ProbabilisticBroadcast
-        net: ExtendedNetworkLayer {
-            @display("p=226,167");
+        wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
+            parameters:
+                @display("p=226,296,row,150;q=queue");
         }
         nl: MessageDispatcher {
             parameters:
                 @display("p=226,229;b=200,5,,,,1");
         }
-        wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
+        net: ExtendedNetworkLayer {
+            @display("p=226,167");
+        }
+        appl: MessageDispatcher {
             parameters:
-                @display("p=226,296,row,150;q=queue");
+                @display("p=226,103;b=200,5,,,,1");
+        }
+        app: <> like IApp {
+            @display("p=226,40");
         }
     connections allowunconnected:
         for i=0..sizeof(radioIn)-1 {
