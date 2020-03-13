@@ -8,10 +8,7 @@ void HelloProtocol::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     bcast_delay = par("broadcastDelay");
     max_attemps = par("maxAttemptNumber").intValue();
-    auto delay = bcast_delay < discovery_time ? 
-                 uniform(0.0, bcast_delay) + discovery_time : 
-                 discovery_time;
-    scheduleAt(omnetpp::simTime() + delay, discovery_timer);
+    scheduleAt(omnetpp::simTime() + backoff(), discovery_timer);
   }
 }
 
@@ -63,4 +60,10 @@ void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
           << '\n';
   //Determine action
   delete msg;
+}
+
+omnetpp::simtime_t HelloProtocol::backoff()  {
+  return bcast_delay < discovery_time ? 
+         uniform(0.0, bcast_delay) + discovery_time : 
+         discovery_time;
 }

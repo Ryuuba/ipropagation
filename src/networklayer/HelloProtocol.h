@@ -31,6 +31,8 @@ protected:
   virtual void send_hello_packet();
   /** @brief Modifies the neighbor cache with the hello information */
   virtual void process_hello_packet(omnetpp::cMessage*);
+  /** @brief Computes a random delay to avoid signal collisions */
+  virtual omnetpp::simtime_t backoff();
 public:
   /** @brief Default constructor */
   HelloProtocol()

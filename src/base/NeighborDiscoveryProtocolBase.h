@@ -93,8 +93,16 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     interface_index = interface_table->getInterfaceByName("wlan0")->getInterfaceId();
     mac = interface_table->getInterfaceByName("wlan0")->getMacAddress();
     EV_INFO << "NeighborDiscoveryProtocol: mac address is " << mac << '\n';
-    inet::registerService(inet::Protocol::neighborDiscovery, nullptr, gate(input_gate_id));
-    inet::registerProtocol(inet::Protocol::neighborDiscovery, gate(output_gate_id), nullptr);
+    inet::registerService(
+      inet::Protocol::neighborDiscovery, 
+      nullptr, 
+      gate(input_gate_id)
+    );
+    inet::registerProtocol(
+      inet::Protocol::neighborDiscovery,
+      gate(output_gate_id),
+      nullptr
+    );
   }
 }
 
