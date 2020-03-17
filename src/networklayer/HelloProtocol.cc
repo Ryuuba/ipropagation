@@ -31,7 +31,7 @@ void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
 }
 
 void HelloProtocol::send_hello_packet() {
-  inet::Packet* hello_pkt = new::inet::Packet("hello");
+  inet::Packet* hello_pkt = new inet::Packet("hello");
   auto hello_info = inet::makeShared<inet::HelloPacket>();
   hello_info->setChunkLength(inet::B(packet_size));
   hello_info->setType(inet::HelloPacketType::REQ);
@@ -41,9 +41,12 @@ void HelloProtocol::send_hello_packet() {
   hello_info->setDstMacAddress(inet::MacAddress::BROADCAST_ADDRESS);
   hello_pkt->insertAtFront(hello_info);
   hello_pkt->addTagIfAbsent<inet::MacAddressReq>()->setSrcAddress(mac);
-  hello_pkt->addTagIfAbsent<inet::MacAddressReq>()->setDestAddress(inet::MacAddress::BROADCAST_ADDRESS);
-  hello_pkt->addTagIfAbsent<inet::InterfaceReq>()->setInterfaceId(interface_index);
-  hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>()->setProtocol(&inet::Protocol::neighborDiscovery);
+  hello_pkt->addTagIfAbsent<inet::MacAddressReq>()->
+    setDestAddress(inet::MacAddress::BROADCAST_ADDRESS);
+  hello_pkt->addTagIfAbsent<inet::InterfaceReq>()->
+    setInterfaceId(interface_index);
+  hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>()->
+    setProtocol(&inet::Protocol::neighborDiscovery);
   send(hello_pkt, output_gate_id);
   EV_INFO << "Hello protocol: hello pkt has been sent\n";
 }
