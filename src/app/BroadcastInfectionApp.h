@@ -16,26 +16,20 @@
 #if !defined(BROADCAST_INFECTION_APP_H)
 #define BROADCAST_INFECTION_APP_H
 
-#include <omnetpp.h>
-
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/Packet.h"
 #include "../base/InfectionBase.h"
 #include "../msg/InfoPacket_m.h"
+#include "inet/common/ModuleAccess.h"
 
 class BroadcastInfectionApp : public InfectionBase
 {
   protected: //App attributes
-    /** @brief The ID of the gate where broadcast messages arrive */
-    int input_gate_id;
-    /** @brief The ID of the gate where broadcast messages are sent */
-    int output_gate_id;
+
     /** @brief The simulation ID of the host */
     int host_id;
     /** @brief The name of the infectious packet */
     const char* packet_name = "infection";
-    /** @brief The length in bytes of the infectious packet */
-    int packet_size;
+    /** @brief The length in bytes of the data within an infectious packet */
+    int payload;
     /** @brief the sort of timers this app reacts */
     enum timer_kind {
       RECOVERY = 100, //Triggers an attempt to recover from an infection

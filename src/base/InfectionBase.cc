@@ -21,7 +21,6 @@ InfectionBase::InfectionBase() :
   recovery_probability(0.0),
   infection_probability(0.0),
   sent_interval(0.0),
-  message_timer(nullptr),
   recovery_timer(nullptr),
   status_timer(nullptr),
   sent_messages(0),
@@ -32,8 +31,36 @@ InfectionBase::InfectionBase() :
 
 InfectionBase::~InfectionBase()
 {
-  cancelAndDelete(message_timer);
   cancelAndDelete(recovery_timer);
   cancelAndDelete(status_timer);
 }
 
+void InfectionBase::initialize(int stage) {
+  if (stage == inet::INITSTAGE_LOCAL) {
+    input_gate_id = gate("inputPort")->getId();
+    output_gate_id = gate("outputPort")->getId();
+    information_timer = new omnetpp::cMessage("information timer");
+    recovery_timer = new omnetpp::cMessage("recovery timer");
+    status_timer = new omnetpp::cMessage("status timer");
+  }
+  else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
+    inet::registerService(
+      inet::Protocol::information,
+      nullptr,
+      gate(input_gate_id)
+    );
+    inet::registerProtocol(
+      inet::Protocol::information,
+      nullptr,
+      gate(output_gate_id)
+    );
+  }
+}
+
+void InfectionBase::send_down(inet::Packet* pkt) {
+  // sets a SimpleNetworkProtocol as destination protocol
+  std::cout << "InfectionBase: sending packet to dispatcher\n";
+  pkt->addTagIfAbsent<inet::DispatchProtocolReq>()->
+    setProtocol(&inet::Protocol::probabilistic);
+  send(pkt, output_gate_id);
+}

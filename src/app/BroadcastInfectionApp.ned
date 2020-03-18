@@ -40,8 +40,8 @@ simple BroadcastInfectionApp extends InfectionBase
 {
     parameters:
         @class(BroadcastInfectionApp);
-        //App settings
-        volatile int packetSize @unit(B); // length in bytes
+        //The payload of the information packet
+        volatile int payload @unit(B); // length in bytes
         //probability that node start infected
         double initialInfectionProbability;
         @signal[sentMessage](type = long);

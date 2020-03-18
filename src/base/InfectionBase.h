@@ -17,9 +17,10 @@
 #define INFECTION_BASE_H
 
 #include <omnetpp.h>
+#include "../contract/IApp.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
-
-class InfectionBase : public omnetpp::cSimpleModule
+class InfectionBase : public IApp
 {
 protected:
   /** @brief The possible node status for this infection app. This enum could 
@@ -42,8 +43,6 @@ protected:
   omnetpp::simtime_t sent_interval;
   /** @brief The rate at which infectious packets are sent per second */
   omnetpp::simtime_t recovery_interval;
-  /** @brief Timer to set the next message */
-  omnetpp::cMessage* message_timer;
   /** @brief Timer to set the next recovery attempt */
   omnetpp::cMessage* recovery_timer;
   /** @brief The duration of the infection period */
@@ -73,12 +72,22 @@ protected:
   virtual void process_packet(omnetpp::cMessage*) = 0;
   /** @brief Emits the host status */
   virtual void emit_status(omnetpp::cMessage*) = 0;
+  /** Sends an INET packet through the output gate of this module */
+  virtual void send_down(inet::Packet*);
 public:
   /** @brief Default constructor, initializes all attributes */
   InfectionBase();
   /** @brief Default destructor, derived classes must cancel and delete 
    *  self-messages */
   virtual ~InfectionBase();
+  /**  
+   * @brief Returns the number of stages needed to initalize an INET node
+   */
+  virtual int numInitStages() const override {
+    return inet::NUM_INIT_STAGES;
+  }
+  /** @brief Initializes the module */
+  virtual void initialize(int) override;
 };
 
 #endif /* INFECTION_BASE_H */

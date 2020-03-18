@@ -11,27 +11,17 @@ omnetpp::simsignal_t InfectionBase::status_signal =
   registerSignal("infectionTime");
 
 BroadcastInfectionApp::BroadcastInfectionApp()
-  : packet_size(0)
-{ 
+  : payload(0)
+{ }
 
-}
-
-BroadcastInfectionApp::~BroadcastInfectionApp()
-{
-  cancelAndDelete(message_timer);
-  cancelAndDelete(recovery_timer);
-  cancelAndDelete(status_timer);
-}
+BroadcastInfectionApp::~BroadcastInfectionApp() { }
 
 void BroadcastInfectionApp::initialize(int stage)
 {
-  if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
-    host_id = getIndex(); //TODO Update this value with the getSimulation()
-    inet::registerService(inet::Protocol::information, gate("inputPort"), nullptr);
-    inet::registerProtocol(inet::Protocol::information, gate("outputPort"), nullptr);
-    input_gate_id = gate("inputPort")->getId();
-    output_gate_id = gate("outputPort")->getId();
-    packet_size = par("packetSize");
+  InfectionBase::initialize(stage);
+  if (stage == inet::INITSTAGE_LOCAL) {
+    host_id = inet::getContainingNode(this)->getIndex();
+    payload = par("payload");
     status_report_interval = par("statusReportInterval");
     recovery_probability = par("recoveryProbability");
     infection_probability = par("infectionProbability");
@@ -40,11 +30,8 @@ void BroadcastInfectionApp::initialize(int stage)
       BroadcastInfectionApp::STATUS
     );
     status_timer->setSchedulingPriority(1);
-    message_timer = new omnetpp::cMessage(
-      "broadcast",
-      BroadcastInfectionApp::BROADCAST
-    );
-    message_timer->setSchedulingPriority(1);
+    information_timer->setKind(BroadcastInfectionApp::BROADCAST);
+    information_timer->setSchedulingPriority(1);
     recovery_timer = new omnetpp::cMessage(
       "recovery",
       BroadcastInfectionApp::RECOVERY
@@ -60,12 +47,15 @@ void BroadcastInfectionApp::initialize(int stage)
     else
       status = InfectionBase::NOT_INFECTED;
     EV_INFO << "Status of host " << host_id << " is " << status << '\n';
-    if (status == InfectionBase::INFECTED)
+    if (status == InfectionBase::INFECTED) {
       scheduleAt(
         omnetpp::simTime() + par("sentInterval"), 
-        message_timer
+        information_timer
       );
+      EV_INFO << "BroadcastInfectionApp: schedule information pkt at " << omnetpp::simTime() + par("sentInterval") << '\n';
+    }
     scheduleAt(omnetpp::simTime() + status_report_interval, status_timer);
+    EV_INFO << "BroadcastInfectionApp: schedule status report at " << omnetpp::simTime() + status_report_interval << '\n';
     WATCH(sent_messages);
     WATCH(received_messages);
     WATCH(status);
@@ -95,16 +85,14 @@ void BroadcastInfectionApp::handleMessage(omnetpp::cMessage* msg)
 void BroadcastInfectionApp::send_message(omnetpp::cMessage* msg)
 {
   if (status == InfectionBase::INFECTED) {
-    inet::Packet* pkt = new inet::Packet("virus");
+    information->setName("virus");
     const auto& content = inet::makeShared<inet::InfoPacket>();
-    content->setChunkLength(inet::B(packet_size));
+    content->setChunkLength(inet::B(payload));
     content->setType(inet::VIRUS);
     content->setIdentifer(555);
     content->setHost_id(host_id);
-    pkt->insertAtBack(content);
-    // set destination protocol
-    pkt->addTagIfAbsent<inet::DispatchProtocolReq>()->setProtocol(&inet::Protocol::probabilistic);
-    send(pkt, output_gate_id);
+    information->insertAtBack(content);
+    send_down(information);
     emit(sent_message_signal, ++sent_messages);
     scheduleAt(omnetpp::simTime() + par("sentInterval"), msg);
   }
@@ -119,7 +107,7 @@ void BroadcastInfectionApp::try_recovery(omnetpp::cMessage* msg)
   if (status == InfectionBase::INFECTED) {
     if (uniform(0.0, 1.0) < recovery_probability) {
       EV_INFO << "Host " << host_id << " recovers from infection\n";
-      cancelEvent(message_timer);
+      cancelEvent(information_timer);
       status = InfectionBase::NOT_INFECTED;
     }
     else {
@@ -137,16 +125,18 @@ void BroadcastInfectionApp::process_packet(omnetpp::cMessage* msg)
 {
   if (status == InfectionBase::NOT_INFECTED) {
     auto pkt = dynamic_cast<inet::Packet*>(msg);
-    const auto& infection_pkt = pkt->popAtFront<inet::InfoPacket>();
+    auto pkt_content = inet::dynamicPtrCast<inet::InfoPacket>(
+      pkt->popAtFront<inet::InfoPacket>()->dupShared()
+    );
     if (bernoulli(infection_probability)) {
       EV_INFO << "Host " << host_id << " received an infectious message from " 
-      << infection_pkt->getIdentifer() << "\n";
-      scheduleAt(omnetpp::simTime() + par("sentInterval"), message_timer);
+              << pkt_content->getIdentifer() << "\n";
+      scheduleAt(omnetpp::simTime() + par("sentInterval"), information_timer);
       status = InfectionBase::INFECTED;
     }
     else 
       EV_INFO << "Host " << host_id << " dropped an infectious message from " 
-      << infection_pkt->getHost_id() << "\n";
+              << pkt_content->getHost_id() << "\n";
   }
   delete msg;
   emit(received_message_signal, ++received_messages);
