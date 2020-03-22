@@ -85,13 +85,17 @@ void BroadcastInfectionApp::handleMessage(omnetpp::cMessage* msg)
 void BroadcastInfectionApp::send_message(omnetpp::cMessage* msg)
 {
   if (status == InfectionBase::INFECTED) {
-    information->setName("virus");
+    std::cout << "BroadcastInfectionApp: Sending infectious message\n";
+    information = new inet::Packet("virus");
     const auto& content = inet::makeShared<inet::InfoPacket>();
+    auto data = inet::makeShared<inet::ByteCountChunk>(inet::B(payload));
     content->setChunkLength(inet::B(payload));
     content->setType(inet::VIRUS);
     content->setIdentifer(555);
     content->setHost_id(host_id);
-    information->insertAtBack(content);
+    information->insertAtBack(data);
+    information->insertAtFront(content);
+    information->addTagIfAbsent<inet::PacketProtocolTag>()->setProtocol(&inet::Protocol::information);
     send_down(information);
     emit(sent_message_signal, ++sent_messages);
     scheduleAt(omnetpp::simTime() + par("sentInterval"), msg);

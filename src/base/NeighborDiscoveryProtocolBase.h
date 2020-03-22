@@ -46,7 +46,7 @@ protected:
   /** @brief A pointer to access the interface table */
   inet::IInterfaceTable* interface_table;
   /** @brief The index of the wlan interface */
-  int interface_index;
+  int interface_id;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
   virtual void send_hello_packet() = 0;
@@ -60,7 +60,7 @@ public:
     , packet_size(0)
     , sequence_number(0)
     , interface_table(nullptr)
-    , interface_index(0)
+    , interface_id(0)
     { }
   virtual ~NeighborDiscoveryProtocolBase(){}
   /**  
@@ -90,8 +90,10 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     interface_table = inet::getModuleFromPar<inet::IInterfaceTable>(par("interfaceTableModule"), this);
   }
   else if (stage == inet::INITSTAGE_NETWORK_LAYER) {
-    interface_index = interface_table->getInterfaceByName("wlan0")->getInterfaceId();
-    mac = interface_table->getInterfaceByName("wlan0")->getMacAddress();
+    auto interface_name = par("interfaceName").stringValue();
+    interface_id = interface_table->
+      findInterfaceByName(interface_name)->getInterfaceId();
+    mac = interface_table->findInterfaceByName(interface_name)->getMacAddress();
     EV_INFO << "NeighborDiscoveryProtocol: mac address is " << mac << '\n';
     inet::registerService(
       inet::Protocol::neighborDiscovery, 

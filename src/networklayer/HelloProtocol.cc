@@ -44,7 +44,7 @@ void HelloProtocol::send_hello_packet() {
   hello_pkt->addTagIfAbsent<inet::MacAddressReq>()->
     setDestAddress(inet::MacAddress::BROADCAST_ADDRESS);
   hello_pkt->addTagIfAbsent<inet::InterfaceReq>()->
-    setInterfaceId(interface_index);
+    setInterfaceId(interface_id);
   hello_pkt->addTagIfAbsent<inet::PacketProtocolTag>()->
     setProtocol(&inet::Protocol::neighborDiscovery);
   send(hello_pkt, output_gate_id);

@@ -23,6 +23,7 @@ simple NeighborDiscoveryProtocolBase like INeighborDiscoveryProtocol
 {
     parameters:
         @display("i=block/network");
+        string interfaceName = default("wlan0");
         string interfaceTableModule;
         int packetSize @unit(bytes);
         double discoveryTime @unit(s);

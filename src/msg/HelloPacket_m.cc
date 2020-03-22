@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.5 from msg/HelloPacket.msg.
+// Generated file, do not edit! Created by nedtool 5.6 from msg/HelloPacket.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -407,7 +407,7 @@ unsigned int HelloPacketDescriptor::getFieldTypeFlags(int field) const
         field -= basedesc->getFieldCount();
     }
     static unsigned int fieldTypeFlags[] = {
-        0,    // FIELD_type
+        FD_ISEDITABLE,    // FIELD_type
         FD_ISEDITABLE,    // FIELD_hostId
         FD_ISEDITABLE,    // FIELD_sequenceNum
         0,    // FIELD_srcMacAddress
@@ -554,6 +554,7 @@ bool HelloPacketDescriptor::setFieldValueAsString(void *object, int field, int i
     }
     HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
+        case FIELD_type: pp->setType((inet::HelloPacketType)string2enum(value, "inet::HelloPacketType")); return true;
         case FIELD_hostId: pp->setHostId(string2long(value)); return true;
         case FIELD_sequenceNum: pp->setSequenceNum(string2long(value)); return true;
         default: return false;

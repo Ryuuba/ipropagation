@@ -33,4 +33,5 @@ class InfoPacket extends FieldsChunk
     InfoType type;
     int identifer;
     int host_id;
+    chunkLength = B(12);
 }

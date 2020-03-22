@@ -31,8 +31,10 @@ InfectionBase::InfectionBase() :
 
 InfectionBase::~InfectionBase()
 {
-  cancelAndDelete(recovery_timer);
-  cancelAndDelete(status_timer);
+  if (recovery_timer)
+    cancelAndDelete(recovery_timer);
+  if (status_timer)
+    cancelAndDelete(status_timer);
 }
 
 void InfectionBase::initialize(int stage) {
