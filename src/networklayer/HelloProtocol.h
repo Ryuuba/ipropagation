@@ -17,20 +17,27 @@
 #define HELLO_PROTOCOL_H
 
 #include "../base/NeighborDiscoveryProtocolBase.h"
-#include "../msg/HelloPacket_m.h"
 
 class HelloProtocol : public NeighborDiscoveryProtocolBase {
 protected:
+  enum timer_kind {
+    DISCOVERY = 0,
+    BACKOFF
+  };
   /** @brief Maximum number of attempts a node must perform to consider a
    * a neighbor is out of range */
   int max_attemps;
   /** @brief Maximum delay before broadcasting a hello packet */
-  omnetpp::simtime_t bcast_delay;
+  omnetpp::simtime_t bcast_delay_max;
+  /** @brief Delay to backoff the emision of a hello message */
+  omnetpp::cMessage* backoff_timer;
+  /** @ A generic packet to encapsulate a hello message */
+  inet::Packet hello_pkt;
 protected:
-  /** @brief Encapsulates a hello message into an INET packet */
-  virtual void send_hello_packet();
+  /** @brief Sends a hello packet */
+  virtual void send_hello_packet(inet::HelloPacketType) override;
   /** @brief Modifies the neighbor cache with the hello information */
-  virtual void process_hello_packet(omnetpp::cMessage*);
+  virtual void process_hello_packet(omnetpp::cMessage*) override;
   /** @brief Computes a random delay to avoid signal collisions */
   virtual omnetpp::simtime_t backoff();
 public:
@@ -39,11 +46,19 @@ public:
   : NeighborDiscoveryProtocolBase()
   { }
   /** @brief Default desconstructor: cancels and deletes the hello timer */
-  virtual ~HelloProtocol() {}
+  virtual ~HelloProtocol() {
+    cancelAndDelete(discovery_timer);
+    cancelAndDelete(backoff_timer);
+  }
   /** @brief Initializes the module state from a NED file */
   virtual void initialize(int) override;
   /** @brief Handles simulation events (timers and msg) */
   virtual void handleMessage(omnetpp::cMessage*) override;
+  /** @brief Sends a hello before the timer in order to update the neighbor 
+   *  cache */
+  virtual void refreshNeighborCache() { 
+    send_hello_packet(inet::HelloPacketType::REQ);
+  }
 };
 
 #endif

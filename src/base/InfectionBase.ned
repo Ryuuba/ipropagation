@@ -25,6 +25,6 @@ simple InfectionBase like IApp{
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta
     gates:
-        input inputPort @labels(to/NetworkLayerDispatcher);
-        output outputPort @labels(from/NetworkLayerDispatcher);
+        input inputSocket @labels(from TransportLayerDispatcher);
+        output outputSocket @labels(to TransportLayerDispatcher);
 }

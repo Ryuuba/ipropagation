@@ -24,6 +24,6 @@ moduleinterface IApp
         //TODO: Change icon to infection app
         @display("i=block/infection_app");
     gates:
-        input inputPort @labels(to NetworkLayerDispatcher);
-        output outputPort @labels(from NetworkLayerDispatcher);
+        input inputSocket @labels(from TransportLayerDispatcher);
+        output outputSocket @labels(to TransportLayerDispatcher);
 }

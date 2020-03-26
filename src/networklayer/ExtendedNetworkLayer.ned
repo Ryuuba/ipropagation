@@ -31,9 +31,9 @@ module ExtendedNetworkLayer extends SimpleNetworkLayer
             @display("p=450,300");
         }
         cache: <default("")> like INeighborCache if typename != "" {
-            @display("p=500,300");
+            @display("p=41,76");
         }
     connections allowunconnected:
-        dp.inputPort <-- lp.out++ if exists(dp);
-        dp.outputPort --> lp.in++ if exists(dp);
+        dp.indicationPort <-- lp.out++ if exists(dp);
+        dp.protocolPort --> lp.in++ if exists(dp);
 }

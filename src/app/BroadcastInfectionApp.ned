@@ -40,6 +40,8 @@ simple BroadcastInfectionApp extends InfectionBase
 {
     parameters:
         @class(BroadcastInfectionApp);
+        bool onlyBroadcast = default(false); //infection messages is send to all neighbors
+        int infectionDegree = default(0); //The maximum number of neighbors to be infected
         //The payload of the information packet
         volatile int payload @unit(B); // length in bytes
         //probability that node start infected

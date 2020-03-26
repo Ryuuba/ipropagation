@@ -23,6 +23,6 @@ moduleinterface INeighborDiscoveryProtocol
     parameters:
         @display("i=block/network");
     gates:
-        input inputPort @labels(from NetworkLayerDispatcher);
-        output outputPort @labels(to NetworkLayerDispatcher);
+        input indicationPort @labels(from NetworkLayerDispatcher);
+        output protocolPort @labels(to NetworkLayerDispatcher);
 }

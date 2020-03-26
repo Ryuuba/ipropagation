@@ -17,6 +17,7 @@
 #define I_NEIGHBOR_DISCOVERY_PROTOCOL_H
 
 #include <omnetpp.h>
+#include "../msg/HelloPacket_m.h"
 
 class INeighborDiscoveryProtocol : public omnetpp::cSimpleModule {
 protected:
@@ -30,7 +31,7 @@ protected:
   int output_gate_id;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
-  virtual void send_hello_packet() = 0;
+  virtual void send_hello_packet(inet::HelloPacketType) = 0;
   /** @briefModifies the neighbor cache with the hello information */
   virtual void process_hello_packet(omnetpp::cMessage*) = 0;
 public:
@@ -40,9 +41,7 @@ public:
     , input_gate_id(0)
     , output_gate_id(0)
     { }
-  virtual ~INeighborDiscoveryProtocol() {
-    cancelAndDelete(discovery_timer);
-  }
+  virtual ~INeighborDiscoveryProtocol() { }
 };
 
 Register_Abstract_Class(INeighborDiscoveryProtocol);

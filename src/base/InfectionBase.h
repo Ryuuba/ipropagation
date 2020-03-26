@@ -19,6 +19,8 @@
 #include <omnetpp.h>
 #include "../contract/IApp.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 
 class InfectionBase : public IApp
 {
@@ -33,6 +35,8 @@ protected:
   Status status;
   /** @brief The rate at which hosts report their status */
   omnetpp::simtime_t status_report_interval;
+  /** @brief The maximum number of neighbors to be infected */
+  int infection_degree;
   /** @brief The probability of recovery of infection (mu) */
   double recovery_probability;
   /** @brief The probability of getting infected after receiving a msg (eta) */
@@ -62,18 +66,24 @@ protected: //App signals that carry statistics
                               received_message_signal,
                               status_signal;
 protected:
-  /** @brief Sends infectious messages to nodes in N(x) following a 
-   *  transferring communication methos (unicast, broadcast, multicast, anycast)
-   * */
+  /** @brief Draws a neighbor from neighbor cache if it is possible */
+  inet::L3Address draw_neighbor();
+  /** @brief Encapsulates a message to send it via a L3 socket */
+  virtual void encapsulate(const inet::L3Address&) = 0;
+  /** @brief Sends infectious messages to nodes in N(x) */
   virtual void send_message(omnetpp::cMessage*) = 0;
   /** @brief Tries to recovery from an infection */
   virtual void try_recovery(omnetpp::cMessage*) = 0;
-  /** @brief Process the received packet */
-  virtual void process_packet(omnetpp::cMessage*) = 0;
   /** @brief Emits the host status */
   virtual void emit_status(omnetpp::cMessage*) = 0;
-  /** Sends an INET packet through the output gate of this module */
-  virtual void send_down(inet::Packet*);
+  /** @brief Process the received packet */
+  virtual void process_packet(inet::Packet*) = 0;
+protected: //Member functions inherited from INetworkSocket::ICallBack
+  /** @brief This memebr function is called back when data arrives thu the 
+   *  socket, it process the received data */
+  virtual void socketDataArrived(inet::L3Socket*, inet::Packet*) override;
+  /** @brief This callback is execute when the socket is closed */
+  virtual void socketClosed(inet::L3Socket*) override;
 public:
   /** @brief Default constructor, initializes all attributes */
   InfectionBase();

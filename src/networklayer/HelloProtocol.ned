@@ -28,5 +28,5 @@ simple HelloProtocol extends NeighborDiscoveryProtocolBase
         //neighbor is out of range
         int maxAttemptNumber;
         //Maximum time to respond a hello message
-        double broadcastDelay @unit(s) = default(1s);
+        double maximumBcastDelay @unit(s);
 }

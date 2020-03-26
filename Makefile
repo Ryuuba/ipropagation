@@ -1,7 +1,7 @@
 INETDIR = $(HOME)/inet4
 
 BUILD_OPTIONS = -f --deep \
-								-I$(INETDIR)/src/ \
+				        -I$(INETDIR)/src/ \
                 -I$(INETDIR)/src/inet/common/ \
 								-L$(INETDIR)/src/ \
 								-lINET_dbg \

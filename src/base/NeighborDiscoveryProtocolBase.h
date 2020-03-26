@@ -49,7 +49,7 @@ protected:
   int interface_id;
 protected:
   /** @brief Encapsulates a hello message into an INET packet */
-  virtual void send_hello_packet() = 0;
+  virtual void send_hello_packet(inet::HelloPacketType) = 0;
   /** @briefModifies the neighbor cache with the hello information */
   virtual void process_hello_packet(omnetpp::cMessage*) = 0;
 public:
@@ -79,11 +79,10 @@ Register_Abstract_Class(NeighborDiscoveryProtocolBase);
 
 void NeighborDiscoveryProtocolBase::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
-    input_gate_id = gate("inputPort")->getId();
-    output_gate_id = gate("outputPort")->getId();
+    input_gate_id = gate("indicationPort")->getId();
+    output_gate_id = gate("protocolPort")->getId();
     packet_size = par("packetSize").intValue();
     discovery_time = par("discoveryTime");
-    discovery_timer = new omnetpp::cMessage("discovery timer");
     node_index = inet::getContainingNode(this)->getIndex();
     auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node", node_index)->getSubmodule("net")->getSubmodule("cache");
     neighbor_cache = static_cast<NeighborCache*>(cache_module);    

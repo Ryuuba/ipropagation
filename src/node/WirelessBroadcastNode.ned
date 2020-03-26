@@ -14,12 +14,12 @@
 // 
 
 package informationpropagation.node;
+import informationpropagation.networklayer.ExtendedNetworkLayer;
+import informationpropagation.contract.IApp;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.common.MessageDispatcher;
-import informationpropagation.networklayer.ExtendedNetworkLayer;
-import informationpropagation.contract.IApp;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.probabilistic.ProbabilisticBroadcast;
 //
@@ -83,8 +83,8 @@ module WirelessBroadcastNode
             wlan[i].upperLayerOut --> nl.in++;
             wlan[i].upperLayerIn <-- nl.out++;
         }
-        app.outputPort --> appl.in++;
-        appl.out++ --> app.inputPort;
+        app.outputSocket --> appl.in++;
+        appl.out++ --> app.inputSocket;
         net.ifOut --> nl.in++;
         nl.out++ --> net.ifIn;
         net.transportOut --> appl.in++;
