@@ -37,8 +37,6 @@ module WirelessBroadcastNode
         status.initialStatus = "NOT_INFO";
         int numWlanInterfaces = default(1);
         mobility.subjectModule = default("^");
-        wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
-        wlan[*].agent.typename = default("");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         wlan[*].radio.antenna.mobility.typename = "";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
@@ -49,7 +47,7 @@ module WirelessBroadcastNode
             parameters:
                 @display("p=65,50;is=s");
         }
-        mobility: <default("StationaryMobility")> like IMobility {
+        mobility: <> like IMobility {
             parameters:
                 @display("p=65,100;is=s");
         }
@@ -57,23 +55,23 @@ module WirelessBroadcastNode
             parameters:
                 @display("p=65,150;is=s");
         }
-        wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
+        wlan[numWlanInterfaces]: <> like IWirelessInterface {
             parameters:
-                @display("p=226,296,row,150;q=queue");
+                @display("p=225,300,row,150;q=queue");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("p=226,229;b=200,5,,,,1");
+                @display("p=225,225;b=200,5,,,,1");
         }
         net: ExtendedNetworkLayer {
-            @display("p=226,167");
+            @display("p=225,150");
         }
         appl: MessageDispatcher {
             parameters:
-                @display("p=226,103;b=200,5,,,,1");
+                @display("p=225,100;b=200,5,,,,1");
         }
         app: <> like IApp {
-            @display("p=226,40");
+            @display("p=225,50");
         }
     connections allowunconnected:
         for i=0..sizeof(radioIn)-1 {

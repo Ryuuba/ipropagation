@@ -37,6 +37,7 @@ void NeighborCache::handleMessage(omnetpp::cMessage* msg) {
 }
 
 void NeighborCache::push_register(NeighborCache::cache_register&& entry) {
+  Enter_Method("NeighborCache: push register");
   cache_it it = std::find_if(
     cache.begin(),
     cache.end(), 
@@ -46,13 +47,13 @@ void NeighborCache::push_register(NeighborCache::cache_register&& entry) {
   );
   if (it == cache.end()) {
     cache.push_back(entry);
-    EV_INFO <<  "NeighborCache: entry: <" << it->netw_address.getId() << ", " 
-             << it->mac_address << ", "
-             << it->last_contact_time << "> is pushed back\n";
+    EV_INFO <<  "NeighborCache: entry: <" << entry.netw_address.getId() << ", " 
+             << entry.mac_address << ", "
+             << entry.last_contact_time << "> is pushed back\n";
   }
   else
-    EV_INFO <<  "NeighborCache: a host with id: "
-            << it->netw_address.getId() << "is already in cache\n";
+    EV_INFO <<  "NeighborCache: a host "
+            << entry.netw_address.getId() << "is already in cache\n";
 }
 
 void NeighborCache::erase_register(const inet::MacAddress& neighbor_mac) {
