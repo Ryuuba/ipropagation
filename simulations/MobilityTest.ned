@@ -16,35 +16,24 @@
 package informationpropagation.simulations;
 import informationpropagation.node.WirelessBroadcastNode;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import slaw.tripmanager.TripManager;
 
-network RadioTest {
+network MobilityTest
+{
     parameters:
         int hostNumber;
-        @display("bgb=400,400;bgg=,,grey10");
-        node[0].mobility.initialX = 100m;
-        node[0].mobility.initialY = 100m;
-        node[1].mobility.initialX = 200m;
-        node[1].mobility.initialY = 100m;
-        node[2].mobility.initialX = 300m;
-        node[2].mobility.initialY = 100m;
-        node[3].mobility.initialX = 100m;
-        node[3].mobility.initialY = 200m;
-        node[4].mobility.initialX = 200m;
-        node[4].mobility.initialY = 200m;
-        node[5].mobility.initialX = 300m;
-        node[5].mobility.initialY = 200m;
-        node[6].mobility.initialX = 100m;
-        node[6].mobility.initialY = 300m;
-        node[7].mobility.initialX = 200m;
-        node[7].mobility.initialY = 300m;
-        node[8].mobility.initialX = 300m;
-        node[8].mobility.initialY = 300m;
+        @display("bgb=2000,2000;bgg=100,2,grey50");
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=50,25;is=s");
+            @display("p=200,250;is=s");
+        }
+        tripmanager: TripManager {
+            @display("p=200,450;is=s");
+            walkermodel.numOfWalker = hostNumber;
+            walkermodel.hurstParameter = 0.75; //?
         }
         node[hostNumber]: WirelessBroadcastNode {
-            @display("p=100,100");
+            @display("p=1000,500;is=s");
         }
     connections allowunconnected:
 }

@@ -1,13 +1,11 @@
 INETDIR = $(HOME)/inet4
 
-BUILD_OPTIONS = -f --deep \
-				        -I$(INETDIR)/src/ \
-                -I$(INETDIR)/src/inet/common/ \
-								-L$(INETDIR)/src/ \
-								-lINET_dbg \
-								-o info_propg
+GENERAL_BUILD_OPTIONS = -f --deep \
+				                -I$(INETDIR)/src/ \
+								        -L$(INETDIR)/src/ \
+								        -o info_propg
 
-.PHONY: all clean cleanall makefiles checkmakefiles
+.PHONY: all clean cleanall makefiles makefiles-dbg checkmakefiles
 
 all: checkmakefiles
 	cd src && $(MAKE)
@@ -21,7 +19,10 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake $(BUILD_OPTIONS)
+	cd src && opp_makemake $(GENERAL_BUILD_OPTIONS) -lINET
+
+makefiles-dbg:
+	cd src && opp_makemake $(GENERAL_BUILD_OPTIONS) -lINET_dbg
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

@@ -16,9 +16,16 @@
 package informationpropagation.observer;
 
 //
-// TODO auto-generated type
+// This module receives the neighborhood of each mobile host and then it 
+// computes the adjacency matrix. The actualization of this module is done 
+// periodically, each time the neighbor cache in the network layer emits
+// a neighborhood notification
 //
+
 simple ConnectivityObserver
 {
-    @display("i=observer/connectivity_observer");
+    parameters:
+        @display("i=observer/connectivity_observer");
+        int hostNumber;
+        string adjMatrixFilename = default("");
 }

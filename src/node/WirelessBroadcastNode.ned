@@ -22,6 +22,7 @@ import inet.linklayer.contract.IWirelessInterface;
 import inet.common.MessageDispatcher;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.probabilistic.ProbabilisticBroadcast;
+import slaw.mobility.SlawMobility;
 //
 // TODO auto-generated type
 //
