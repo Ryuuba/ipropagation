@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.6 from msg/HelloPacket.msg.
+// Generated file, do not edit! Created by nedtool 5.6 from networklayer/../base/../contract/../msg/HelloPacket.msg.
 //
 
 #ifndef __INET_HELLOPACKET_M_H
@@ -32,7 +32,7 @@ class HelloPacket;
 namespace inet {
 
 /**
- * Enum generated from <tt>msg/HelloPacket.msg:26</tt> by nedtool.
+ * Enum generated from <tt>networklayer/../base/../contract/../msg/HelloPacket.msg:26</tt> by nedtool.
  * <pre>
  * enum HelloPacketType
  * {
@@ -47,7 +47,7 @@ enum HelloPacketType {
 };
 
 /**
- * Class generated from <tt>msg/HelloPacket.msg:32</tt> by nedtool.
+ * Class generated from <tt>networklayer/../base/../contract/../msg/HelloPacket.msg:32</tt> by nedtool.
  * <pre>
  * class HelloPacket extends FieldsChunk
  * {

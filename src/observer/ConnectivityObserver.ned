@@ -27,5 +27,4 @@ simple ConnectivityObserver
     parameters:
         @display("i=observer/connectivity_observer");
         int hostNumber;
-        string adjMatrixFilename = default("");
 }

@@ -69,7 +69,7 @@ void InfectionBase::initialize(int stage) {
 }
 
 inet::L3Address InfectionBase::draw_neighbor() {
-  auto cache = neighbor_cache->get_neighbor_cache();
+  auto cache = neighbor_cache->get();
   inet::L3Address neighbor_address;
   if (!cache->empty()) {
     auto it = cache->begin();

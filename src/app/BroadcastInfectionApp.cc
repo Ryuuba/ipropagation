@@ -101,7 +101,7 @@ void BroadcastInfectionApp::encapsulate(const inet::L3Address& dst_addr) {
 void BroadcastInfectionApp::send_message(omnetpp::cMessage* msg)
 {
   if (status == InfectionBase::INFECTED) {
-    if (!neighbor_cache->get_neighbor_cache()->empty()) {
+    if (!neighbor_cache->get()->empty()) {
       auto neighbor_address = draw_neighbor();
       encapsulate(neighbor_address);
       EV_INFO << "BroadcastInfectionApp: Sending infectious message to host " 

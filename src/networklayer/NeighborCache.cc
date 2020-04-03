@@ -6,9 +6,9 @@ omnetpp::simsignal_t NeighborCache::neighborhood_signal =
   registerSignal("neighborhood");
 
 std::ostream& operator<<(std::ostream& os, const NeighborCache& cache) {
-  for (auto &&neighbor : cache)
-    std::cout << neighbor.netw_address.getId() << ' ' 
-              << neighbor.mac_address
+  for (auto&& neighbor : cache)
+    std::cout << neighbor.netw_address.getId() << ' '
+              << neighbor.mac_address  << ' '
               << neighbor.last_contact_time
               << '\n';
   return os;
@@ -19,12 +19,13 @@ void NeighborCache::initialize(int stage) {
     timer = new omnetpp::cMessage("send state");
     signaling_time = par("signalingTime");
     scheduleAt(omnetpp::simTime() + signaling_time, timer);
+    WATCH_LIST(*cache);
   }
 }
 
 void NeighborCache::handleMessage(omnetpp::cMessage* msg) {
   if (msg->isSelfMessage()) {
-    const std::list<cache_register>* ptr = get_neighbor_cache();
+    auto ptr = get();
     NeighborhoodNotificacion notification(ptr);
     emit(neighborhood_signal, &notification);
     scheduleAt(omnetpp::simTime() + signaling_time, timer);
@@ -36,17 +37,17 @@ void NeighborCache::handleMessage(omnetpp::cMessage* msg) {
     );
 }
 
-void NeighborCache::push_register(NeighborCache::cache_register&& entry) {
+void NeighborCache::push_register(CacheRegister&& entry) {
   Enter_Method("NeighborCache: push register");
   cache_it it = std::find_if(
-    cache.begin(),
-    cache.end(), 
+    cache->begin(),
+    cache->end(), 
     [entry](const cache_register & entry_) -> bool {
       return entry.netw_address.getId() == entry_.netw_address.getId();
     }
   );
-  if (it == cache.end()) {
-    cache.push_back(entry);
+  if (it == cache->end()) {
+    cache->push_back(entry);
     EV_INFO <<  "NeighborCache: entry: <" << entry.netw_address.getId() << ", " 
              << entry.mac_address << ", "
              << entry.last_contact_time << "> is pushed back\n";
@@ -58,17 +59,17 @@ void NeighborCache::push_register(NeighborCache::cache_register&& entry) {
 
 void NeighborCache::erase_register(const inet::MacAddress& neighbor_mac) {
   cache_it it = std::find_if(
-    cache.begin(),
-    cache.end(), 
+    cache->begin(),
+    cache->end(), 
     [neighbor_mac](const cache_register & entry) -> bool {
       return entry.mac_address == neighbor_mac;
     }
   );
-  if (it != cache.end()) {
+  if (it != cache->end()) {
     EV_INFO <<  "NeighborCache: entry: <" << it->netw_address.getId() << ", " 
              << it->mac_address << ", "
              << it->last_contact_time << "> is erased\n";
-    cache.erase(it);
+    cache->erase(it);
   }
   else
     EV_ERROR << "NeighborCache: there is not an entry that matches the MAC\
@@ -77,17 +78,17 @@ void NeighborCache::erase_register(const inet::MacAddress& neighbor_mac) {
 
 void NeighborCache::erase_register(int neighbor_id) {
   cache_it it = std::find_if(
-    cache.begin(),
-    cache.end(), 
+    cache->begin(),
+    cache->end(), 
     [neighbor_id](const cache_register & entry) -> bool {
       return entry.netw_address.getId() == neighbor_id;
     }
   );
-  if (it != cache.end()) {
+  if (it != cache->end()) {
     EV_INFO <<  "NeighborCache: entry: <" << it->netw_address.getId() << ", " 
              << it->mac_address << ", "
              << it->last_contact_time << "> is erased\n";
-    cache.erase(it);
+    cache->erase(it);
   }
   else
     EV_ERROR << "NeighborCache: there is not an entry that matches the host ID\
@@ -96,13 +97,13 @@ void NeighborCache::erase_register(int neighbor_id) {
 
 void NeighborCache::update_last_contact_time(int id, omnetpp::simtime_t time) {
   cache_it it = std::find_if(
-    cache.begin(),
-    cache.end(), 
+    cache->begin(),
+    cache->end(), 
     [id](const cache_register & entry) -> bool {
       return entry.netw_address.getId() == id;
     }
   );
-  if (it != cache.end()) {
+  if (it != cache->end()) {
     it->last_contact_time = time;
     EV_INFO <<  "NeighborCache: entry: <" << it->netw_address.getId() << ", " 
              << it->mac_address << ", "
@@ -116,13 +117,13 @@ void NeighborCache::update_last_contact_time(int id, omnetpp::simtime_t time) {
 bool NeighborCache::is_in_cache(int id) {
   bool result = false;
   cache_it it = std::find_if(
-    cache.begin(),
-    cache.end(), 
+    cache->begin(),
+    cache->end(), 
     [id](const cache_register & entry) -> bool {
       return entry.netw_address.getId() == id;
     }
   );
-  if (it != cache.end()) {
+  if (it != cache->end()) {
     result = true;
     EV_INFO <<  "NeighborCache: entry: <" << it->netw_address.getId() << ", " 
              << it->mac_address << ", "

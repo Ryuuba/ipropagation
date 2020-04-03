@@ -20,24 +20,20 @@
 #include <list>
 #include <utility>
 #include <ostream>
+#include <memory>
 #include <omnetpp.h>
-#include "inet/linklayer/common/MacAddress.h"
-#include "inet/networklayer/common/ModuleIdAddress.h"
+
+#include "CacheRegister.h"
+#include "../signal/NeighborNotification.h"
 
 class NeighborCache : public omnetpp::cSimpleModule {
 public:
-  /** @brief A cache entry */
-  typedef struct CacheRegister {
-    inet::ModuleIdAddress netw_address;
-    inet::MacAddress mac_address;
-    omnetpp::simtime_t last_contact_time;
-  } cache_register;
   /** @brief An iterator */
   typedef std::list<cache_register>::iterator cache_it;
   typedef std::list<cache_register>::const_iterator cache_const_it;
 protected:
   /** @brief Data structure storing the one-hop neighborhood N(x) of a node x*/
-  std::list<cache_register> cache;
+  std::shared_ptr< std::list<cache_register> > cache;
   /** @brief A timer to send the neighborhood to an observer that computes the
    *  the adjacency matrix
    * */
@@ -47,7 +43,10 @@ protected:
   /** @brief Signal conveying N(x) */
   static omnetpp::simsignal_t neighborhood_signal;
 public:
-  NeighborCache() : timer(nullptr) {}
+  NeighborCache()
+    : cache{std::make_shared< std::list<CacheRegister> >()}
+    , timer{nullptr}
+  { }
   virtual ~NeighborCache() {
     cancelAndDelete(timer);
   }
@@ -66,8 +65,8 @@ public:
   virtual void initialize(int) override;
   /** 
    * @brief Returns a const pointer to access the neighbor cache in const mode */
-  virtual const std::list<cache_register>* get_neighbor_cache() const{
-    const std::list<cache_register>* ptr = &cache;
+  virtual std::shared_ptr<const std::list<cache_register> > get() const {
+    std::shared_ptr< const std::list<cache_register> > ptr = cache;
     return ptr;
   }
   /** @brief Indicates if an neighbor is in cache */
@@ -84,34 +83,22 @@ public:
   virtual void update_last_contact_time(int, omnetpp::simtime_t);
   /** @brief Returns the begin of the cache for loop-range iteration */
   cache_it begin() {
-    return cache.begin();
+    return cache->begin();
   }
   /** @brief Returns the end of the cache for loop-range iteration */
   cache_it end() {
-    return cache.end();
+    return cache->end();
   }
   /** @brief Returns the begin of the cache for loop-range iteration */
   cache_const_it begin() const{
-    return cache.begin();
+    return cache->begin();
   }
   /** @brief Returns the end of the cache for loop-range iteration */
   cache_const_it end() const {
-    return cache.end();
+    return cache->end();
   }
   /** @brief Allows a WATCH macro to display the neighbor cache of a node */
   friend std::ostream& operator<<(std::ostream&, const NeighborCache&);
 };
-
-class NeighborhoodNotificacion : public omnetpp::cObject, omnetpp::noncopyable {
-public:
-  const std::list<NeighborCache::cache_register>* neighborhood;
-public:
-  NeighborhoodNotificacion() : neighborhood(nullptr) {}
-  NeighborhoodNotificacion(const std::list<NeighborCache::cache_register>* n_)
-    : neighborhood(n_)
-  { }
-};
-
-Register_Class(NeighborhoodNotificacion);
 
 #endif // NEIGHBOR_CACHE_H

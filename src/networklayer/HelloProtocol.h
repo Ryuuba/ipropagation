@@ -17,6 +17,7 @@
 #define HELLO_PROTOCOL_H
 
 #include "../base/NeighborDiscoveryProtocolBase.h"
+#include "CacheRegister.h"
 
 class HelloProtocol : public NeighborDiscoveryProtocolBase {
 protected:

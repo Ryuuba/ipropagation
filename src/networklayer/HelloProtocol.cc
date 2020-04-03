@@ -86,7 +86,7 @@ void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
           << hello_header->getSrcMacAddress() << ' '
           << hello_header->getHostId() << ' '
           << '\n';
-  NeighborCache::cache_register cache_reg;
+  cache_register cache_reg;
   cache_reg.netw_address = inet::ModuleIdAddress(hello_header->getHostId());
   cache_reg.mac_address = hello_header->getSrcMacAddress();
   cache_reg.last_contact_time = omnetpp::simTime();
