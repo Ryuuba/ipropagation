@@ -38,8 +38,6 @@ protected:
    *  the adjacency matrix
    * */
   omnetpp::cMessage* timer;
-  /** @brief The time between signal transmissions that conveys the N(x) */
-  omnetpp::simtime_t signaling_time;
   /** @brief Signal conveying N(x) */
   static omnetpp::simsignal_t neighborhood_signal;
 public:
@@ -81,22 +79,35 @@ public:
   virtual void erase_register(int);
   /** @brief Updates the last time a neighbor has been seen */
   virtual void update_last_contact_time(int, omnetpp::simtime_t);
+  /** @brief Sets value is_updated of all entries to false */
+  virtual void invalid_cache();
+  /** @brief Flushes stale entries */
+  virtual void flush_cache();
+  /** @brief Returns the numbers of entries in the cache */
+  virtual size_t size() {
+    return cache->size();
+  }
+  /** @brief Erases an entry in the cache */
+  virtual cache_const_it erase(cache_const_it it) {
+    return cache->erase(it);
+  }
   /** @brief Returns the begin of the cache for loop-range iteration */
-  cache_it begin() {
+  virtual cache_it begin() {
     return cache->begin();
   }
   /** @brief Returns the end of the cache for loop-range iteration */
-  cache_it end() {
+  virtual cache_it end() {
     return cache->end();
   }
   /** @brief Returns the begin of the cache for loop-range iteration */
-  cache_const_it begin() const{
+  virtual cache_const_it begin() const{
     return cache->begin();
   }
   /** @brief Returns the end of the cache for loop-range iteration */
-  cache_const_it end() const {
+  virtual cache_const_it end() const {
     return cache->end();
   }
+  virtual void emit();
   /** @brief Allows a WATCH macro to display the neighbor cache of a node */
   friend std::ostream& operator<<(std::ostream&, const NeighborCache&);
 };

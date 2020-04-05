@@ -32,19 +32,20 @@ class ConnectivityObserver
 protected:
   struct Cell
   {
-    omnetpp::simtime_t accum;
+    omnetpp::simtime_t lifetime;
     omnetpp::simtime_t last_contact_time;
     Cell() 
-      : accum(0.0)
+      : lifetime(0.0)
       , last_contact_time(0.0)
     { }
     friend std::ostream& operator << (std::ostream& os, const Cell& cell_) {
-      os << '[' << cell_.accum << ", " << cell_.last_contact_time << ']'; 
+      os << '[' << cell_.lifetime << ", " << cell_.last_contact_time << ']'; 
       return os;
     }
   };
   typedef Cell cell_t;
 protected:
+  size_t host_number;
   std::unique_ptr< SquareMatrix<cell_t> > adjacency_matrix;
   static omnetpp::simsignal_t neighborhood_notification_signal;
 public:
@@ -53,7 +54,8 @@ public:
   }
   /** @brief Default constructor */
   ConnectivityObserver()
-    : adjacency_matrix(nullptr)
+    : host_number(0)
+    , adjacency_matrix(nullptr)
   { }
   ~ConnectivityObserver() 
   { 

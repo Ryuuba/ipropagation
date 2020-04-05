@@ -9,7 +9,9 @@
 struct CacheRegister {
   inet::ModuleIdAddress netw_address;
   inet::MacAddress mac_address;
+  omnetpp::simtime_t start_time;
   omnetpp::simtime_t last_contact_time;
+  bool still_updated;
   friend std::ostream& operator <<(std::ostream& os, const CacheRegister& c) {
     os << '[' << c.netw_address.getId() << ", "
        << c.mac_address << ", "

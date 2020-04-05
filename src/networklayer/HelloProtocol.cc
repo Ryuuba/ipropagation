@@ -6,11 +6,13 @@ Define_Module(HelloProtocol);
 void HelloProtocol::initialize(int stage) {
   NeighborDiscoveryProtocolBase::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
+    host_id = inet::getContainingNode(getParentModule())->getIndex();
     bcast_delay_max = par("maximumBcastDelay");
     max_attemps = par("maxAttemptNumber").intValue();
+    flush_delay = par("flushDelay");
     discovery_timer = new omnetpp::cMessage(
       "discoverytimer", 
-      timer_kind::DISCOVERY
+      TimerKind::DISCOVERY
     );
     if (bcast_delay_max >= discovery_time)
       throw omnetpp::cRuntimeError(
@@ -18,34 +20,41 @@ void HelloProtocol::initialize(int stage) {
       );
     else {
       backoff_timer = bcast_delay_max >= 0
-                    ? new omnetpp::cMessage("backofftimer", timer_kind::BACKOFF)
+                    ? new omnetpp::cMessage("backofftimer", TimerKind::BACKOFF)
                     : nullptr;
     }
-    scheduleAt(omnetpp::simTime() + discovery_time, discovery_timer);
+    scheduleAt(omnetpp::simTime(), discovery_timer);
+    flush_timer = new omnetpp::cMessage("flushtimer", TimerKind::FLUSH);
   }
 }
 
 void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
-  if (msg->isSelfMessage())
-    switch (msg->getKind())
-    {
-    case timer_kind::DISCOVERY :
-      if (bcast_delay_max > 0.0)
-        scheduleAt(omnetpp::simTime() + backoff(), backoff_timer);
-      else
+  if (msg->isSelfMessage()) {
+    switch (msg->getKind()) {
+      case TimerKind::DISCOVERY :
+        scheduleAt(omnetpp::simTime() + flush_delay, flush_timer);
+        scheduleAt(omnetpp::simTime() + discovery_time, discovery_timer);
+        neighbor_cache->invalid_cache();
+        if (bcast_delay_max > 0.0)
+          scheduleAt(omnetpp::simTime() + backoff(), backoff_timer);
+        else
+          send_hello_packet(inet::HelloPacketType::REQ); //Says hello
+        break;
+      case TimerKind::BACKOFF :
         send_hello_packet(inet::HelloPacketType::REQ); //Says hello
-      scheduleAt(omnetpp::simTime() + discovery_time, discovery_timer);
-      break;
-    case timer_kind::BACKOFF :
-      send_hello_packet(inet::HelloPacketType::REQ); //Says hello
-      break;
-    default:
-      throw omnetpp::cRuntimeError(
-        "HelloProtocol: unknown timer kind (msg_name: %d)\n",
-        msg->getKind()
-      );
-      break;
+        break;
+      case TimerKind::FLUSH :
+        neighbor_cache->emit();
+        neighbor_cache->flush_cache();
+        break;
+      default:
+        throw omnetpp::cRuntimeError(
+          "HelloProtocol: unknown timer kind (msg_name: %d)\n",
+          msg->getKind()
+        );
+        break;
     }
+  }
   else if (msg->arrivedOn(input_gate_id))
     process_hello_packet(msg);
   else
@@ -87,9 +96,11 @@ void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
           << hello_header->getHostId() << ' '
           << '\n';
   cache_register cache_reg;
+  cache_reg.start_time = omnetpp::simTime();
   cache_reg.netw_address = inet::ModuleIdAddress(hello_header->getHostId());
   cache_reg.mac_address = hello_header->getSrcMacAddress();
   cache_reg.last_contact_time = omnetpp::simTime();
+  cache_reg.still_updated = true;
   if (neighbor_cache->is_in_cache(hello_header->getHostId()))
     neighbor_cache->update_last_contact_time(
       hello_header->getHostId(),

@@ -21,19 +21,23 @@
 
 class HelloProtocol : public NeighborDiscoveryProtocolBase {
 protected:
-  enum timer_kind {
+  enum TimerKind {
     DISCOVERY = 0,
-    BACKOFF
+    BACKOFF,
+    FLUSH
   };
+  int host_id;
   /** @brief Maximum number of attempts a node must perform to consider a
    * a neighbor is out of range */
   int max_attemps;
   /** @brief Maximum delay before broadcasting a hello packet */
   omnetpp::simtime_t bcast_delay_max;
-  /** @brief Delay to backoff the emision of a hello message */
+  /** @brief Delay to flush stale entries in the neighbor cache */
+  omnetpp::simtime_t flush_delay;
+  /** @brief Timer to trigger the emision of a hello message */
   omnetpp::cMessage* backoff_timer;
-  /** @ A generic packet to encapsulate a hello message */
-  inet::Packet hello_pkt;
+  /** @brief Timer to flush the neighbor cache */
+  omnetpp::cMessage* flush_timer;
 protected:
   /** @brief Sends a hello packet */
   virtual void send_hello_packet(inet::HelloPacketType) override;
@@ -44,12 +48,19 @@ protected:
 public:
   /** @brief Default constructor */
   HelloProtocol()
-  : NeighborDiscoveryProtocolBase()
+    : NeighborDiscoveryProtocolBase()
+    , host_id(-1)
+    , max_attemps(0)
+    , bcast_delay_max(0.0)
+    , flush_delay(0.0)
+    , backoff_timer(nullptr)
+    , flush_timer(nullptr)
   { }
   /** @brief Default desconstructor: cancels and deletes the hello timer */
   virtual ~HelloProtocol() {
     cancelAndDelete(discovery_timer);
     cancelAndDelete(backoff_timer);
+    cancelAndDelete(flush_timer);
   }
   /** @brief Initializes the module state from a NED file */
   virtual void initialize(int) override;

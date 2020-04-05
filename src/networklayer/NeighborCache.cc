@@ -17,18 +17,13 @@ std::ostream& operator<<(std::ostream& os, const NeighborCache& cache) {
 void NeighborCache::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     timer = new omnetpp::cMessage("send state");
-    signaling_time = par("signalingTime");
-    scheduleAt(omnetpp::simTime() + signaling_time, timer);
     WATCH_LIST(*cache);
   }
 }
 
 void NeighborCache::handleMessage(omnetpp::cMessage* msg) {
   if (msg->isSelfMessage()) {
-    auto ptr = get();
-    NeighborhoodNotificacion notification(ptr);
-    emit(neighborhood_signal, &notification);
-    scheduleAt(omnetpp::simTime() + signaling_time, timer);
+
   }
   else 
     throw omnetpp::cRuntimeError(
@@ -58,6 +53,7 @@ void NeighborCache::push_register(CacheRegister&& entry) {
 }
 
 void NeighborCache::erase_register(const inet::MacAddress& neighbor_mac) {
+  Enter_Method_Silent();
   cache_it it = std::find_if(
     cache->begin(),
     cache->end(), 
@@ -77,6 +73,7 @@ void NeighborCache::erase_register(const inet::MacAddress& neighbor_mac) {
 }
 
 void NeighborCache::erase_register(int neighbor_id) {
+  Enter_Method_Silent();
   cache_it it = std::find_if(
     cache->begin(),
     cache->end(), 
@@ -96,6 +93,7 @@ void NeighborCache::erase_register(int neighbor_id) {
 }
 
 void NeighborCache::update_last_contact_time(int id, omnetpp::simtime_t time) {
+  Enter_Method_Silent();
   cache_it it = std::find_if(
     cache->begin(),
     cache->end(), 
@@ -105,6 +103,7 @@ void NeighborCache::update_last_contact_time(int id, omnetpp::simtime_t time) {
   );
   if (it != cache->end()) {
     it->last_contact_time = time;
+    it->still_updated = true;
     EV_INFO <<  "NeighborCache: entry: <" << it->netw_address.getId() << ", " 
              << it->mac_address << ", "
              << it->last_contact_time << "> has been updated\n";
@@ -130,4 +129,27 @@ bool NeighborCache::is_in_cache(int id) {
              << it->last_contact_time << "> is in cache\n";
   }
   return result;
+}
+
+void NeighborCache::invalid_cache() {
+  Enter_Method_Silent();
+  for (auto&& entry : *cache)
+    entry.still_updated = false;
+}
+
+void NeighborCache::flush_cache() {
+  Enter_Method_Silent();
+  auto it = cache->begin();
+  while (it != cache->end()) {
+    if (!it->still_updated)
+      it = cache->erase(it);
+    else
+      ++it;
+  }
+}
+
+void NeighborCache::emit() {
+  Enter_Method_Silent();
+  NeighborhoodNotificacion notification(get());
+  omnetpp::cSimpleModule::emit(neighborhood_signal, &notification);
 }

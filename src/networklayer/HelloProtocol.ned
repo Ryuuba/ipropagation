@@ -24,9 +24,11 @@ simple HelloProtocol extends NeighborDiscoveryProtocolBase
     parameters:
         @class(HelloProtocol);
         @display("i=block/network");
-        //Maximum number of contact attempts a node must perform to consider a 
-        //neighbor is out of range
+        // Maximum number of contact attempts a node must perform to consider a 
+        // neighbor is out of range
         int maxAttemptNumber;
-        //Maximum time to respond a hello message
+        // backoff time to send a hello message
         double maximumBcastDelay @unit(s);
+        // delay to flush the neighbor cache before emitting a hello msg
+        double flushDelay @unit(s);
 }

@@ -15,7 +15,7 @@
 
 package informationpropagation.simulations;
 import informationpropagation.node.WirelessBroadcastNode;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import slaw.tripmanager.TripManager;
 import informationpropagation.observer.ConnectivityObserver;
 
@@ -25,7 +25,7 @@ network ObserverTest
         int hostNumber;
         @display("bgb=2000,2000;bgg=100,2,grey50");
     submodules:
-        radioMedium: Ieee80211ScalarRadioMedium {
+        radioMedium: <> like IRadioMedium{
             @display("p=200,250;is=s");
         }
         tripmanager: TripManager {

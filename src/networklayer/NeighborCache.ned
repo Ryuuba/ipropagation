@@ -22,10 +22,6 @@ import informationpropagation.contract.INeighborCache;
 simple NeighborCache like INeighborCache
 {
     parameters:
-        //TODO: implement an algorithm to erase the cache
-        //double removeNeighborTimer
-        //The time between two consecutive emittion of signals
-        double signalingTime @unit(s);
         @display("i=block/table");
         @signal[neighborhood](type=NeighborhoodNotificacion?);
 }
