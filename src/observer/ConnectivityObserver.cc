@@ -25,27 +25,27 @@ void ConnectivityObserver::handleMessage(omnetpp::cMessage* msg) {
 }
 
 void ConnectivityObserver::receiveSignal(
-  omnetpp::cComponent* src, 
-  omnetpp::simsignal_t id, 
-  omnetpp::cObject* obj, 
-  omnetpp::cObject* details
+  omnetpp::cComponent* src,   //@param the module emitting the signal 
+  omnetpp::simsignal_t id,    //@param the signal id
+  omnetpp::cObject* obj,      //@param the object carried by the signal
+  omnetpp::cObject* details   //@param details about the object
 ) {
   static unsigned counter = 0;
   auto notification_ptr = dynamic_cast<NeighborhoodNotificacion*>(obj);
   auto neighborhood = notification_ptr->neighborhood;
   auto netw_layer = dynamic_cast<omnetpp::cModule*>(src)->getParentModule();
   size_t i = inet::getContainingNode(netw_layer)->getIndex(); //host_id
-  Enter_Method("Receiving signal from %d", i);
+  Enter_Method("Receiving neighborhood from host[%d]", i);
   // Updates the neighborhood of host host_id
   for (auto&& entry : *neighborhood) {
     size_t j = entry.netw_address.getId(); //neighbor_id
-    if (!entry.still_updated) //j is not more neighbor of i
+    if (!entry.still_connected) //j is not more neighbor of i
       (*adjacency_matrix)(i, j).lifetime += 
         entry.last_contact_time - entry.start_time;
     (*adjacency_matrix)(i, j).last_contact_time = entry.last_contact_time;
+    (*adjacency_matrix)(i, j).start_time = entry.start_time;
+    (*adjacency_matrix)(i, j).still_connected = entry.still_connected;
   }
-  std::cout << "ConnectivityObserver: Update neighborhood of host "
-          << i << '\n';
   if (counter%(host_number) == (host_number-1))
     std::cout << *adjacency_matrix << '\n';
   counter++;
@@ -55,11 +55,19 @@ void ConnectivityObserver::finish() {
   std::string result_file {
     omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}")
   };
-  std::ofstream ofs(result_file + ".mat");
+  //Updates lifetime of still connected neighbors
+  for (size_t i = 0; i < adjacency_matrix->size(); i++)
+    for (size_t j = 0; j < adjacency_matrix->size(); j++)
+      if ((*adjacency_matrix)(i, j).still_connected)
+        (*adjacency_matrix)(i, j).lifetime += 
+          (*adjacency_matrix)(i, j).last_contact_time - 
+          (*adjacency_matrix)(i, j).start_time;
+  std::ofstream ofs( result_file + ".mat" );
+  //Writes lifetime
   try {
     for (size_t i = 0; i < adjacency_matrix->size(); i++) {
       for (size_t j = 0; j < adjacency_matrix->size(); j++)
-        ofs << (*adjacency_matrix)(i, j).lifetime << ' ';
+        ofs << std::fixed << std::setprecision(2) << (*adjacency_matrix)(i, j).lifetime.dbl() << ' ';
       ofs << '\n';
     }
   }
@@ -67,11 +75,12 @@ void ConnectivityObserver::finish() {
     std::cerr << e.what() << '\n';
   }
   ofs.close();
+  //Writes connectivity ratio
   ofs.open(result_file + "-ratio" + ".mat");
   try {
     for (size_t i = 0; i < adjacency_matrix->size(); i++) {
       for (size_t j = 0; j < adjacency_matrix->size(); j++)
-        ofs << (*adjacency_matrix)(i, j).lifetime/omnetpp::simTime() << ' ';
+        ofs << std::fixed << std::setprecision(2) << (*adjacency_matrix)(i, j).lifetime.dbl()/omnetpp::simTime().dbl() << ' ';
       ofs << '\n';
     }
   }

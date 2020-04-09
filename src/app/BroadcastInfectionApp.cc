@@ -42,8 +42,11 @@ void BroadcastInfectionApp::initialize(int stage)
     if (
       coin < 
       par("initialInfectionProbability").doubleValue()
-    )
+    ) {
       status = InfectionBase::INFECTED;
+      if (hasGUI())
+        getParentModule()->bubble("Get infected!");
+    }
     else
       status = InfectionBase::NOT_INFECTED;
     EV_INFO << "Status of host " << src_address->toModuleId().getId() 
@@ -126,6 +129,8 @@ void BroadcastInfectionApp::try_recovery(omnetpp::cMessage* msg)
       EV_INFO << "Host " << src_address->toModuleId().getId() << " recovers from infection\n";
       cancelEvent(information_timer);
       status = InfectionBase::NOT_INFECTED;
+      if (hasGUI())
+        getParentModule()->bubble("Get not infected!");
     }
     else {
       EV_INFO << "Host " << src_address->toModuleId().getId() << " fails to recover from infection\n";
@@ -150,6 +155,8 @@ void BroadcastInfectionApp::process_packet(inet::Packet* pkt)
               << pkt_header->getIdentifer() << "\n";
       scheduleAt(omnetpp::simTime() + par("sentInterval"), information_timer);
       status = InfectionBase::INFECTED;
+      if (hasGUI())
+       getParentModule()->bubble("Get infected!");
     }
     else 
       EV_INFO << "Host " << src_address->toModuleId().getId() 
@@ -171,6 +178,11 @@ void BroadcastInfectionApp::emit_status(omnetpp::cMessage* msg) {
 
 void BroadcastInfectionApp::refreshDisplay() const
 {
-
+  auto parent_module = getParentModule();
+  omnetpp::cDisplayString& display_str = parent_module->getDisplayString();
+  if (status == InfectionBase::INFECTED)
+    display_str.setTagArg("i", 1, "red");
+  else 
+    display_str.setTagArg("i", 1, "");
 }
 

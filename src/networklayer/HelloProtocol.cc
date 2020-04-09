@@ -100,7 +100,7 @@ void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
   cache_reg.netw_address = inet::ModuleIdAddress(hello_header->getHostId());
   cache_reg.mac_address = hello_header->getSrcMacAddress();
   cache_reg.last_contact_time = omnetpp::simTime();
-  cache_reg.still_updated = true;
+  cache_reg.still_connected = true;
   if (neighbor_cache->is_in_cache(hello_header->getHostId()))
     neighbor_cache->update_last_contact_time(
       hello_header->getHostId(),

@@ -17,6 +17,7 @@
 #define CONNECTIVITY_OBSERVER_H
 
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <omnetpp.h>
@@ -24,6 +25,7 @@
 #include "inet/common/INETDefs.h"
 #include "../common/SquareMatrix.h"
 #include "../signal/NeighborNotification.h"
+#include <iomanip>
 
 class ConnectivityObserver
   : public omnetpp::cSimpleModule
@@ -32,10 +34,14 @@ class ConnectivityObserver
 protected:
   struct Cell
   {
+    bool still_connected;
     omnetpp::simtime_t lifetime;
+    omnetpp::simtime_t start_time;
     omnetpp::simtime_t last_contact_time;
     Cell() 
-      : lifetime(0.0)
+      : still_connected(false)
+      , lifetime(0.0)
+      , start_time(0.0)
       , last_contact_time(0.0)
     { }
     friend std::ostream& operator << (std::ostream& os, const Cell& cell_) {
@@ -48,6 +54,8 @@ protected:
   size_t host_number;
   std::unique_ptr< SquareMatrix<cell_t> > adjacency_matrix;
   static omnetpp::simsignal_t neighborhood_notification_signal;
+protected:
+  void write_matrix(const char*, const std::function<double(size_t, size_t)>&);
 public:
   virtual int numInitStages() const override {
     return inet::NUM_INIT_STAGES;

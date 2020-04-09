@@ -103,7 +103,7 @@ void NeighborCache::update_last_contact_time(int id, omnetpp::simtime_t time) {
   );
   if (it != cache->end()) {
     it->last_contact_time = time;
-    it->still_updated = true;
+    it->still_connected = true;
     EV_INFO <<  "NeighborCache: entry: <" << it->netw_address.getId() << ", " 
              << it->mac_address << ", "
              << it->last_contact_time << "> has been updated\n";
@@ -134,14 +134,14 @@ bool NeighborCache::is_in_cache(int id) {
 void NeighborCache::invalid_cache() {
   Enter_Method_Silent();
   for (auto&& entry : *cache)
-    entry.still_updated = false;
+    entry.still_connected = false;
 }
 
 void NeighborCache::flush_cache() {
   Enter_Method_Silent();
   auto it = cache->begin();
   while (it != cache->end()) {
-    if (!it->still_updated)
+    if (!it->still_connected)
       it = cache->erase(it);
     else
       ++it;

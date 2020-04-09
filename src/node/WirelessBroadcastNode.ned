@@ -29,7 +29,7 @@ import slaw.mobility.SlawMobility;
 module WirelessBroadcastNode
 {
     parameters:
-        @display("i=device/palm2,,4");
+        @display("i=device/palm2");
         @labels(node,ad-hoc-node);
         @networkNode;
         bool hasStatus = default(false);
