@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.6 from base/../base/../contract/../msg/InfoPacket.msg.
+// Generated file, do not edit! Created by nedtool 5.6 from msg/InfoPacket.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
