@@ -95,7 +95,7 @@ void InfectionBase::socketDataArrived(
 }
 
 void InfectionBase::socketClosed(inet::L3Socket* s) {
-  std::cout << "InfectionBase: socket has been closed\n";
+  EV_INFO << "InfectionBase: socket has been closed\n";
   if (s == socket) {
     socket->close();
     delete socket;

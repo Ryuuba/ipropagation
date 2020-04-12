@@ -47,7 +47,7 @@ void ConnectivityObserver::receiveSignal(
     (*adjacency_matrix)(i, j).still_connected = entry.still_connected;
   }
   if (counter%(host_number) == (host_number-1))
-    std::cout << *adjacency_matrix << '\n';
+    EV_INFO << *adjacency_matrix << '\n';
   counter++;
 }
 
