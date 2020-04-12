@@ -17,14 +17,23 @@
 
 Register_Abstract_Class(InfectionBase);
 
-InfectionBase::InfectionBase() : 
-  recovery_probability(0.0),
-  infection_probability(0.0),
-  sent_interval(0.0),
-  recovery_timer(nullptr),
-  status_timer(nullptr),
-  sent_messages(0),
-  received_messages(0)
+omnetpp::simsignal_t InfectionBase::sent_message_signal = 
+  registerSignal("sentMessage");
+omnetpp::simsignal_t InfectionBase::received_message_signal = 
+  registerSignal("receivedMessage");
+omnetpp::simsignal_t InfectionBase::last_status_signal = 
+  registerSignal("lastStatus");
+omnetpp::simsignal_t InfectionBase::infection_time_signal = 
+  registerSignal("infectionTime");
+
+InfectionBase::InfectionBase()
+  : recovery_probability(0.0)
+  , infection_probability(0.0)
+  , sent_interval(0.0)
+  , recovery_timer(nullptr)
+  , infection_time(0.0)
+  , sent_messages(0)
+  , received_messages(0)
 {
   // TODO Auto-generated constructor stub
 }
@@ -35,8 +44,6 @@ InfectionBase::~InfectionBase()
     cancelAndDelete(information_timer);
   if (recovery_timer)
     cancelAndDelete(recovery_timer);
-  if (status_timer)
-    cancelAndDelete(status_timer);
   if (socket) {
     delete socket;
     socket = nullptr;
@@ -51,7 +58,6 @@ void InfectionBase::initialize(int stage) {
     output_gate_id = gate("outputSocket")->getId();
     information_timer = new omnetpp::cMessage("information timer");
     recovery_timer = new omnetpp::cMessage("recovery timer");
-    status_timer = new omnetpp::cMessage("status timer");
     auto cache_module = getSimulation()->getSystemModule()->
       getSubmodule("node", inet::getContainingNode(this)->getIndex())->
       getSubmodule("net")->getSubmodule("cache");
@@ -101,4 +107,18 @@ void InfectionBase::socketClosed(inet::L3Socket* s) {
     delete socket;
     socket = nullptr;
   }
+}
+
+const char* InfectionBase::status_to_string(Status s) {
+  switch (s)
+  {
+  case INFECTED:
+    return "INFECTED";
+  case NOT_INFECTED:
+    return "NOT_INFECTED";
+  default:
+    throw omnetpp::cRuntimeError(
+      "InfectionBase: invalid conversion to string from status %d", s);
+    break;
+  } 
 }

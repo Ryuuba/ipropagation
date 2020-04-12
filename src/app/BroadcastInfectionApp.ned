@@ -46,10 +46,5 @@ simple BroadcastInfectionApp extends InfectionBase
         volatile int payload @unit(B); // length in bytes
         //probability that node start infected
         double initialInfectionProbability;
-        @signal[sentMessage](type = long);
-        @statistic[sentMessage](record=histogram,vector);
-        @signal[receivedMessage](type = long);
-        @statistic[receivedMessage](record=histogram,vector);
-        @signal[infectionTime](type = long);
-        @statistic[infectionTime](record=histogram,vector);
+
 }

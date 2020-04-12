@@ -3,13 +3,6 @@
 
 Define_Module(BroadcastInfectionApp);
 
-omnetpp::simsignal_t InfectionBase::sent_message_signal = 
-  registerSignal("sentMessage");
-omnetpp::simsignal_t InfectionBase::received_message_signal = 
-  registerSignal("receivedMessage");
-omnetpp::simsignal_t InfectionBase::status_signal = 
-  registerSignal("infectionTime");
-
 BroadcastInfectionApp::BroadcastInfectionApp()
   : payload(0)
 { }
@@ -26,8 +19,6 @@ void BroadcastInfectionApp::initialize(int stage)
     status_report_interval = par("statusReportInterval");
     recovery_probability = par("recoveryProbability");
     infection_probability = par("infectionProbability");
-    status_timer->setKind(TimerKind::STATUS);
-    status_timer->setSchedulingPriority(1);
     information_timer->setKind(TimerKind::BROADCAST);
     information_timer->setSchedulingPriority(1);
     recovery_timer->setKind(TimerKind::RECOVERY);
@@ -58,7 +49,6 @@ void BroadcastInfectionApp::initialize(int stage)
       );
       EV_INFO << "BroadcastInfectionApp: schedule information pkt at " << omnetpp::simTime() + par("sentInterval") << '\n';
     }
-    scheduleAt(omnetpp::simTime() + status_report_interval, status_timer);
     EV_INFO << "BroadcastInfectionApp: schedule status report at " << omnetpp::simTime() + status_report_interval << '\n';
   }
 }
@@ -70,7 +60,6 @@ void BroadcastInfectionApp::handleMessage(omnetpp::cMessage* msg)
     {
     case RECOVERY: try_recovery(msg); break;
     case BROADCAST: send_message(msg); break;
-    case STATUS: emit_status(msg); break;
     default:
       throw omnetpp::cRuntimeError("App: Unknown timer %d", msg->getKind());
       break;
@@ -127,6 +116,9 @@ void BroadcastInfectionApp::try_recovery(omnetpp::cMessage* msg)
   if (status == InfectionBase::INFECTED) {
     if (uniform(0.0, 1.0) < recovery_probability) {
       EV_INFO << "Host " << src_address->toModuleId().getId() << " recovers from infection\n";
+      infection_time = omnetpp::simTime() - infection_time;
+      emit(infection_time_signal, infection_time);
+      emit(last_status_signal, status);
       cancelEvent(information_timer);
       status = InfectionBase::NOT_INFECTED;
       if (hasGUI())
@@ -154,6 +146,9 @@ void BroadcastInfectionApp::process_packet(inet::Packet* pkt)
               << " received an infectious message from " 
               << pkt_header->getIdentifer() << "\n";
       scheduleAt(omnetpp::simTime() + par("sentInterval"), information_timer);
+      infection_time = omnetpp::simTime() - infection_time;
+      emit(infection_time_signal, infection_time);
+      emit(last_status_signal, status);
       status = InfectionBase::INFECTED;
       if (hasGUI())
        getParentModule()->bubble("Get infected!");
@@ -170,10 +165,10 @@ void BroadcastInfectionApp::process_packet(inet::Packet* pkt)
   emit(received_message_signal, ++received_messages);
 }
 
+//TODO: make reactive
 void BroadcastInfectionApp::emit_status(omnetpp::cMessage* msg) {
   EV_INFO << "The status of host " << src_address->toModuleId().getId() << " is " << status << '\n';
-  emit(status_signal, status);
-  scheduleAt(omnetpp::simTime() + status_signal, msg);
+  emit(infection_time_signal, status);
 }
 
 void BroadcastInfectionApp::refreshDisplay() const
@@ -186,3 +181,8 @@ void BroadcastInfectionApp::refreshDisplay() const
     display_str.setTagArg("i", 1, "");
 }
 
+void BroadcastInfectionApp::finish() {
+  infection_time = omnetpp::simTime() - infection_time;
+  emit(infection_time_signal, infection_time);
+  emit(last_status_signal, status);
+}

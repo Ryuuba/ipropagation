@@ -24,6 +24,14 @@ simple InfectionBase like IApp{
         double statusReportInterval @unit(s) = default (1s);
         double recoveryProbability; //a.k.a. mu
         double infectionProbability; //a.k.a. eta
+        @signal[sentMessage](type = long);
+        @statistic[sentMessage](title = "number of sent infectios messages"; record=histogram,vector);
+        @signal[receivedMessage](type = long);
+        @statistic[receivedMessage](title = "number of received infectious messages"; record=histogram,vector);
+        @signal[infectionTime](type = simtime_t);
+        @statistic[infectionTime](title = "infection time"; record=histogram,vector);
+        @signal[lastStatus](type = long);
+        @statistic[lastStatus](title = "last recorded status"; record=vector);
     gates:
         input inputSocket @labels(from TransportLayerDispatcher);
         output outputSocket @labels(to TransportLayerDispatcher);

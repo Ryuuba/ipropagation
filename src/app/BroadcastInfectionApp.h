@@ -61,6 +61,8 @@ protected: //App member functions
   /** @brief Initializes the app state getting N(x), the initial node 
    *  status, probability distributions, etc.  */
   virtual void initialize(int stage) override;
+  /** @brief Sends not emitted statistics */
+  virtual void finish();
   /** @brief Changes the icon of the app to indicate the host status */
   virtual void refreshDisplay() const override;
 public:

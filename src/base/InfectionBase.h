@@ -28,7 +28,7 @@ protected:
   /** @brief The possible node status for this infection app. This enum could 
    *  be extended if the first you override it */
   enum Status {
-    INFECTED,          //Nodes broadcasted infectious messages to its neighbors
+    INFECTED = 0,      //Nodes broadcasted infectious messages to its neighbors
     NOT_INFECTED       //Nodes listen to the wireless channel
   };
   /** @brief The current status of nodes running the infection app */
@@ -50,8 +50,6 @@ protected:
   /** @brief Timer to set the next recovery attempt */
   omnetpp::cMessage* recovery_timer;
   /** @brief The duration of the infection period */
-  omnetpp::cMessage* status_timer;
-  /** @brief The duration of the infection period */
   omnetpp::simtime_t infection_time;
   /** @brief The number of sent messages */
   long sent_messages;
@@ -64,8 +62,11 @@ protected: //App signals that carry statistics
    */
   static omnetpp::simsignal_t sent_message_signal, 
                               received_message_signal,
-                              status_signal;
+                              last_status_signal,
+                              infection_time_signal;
 protected:
+  /** @brief Returns a string indicating the host status */
+  const char* status_to_string(Status);
   /** @brief Draws a neighbor from neighbor cache if it is possible */
   inet::L3Address draw_neighbor();
   /** @brief Encapsulates a message to send it via a L3 socket */
