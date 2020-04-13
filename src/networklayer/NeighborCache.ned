@@ -24,4 +24,6 @@ simple NeighborCache like INeighborCache
     parameters:
         @display("i=block/table");
         @signal[neighborhood](type=NeighborhoodNotificacion?);
+        @signal[degree](type = unsigned long);
+        @statistic[degree](title = "number of neighbors"; record=vector);
 }

@@ -5,6 +5,9 @@ Define_Module(NeighborCache);
 omnetpp::simsignal_t NeighborCache::neighborhood_signal = 
   registerSignal("neighborhood");
 
+  omnetpp::simsignal_t NeighborCache::degree_signal = 
+  registerSignal("degree");
+
 std::ostream& operator<<(std::ostream& os, const NeighborCache& cache) {
   for (auto&& neighbor : cache)
     std::cout << neighbor.netw_address.getId() << ' '
@@ -152,4 +155,5 @@ void NeighborCache::emit() {
   Enter_Method_Silent();
   NeighborhoodNotificacion notification(get());
   omnetpp::cSimpleModule::emit(neighborhood_signal, &notification);
+  omnetpp::cSimpleModule::emit(degree_signal, cache->size());
 }

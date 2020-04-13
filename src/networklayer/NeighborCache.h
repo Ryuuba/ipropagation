@@ -40,6 +40,8 @@ protected:
   omnetpp::cMessage* timer;
   /** @brief Signal conveying N(x) */
   static omnetpp::simsignal_t neighborhood_signal;
+  /** @brief Signal conveying |N(x)| */
+  static omnetpp::simsignal_t degree_signal;
 public:
   NeighborCache()
     : cache{std::make_shared< std::list<CacheRegister> >()}
