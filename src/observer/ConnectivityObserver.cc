@@ -53,7 +53,7 @@ void ConnectivityObserver::receiveSignal(
 
 void ConnectivityObserver::finish() {
   std::string result_file {
-    omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}")
+    omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${seedset}")
   };
   //Updates lifetime of still connected neighbors
   for (size_t i = 0; i < adjacency_matrix->size(); i++)
