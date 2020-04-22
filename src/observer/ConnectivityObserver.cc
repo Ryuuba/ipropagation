@@ -9,7 +9,7 @@ omnetpp::simsignal_t ConnectivityObserver::neighborhood_notification_signal =
 void ConnectivityObserver::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     host_number = par("hostNumber").intValue();
-    adjacency_matrix = std::make_unique< SquareMatrix<cell_t> >(host_number);
+    adjacency_matrix = std::make_shared< SquareMatrix<cell_t> >(host_number);
     getSimulation()->getSystemModule()->subscribe(
       neighborhood_notification_signal,
       this

@@ -52,7 +52,7 @@ protected:
   typedef Cell cell_t;
 protected:
   size_t host_number;
-  std::unique_ptr< SquareMatrix<cell_t> > adjacency_matrix;
+  std::shared_ptr< SquareMatrix<cell_t> > adjacency_matrix;
   static omnetpp::simsignal_t neighborhood_notification_signal;
 protected:
   void write_matrix(const char*, const std::function<double(size_t, size_t)>&);

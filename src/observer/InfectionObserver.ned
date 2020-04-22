@@ -16,10 +16,18 @@
 package informationpropagation.observer;
 
 //
-// TODO auto-generated type
+// This observer keeps track the number of infected nodes receiving the status
+// signal from them. In addition, this module finishes the simulation when 
+// the system reaches its stationary state, that is, whem the average of 
+// infected nodes is stable
 //
 simple InfectionObserver
 {
     @display("i=observer/infection_observer");
+    @signal[infectedNodes](type = unsigned long);
+    @statistic[infectedNodes](
+        title= "Number of infected nodes"; 
+        record = vector
+    );
 }
 

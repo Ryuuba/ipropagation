@@ -24,13 +24,14 @@
 
 class InfectionBase : public IApp
 {
-protected:
+public:
   /** @brief The possible node status for this infection app. This enum could 
    *  be extended if the first you override it */
   enum Status {
     INFECTED = 0,      //Nodes broadcasted infectious messages to its neighbors
     NOT_INFECTED       //Nodes listen to the wireless channel
   };
+protected:
   /** @brief The current status of nodes running the infection app */
   Status status;
   /** @brief The rate at which hosts report their status */

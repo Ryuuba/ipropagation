@@ -3,3 +3,6 @@
 *.vci
 *.dat
 *.pdf
+src/Makefile
+out/
+

@@ -62,5 +62,8 @@
     "editor.tabSize": 2,
     "editor.wordWrap": "bounded",
     "html.format.wrapLineLength": 80,
-    "editor.rulers": [80]
+    "editor.rulers": [
+        80
+    ],
+    "cSpell.enabled": false
 }

@@ -4,7 +4,6 @@ GENERAL_BUILD_OPTIONS = -f --deep \
 				                -I$(INETDIR)/src/ \
 								        -L$(INETDIR)/src/ \
 								        -o info_propg
-												-std=c++14
 
 .PHONY: all clean cleanall makefiles makefiles-dbg checkmakefiles
 
