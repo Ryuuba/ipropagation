@@ -22,34 +22,16 @@
 #include <memory>
 #include <omnetpp.h>
 #include <string>
+#include <iomanip>
 #include "inet/common/INETDefs.h"
 #include "../common/SquareMatrix.h"
 #include "../signal/NeighborNotification.h"
-#include <iomanip>
+#include "../common/ConnectivityObserverCell.h"
 
 class ConnectivityObserver
   : public omnetpp::cSimpleModule
   , public omnetpp::cListener
 {
-protected:
-  struct Cell
-  {
-    bool still_connected;
-    omnetpp::simtime_t lifetime;
-    omnetpp::simtime_t start_time;
-    omnetpp::simtime_t last_contact_time;
-    Cell() 
-      : still_connected(false)
-      , lifetime(0.0)
-      , start_time(0.0)
-      , last_contact_time(0.0)
-    { }
-    friend std::ostream& operator << (std::ostream& os, const Cell& cell_) {
-      os << '[' << cell_.lifetime << ", " << cell_.last_contact_time << ']'; 
-      return os;
-    }
-  };
-  typedef Cell cell_t;
 protected:
   size_t host_number;
   std::shared_ptr< SquareMatrix<cell_t> > adjacency_matrix;
@@ -81,6 +63,13 @@ public:
   /** @brief Receives the one-hop neighborhood and updates the adjacency matrix */
   virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
     omnetpp::cObject*, omnetpp::cObject*);
+  /** @brief Returns the neighborhood of a host
+   *  @params host id
+  */
+  virtual std::shared_ptr<const SquareMatrix<cell_t> > get_adjacency_matrix() {
+    std::shared_ptr<const SquareMatrix<cell_t> > m = adjacency_matrix;
+    return m;
+  }
 };
 
 

@@ -23,11 +23,20 @@ package informationpropagation.observer;
 //
 simple InfectionObserver
 {
+    double epsilon = default(0.001); //error tolerance
+    double beta; //transmission probability (from network layer)
+    double mu;   //recovery probability (from app layer)
     @display("i=observer/infection_observer");
     @signal[infectedNodes](type = unsigned long);
     @statistic[infectedNodes](
         title= "Number of infected nodes"; 
         record = vector
     );
+    @signal[rho](type = double);
+    @statistic[rho](
+        title = "Expected infection density";
+        recor = vector
+    )
+
 }
 

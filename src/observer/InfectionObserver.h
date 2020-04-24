@@ -16,50 +16,83 @@
 #if !defined(INFECTION_OBSERVER_H)
 #define INFECTION_OBSERVER_H
 
+#include <numeric>
 #include <vector>
 #include <omnetpp.h>
+#include <memory>
 #include "inet/common/INETDefs.h"
-#include "../common/SquareMatrix.h"
 #include "../app/BroadcastInfectionApp.h"
+#include "../signal/NeighborNotification.h"
+#include "../networklayer/CacheRegister.h"
 
 class InfectionObserver
   : public omnetpp::cSimpleModule
   , public omnetpp::cListener
 {
 protected:
+  // @brief The error tolerance
+  double epsilon;
   // @brief The expected infection density
   double rho;
+  // @brief Transmission probability from network layer
+  double beta;
+  // @brief Recovery probability from network layer
+  double mu;
   // @brief The number of hosts
-  unsigned host_num;
+  size_t host_num;
   // @brief The total of infected nodes
-  unsigned infected_num;
+  size_t infected_num;
   // @brief The node status
   static omnetpp::simsignal_t status_signal;
   // @brief The number of infected nodes
   static omnetpp::simsignal_t infected_node_stat;
-  // @brief Data structure to save the status of each nodes and their N(x)
-  SquareMatrix<BroadcastInfectionApp::Status> adjacency_matrix;
+  // @brief The expected infection density
+  static omnetpp::simsignal_t rho_stat;
+  // @brief The neighborhood of a node
+  static omnetpp::simsignal_t neighborhood_notification_signal;
+  // @brief node status, indeces match the node id
+  std::unique_ptr < std::vector<unsigned> > p;
+  // @brief probability of node i does not get infected by a neighbor
+  std::unique_ptr < std::vector<double> > q;
+  // @brief probability of node i gets infected at t+1
+  std::unique_ptr < std::vector<double> > next_p;
+  // @brief adjacency matrix at time t
+  std::unique_ptr <std::vector<std::shared_ptr< const std::list<cache_register> > > >adjacency_matrix;
+protected:
+  // @brief Computes the probability a node i gets infected
+  virtual double compute_rho();
 public:
   // @brief Default constructor
   InfectionObserver()
-    : rho(0.0)
+    : epsilon(0.0)
+    , rho(0.0)
+    , beta(0.0)
+    , mu(0.0)
+    , host_num(0)
     , infected_num(0)
+    , p(nullptr)
+    , q(nullptr)
+    , next_p(nullptr)
+    , adjacency_matrix(nullptr)
   { }
   // @brief Default destructor
-  virtual ~InfectionObserver() { }
+  virtual ~InfectionObserver();
   virtual int numInitStages() const override {
     return inet::NUM_INIT_STAGES;
   }
   // @brief Initializes the module state
   virtual void initialize(int) override;
-  // @brief This module does not process messages 
+  // @brief This module only process self-messages
   virtual void handleMessage(omnetpp::cMessage*) override {
     throw omnetpp::cRuntimeError(
-      "InfectionObserver: this module does not receive any message\n"
+      "InfectionObserver: This module does not process messages\n"
     );
   }
   /** @brief Receives the node status and updates the average of infected nodes 
     * rho */
+  virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
+    long, omnetpp::cObject*);
+  // @brief Receives one-hop neighborhoods
   virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
     omnetpp::cObject*, omnetpp::cObject*);
 };

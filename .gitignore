@@ -4,5 +4,6 @@
 *.dat
 *.pdf
 src/Makefile
+src/ipropagation*
 out/
 

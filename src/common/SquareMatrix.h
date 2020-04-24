@@ -28,15 +28,16 @@ class SquareMatrix
 {
 private:
   size_t size_;
-  std::unique_ptr<std::unique_ptr<T[]>[]> matrix;
+  std::shared_ptr<std::shared_ptr<T[]>[]> matrix;
 public:
   SquareMatrix()
     : size_(0)
     , matrix(nullptr)
   { }
+  
   SquareMatrix(size_t size_, const T& t = T()) 
     : size_(size_)
-    , matrix(std::make_unique< std::unique_ptr<T[]>[] >(size_))
+    , matrix(std::make_unique< std::shared_ptr<T[]>[] >(size_))
   {
     for (size_t i = 0; i < size_; i++) {
       matrix[i] = std::make_unique< T[] >(size_);
@@ -44,14 +45,19 @@ public:
         matrix[i][j] = t;
     }
   }
+
   ~SquareMatrix() { }
+
   T& operator()(size_t x, size_t y) {
     return matrix[x][y];
   }
+
   const T& operator()(size_t x, size_t y) const {
     return matrix[x][y];
   }
+
   size_t size() { return size_; }
+
   void print(const char* filename)
   {
     std::ofstream ofs(filename);
@@ -70,6 +76,7 @@ public:
     }
     ofs.close();
   }
+
   template <typename U> 
   friend std::ostream& operator<<(std::ostream& os, const SquareMatrix<U>& m) {
     for (size_t i = 0; i < m.size_-1; i++) {

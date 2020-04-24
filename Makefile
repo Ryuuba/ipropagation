@@ -3,8 +3,7 @@ INETDIR = $(HOME)/inet4
 GENERAL_BUILD_OPTIONS = -f --deep \
 				                -I$(INETDIR)/src/ \
 								        -L$(INETDIR)/src/ \
-								        -o info_propg
-
+								        -o ipropagation
 .PHONY: all clean cleanall makefiles makefiles-dbg checkmakefiles
 
 all: checkmakefiles
