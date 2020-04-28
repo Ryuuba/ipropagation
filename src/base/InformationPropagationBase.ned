@@ -16,14 +16,13 @@
 package informationpropagation.base;
 import informationpropagation.contract.IApp;
 
-simple InfectionBase like IApp{
+simple InformationPropagationBase like IApp{
     parameters:
         @display("i=block/infection_app");
-        volatile double sentInterval @unit(s);
-        volatile double recoveryInterval @unit(s);
-        double statusReportInterval @unit(s) = default (1s);
-        double recoveryProbability; //a.k.a. mu
+        volatile double step @unit(s);
+        double recoveryProbability;  //a.k.a. mu
         double infectionProbability; //a.k.a. eta
+        int numberOfTrials;          //a.k.a. lambda
         @signal[sentMessage](type = long);
         @statistic[sentMessage](title = "number of sent infectios messages"; record = vector);
         @signal[receivedMessage](type = long);

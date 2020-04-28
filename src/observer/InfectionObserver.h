@@ -21,9 +21,11 @@
 #include <omnetpp.h>
 #include <memory>
 #include "inet/common/INETDefs.h"
-#include "../app/BroadcastInfectionApp.h"
+#include "inet/networklayer/probabilistic/ProbabilisticBroadcast.h"
+#include "../app/InformationPropagationApp.h"
 #include "../signal/NeighborNotification.h"
 #include "../networklayer/CacheRegister.h"
+
 
 class InfectionObserver
   : public omnetpp::cSimpleModule
@@ -51,7 +53,7 @@ protected:
   // @brief The neighborhood of a node
   static omnetpp::simsignal_t neighborhood_notification_signal;
   // @brief node status, indeces match the node id
-  std::unique_ptr < std::vector<unsigned> > p;
+  std::unique_ptr < std::vector<InformationPropagationApp::Status> > p;
   // @brief probability of node i does not get infected by a neighbor
   std::unique_ptr < std::vector<double> > q;
   // @brief probability of node i gets infected at t+1

@@ -14,7 +14,7 @@
 // 
 
 package informationpropagation.app;
-import informationpropagation.base.InfectionBase;
+import informationpropagation.base.InformationPropagationBase;
 
 //
 // Infected nodes using this app broadcast infectious messages to neighboring 
@@ -36,15 +36,15 @@ import informationpropagation.base.InfectionBase;
 // the INET lifecycle failure model. In turn, node motion is considered since
 // this app is designed for analyzing ad hoc networks, e.g., MANETs or OPPNETs.
 
-simple BroadcastInfectionApp extends InfectionBase
+simple InformationPropagationApp extends InformationPropagationBase
 {
     parameters:
-        @class(BroadcastInfectionApp);
-        bool onlyBroadcast = default(false); //infection messages is send to all neighbors
-        int infectionDegree = default(0); //The maximum number of neighbors to be infected
+        @class(InformationPropagationApp);
         //The payload of the information packet
         volatile int payload @unit(B); // length in bytes
         //probability that node start infected
         double initialInfectionProbability;
-
+        // Random operation mode
+        string communicationMode @enum("unicast", "multicast", "broadcast") = default("unicast");
+        string packetName;
 }

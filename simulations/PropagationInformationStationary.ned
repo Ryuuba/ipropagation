@@ -16,6 +16,7 @@
 package informationpropagation.simulations;
 import informationpropagation.node.WirelessBroadcastNode;
 import informationpropagation.observer.ConnectivityObserver;
+import informationpropagation.observer.InfectionObserver;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import slaw.map.SelfSimilarWaypointMap;
 //
@@ -32,14 +33,19 @@ network PropagationInformationStationary
             @display("p=550,20;is=s");
         }
         node[hostNumber]: WirelessBroadcastNode {
-            @display("p=550,100");
+            @display("p=250,250;is=s");
+            mobility.numHosts = hostNumber;
         }
         connectivityobserver: ConnectivityObserver {
             @display("p=550,80;is=s");
             hostNumber = hostNumber;
         }
-        map: SelfSimilarWaypointMap if hasSelfSimilarMap {
+        infectionobserver: InfectionObserver {
             @display("p=550,140;is=s");
+            hostNumber = hostNumber;
+        }
+        map: SelfSimilarWaypointMap if hasSelfSimilarMap {
+            @display("p=550,200;is=s");
         }
     connections allowunconnected:
 }

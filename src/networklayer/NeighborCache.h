@@ -89,6 +89,10 @@ public:
   virtual size_t size() {
     return cache->size();
   }
+  /** @brief Returns the numbers of entries in the cache */
+  virtual size_t size() const {
+    return cache->size();
+  }
   /** @brief Erases an entry in the cache */
   virtual cache_const_it erase(cache_const_it it) {
     return cache->erase(it);

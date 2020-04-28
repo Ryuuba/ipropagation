@@ -13,50 +13,49 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if !defined(BROADCAST_INFECTION_APP_H)
-#define BROADCAST_INFECTION_APP_H
+#if !defined(INFORMTATION_PROPAGATION_APP_H)
+#define INFORMTATION_PROPAGATION_APP_H
 
-#include "../base/InfectionBase.h"
+#include "../base/InformationPropagationBase.h"
 #include "../msg/InfoPacket_m.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
-class BroadcastInfectionApp : public InfectionBase
+class InformationPropagationApp : public InformationPropagationBase
 {
+public:
+  enum COMM_MODE {
+    UNICAST = 0,
+    MULTICAST,
+    BROADCAST
+  };
 protected: //App attributes
-  /** The maximum number of neighbors a node will try to infect. If |N(x)| is
-   *  less than infection_degree, then the node will try to infect |N(x)| 
-   * neighbors */
-  int infection_degree;
-  /** If it is true, then messages are sent to all neighbors, in other case 
-   *  the infection degree takes effect */
-  bool only_bcast;
   /** @brief The name of the infectious packet */
-  const char* packet_name = "infection";
+  const char* packet_name;
   /** @brief The length in bytes of the data within an infectious packet */
   int payload;
-  /** @brief the sort of timers this app reacts */
-  enum TimerKind {
-    RECOVERY = 100, //Triggers an attempt to recover from an infection
-    BROADCAST,      //Triggers the broadcasting of a packet
-    STATUS          //Triggers the emittion of the host status
-  };
+  /** @brief Communication scheme */
+  COMM_MODE comm_mode;
 protected: //App member functions
+  /** @brief Draws randomly a neighbor according to a communication scheme */
+  virtual std::list<inet::L3Address> draw_neighbor(COMM_MODE);
+  /** @brief Computes whether this node starts infected or not */
+  virtual void compute_initial_state();
   /** @brief Encapsulates a message to send it via a L3 socket */
   virtual void encapsulate(const inet::L3Address&);
-  /** @brief Broadcasts infectious messages to nodes in N(x) at a rate of 
-   *  broadcast_rate per broadcast_timer (in seconds), overridden from
-   *  InfectionBase class */
-  virtual void send_message(omnetpp::cMessage*) override;
+  /** @brief Sends an infectious message according to a communication scheme
+   *  In case the communication scheme is unicast or multicast, then 
+   *  destinations are randomly drawn */
+  virtual void send_message(omnetpp::cMessage*);
   /** @brief Tries to recovery from an infection */
   virtual void try_recovery(omnetpp::cMessage*) override;
-  /** @brief Emits the host status */
-  virtual void emit_status(omnetpp::cMessage*) override;
   /** @brief Process the received packet */
   virtual void process_packet(inet::Packet*) override;
   /** @brief Handle the timers of this application */
   virtual void handleMessage(omnetpp::cMessage*) override;
   /** @brief INET applications need 12 states to initialize all simulation 
-   *  modules. TODO: check this whether this condition is needed or not */
+   *  modules. */
   virtual int numInitStages() const override {return inet::NUM_INIT_STAGES;}
   /** @brief Initializes the app state getting N(x), the initial node 
    *  status, probability distributions, etc.  */
@@ -67,10 +66,13 @@ protected: //App member functions
   virtual void refreshDisplay() const override;
 public:
   /** @brief Default constructor initializing the class parameters */
-  BroadcastInfectionApp();
-  /** @brief Cancels self-messages (timers) when destructing *this */
-  virtual ~BroadcastInfectionApp();
-
+InformationPropagationApp()
+  : packet_name("")
+  , payload(0)
+  , comm_mode(UNICAST)
+  { }
+  /** @brief Default destructor */
+  ~InformationPropagationApp() { }
 };
 
-#endif // BROADCAST_INFECTION_APP_H
+#endif // INFORMTATION_PROPAGATION_APP_H

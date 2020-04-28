@@ -13,37 +13,40 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "../base/InfectionBase.h"
+#include "../base/InformationPropagationBase.h"
 
-Register_Abstract_Class(InfectionBase);
+Register_Abstract_Class(InformationPropagationBase);
 
-omnetpp::simsignal_t InfectionBase::sent_message_signal = 
+omnetpp::simsignal_t InformationPropagationBase::sent_message_signal = 
   registerSignal("sentMessage");
-omnetpp::simsignal_t InfectionBase::received_message_signal = 
+omnetpp::simsignal_t InformationPropagationBase::received_message_signal = 
   registerSignal("receivedMessage");
-omnetpp::simsignal_t InfectionBase::last_status_signal = 
+omnetpp::simsignal_t InformationPropagationBase::last_status_signal = 
   registerSignal("lastStatus");
-omnetpp::simsignal_t InfectionBase::infection_time_signal = 
+omnetpp::simsignal_t InformationPropagationBase::infection_time_signal = 
   registerSignal("infectionTime");
 
-InfectionBase::InfectionBase()
-  : recovery_probability(0.0)
-  , infection_probability(0.0)
-  , sent_interval(0.0)
-  , recovery_timer(nullptr)
+InformationPropagationBase::InformationPropagationBase()
+  : mu(0.0)
+  , eta(0.0)
+  , lambda(0)
+  , step_time(0.0)
+  , trial_num(0)
+  , diff_time(0.0)
   , infection_time(0.0)
   , sent_messages(0)
   , received_messages(0)
+  , step_timer(nullptr)
 {
   // TODO Auto-generated constructor stub
 }
 
-InfectionBase::~InfectionBase()
+InformationPropagationBase::~InformationPropagationBase()
 {
+  if (step_timer)
+    cancelAndDelete(step_timer);
   if (information_timer)
     cancelAndDelete(information_timer);
-  if (recovery_timer)
-    cancelAndDelete(recovery_timer);
   if (socket) {
     delete socket;
     socket = nullptr;
@@ -52,12 +55,12 @@ InfectionBase::~InfectionBase()
     delete src_address;
 }
 
-void InfectionBase::initialize(int stage) {
+void InformationPropagationBase::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     input_gate_id = gate("inputSocket")->getId();
     output_gate_id = gate("outputSocket")->getId();
+    step_timer = new omnetpp::cMessage("step timer");
     information_timer = new omnetpp::cMessage("information timer");
-    recovery_timer = new omnetpp::cMessage("recovery timer");
     auto cache_module = getSimulation()->getSystemModule()->
       getSubmodule("node", inet::getContainingNode(this)->getIndex())->
       getSubmodule("net")->getSubmodule("cache");
@@ -74,7 +77,7 @@ void InfectionBase::initialize(int stage) {
   }
 }
 
-inet::L3Address InfectionBase::draw_neighbor() {
+inet::L3Address InformationPropagationBase::draw_neighbor() {
   auto cache = neighbor_cache->get();
   inet::L3Address neighbor_address;
   if (!cache->empty()) {
@@ -85,23 +88,41 @@ inet::L3Address InfectionBase::draw_neighbor() {
   return neighbor_address;
 }
 
-void InfectionBase::socketDataArrived(
+std::list<inet::L3Address> InformationPropagationBase::draw_neighbor(size_t max) {
+  std::list<inet::L3Address> neighbor_list;
+  if (max > 0) {
+    std::list<cache_register> neighborhood = *(neighbor_cache->get());
+    if (max < neighborhood.size())
+      while (neighbor_list.size() < max) {
+        auto it = neighborhood.begin();
+        std::advance(it, intuniform(0, neighborhood.size() - 1));
+        neighbor_list.push_back( it->netw_address );
+        neighborhood.erase(it);
+      }
+    else
+      for (auto&& entry : neighborhood)
+        neighbor_list.push_back(entry.netw_address);
+  }
+  return neighbor_list;
+}
+
+void InformationPropagationBase::socketDataArrived(
   inet::L3Socket* socket, 
   inet::Packet* pkt
 ) {
   auto pkt_protocol = pkt->getTag<inet::PacketProtocolTag>()->getProtocol();
-  EV_INFO << "InfectionBase: Receiving packet with name " 
+  EV_INFO << "InformationPropagationBase: Receiving packet with name " 
           << pkt->getName() << '\n';
   if (pkt_protocol == &inet::Protocol::information)
     process_packet(pkt);
   else
     throw omnetpp::cRuntimeError(
-      "InfectionBase: Unaccepted packet %s(%s)", pkt->getName(), pkt->getClassName()
+      "InformationPropagationBase: Unaccepted packet %s(%s)", pkt->getName(), pkt->getClassName()
     );
 }
 
-void InfectionBase::socketClosed(inet::L3Socket* s) {
-  EV_INFO << "InfectionBase: socket has been closed\n";
+void InformationPropagationBase::socketClosed(inet::L3Socket* s) {
+  EV_INFO << "InformationPropagationBase: socket has been closed\n";
   if (s == socket) {
     socket->close();
     delete socket;
@@ -109,7 +130,7 @@ void InfectionBase::socketClosed(inet::L3Socket* s) {
   }
 }
 
-const char* InfectionBase::status_to_string(Status s) {
+const char* InformationPropagationBase::status_to_string(Status s) {
   switch (s)
   {
   case INFECTED:
@@ -118,7 +139,7 @@ const char* InfectionBase::status_to_string(Status s) {
     return "NOT_INFECTED";
   default:
     throw omnetpp::cRuntimeError(
-      "InfectionBase: invalid conversion to string from status %d", s);
+      "InformationPropagationBase: invalid conversion to string from status %d", s);
     break;
   } 
 }
