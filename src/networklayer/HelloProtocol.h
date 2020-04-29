@@ -26,7 +26,6 @@ protected:
     BACKOFF,
     FLUSH
   };
-  int host_id;
   /** @brief Maximum number of attempts a node must perform to consider a
    * a neighbor is out of range */
   int max_attemps;
@@ -49,7 +48,6 @@ public:
   /** @brief Default constructor */
   HelloProtocol()
     : NeighborDiscoveryProtocolBase()
-    , host_id(-1)
     , max_attemps(0)
     , bcast_delay_max(0.0)
     , flush_delay(0.0)

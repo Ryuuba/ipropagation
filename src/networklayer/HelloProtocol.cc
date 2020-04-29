@@ -6,7 +6,6 @@ Define_Module(HelloProtocol);
 void HelloProtocol::initialize(int stage) {
   NeighborDiscoveryProtocolBase::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
-    host_id = inet::getContainingNode(getParentModule())->getIndex();
     bcast_delay_max = par("maximumBcastDelay");
     max_attemps = par("maxAttemptNumber").intValue();
     flush_delay = par("flushDelay");
@@ -70,7 +69,7 @@ void HelloProtocol::send_hello_packet(inet::HelloPacketType type) {
   hello_info->setChunkLength(inet::B(packet_size));
   hello_info->setType(type);
   hello_info->setSequenceNum(sequence_number++);
-  hello_info->setHostId(node_index);
+  hello_info->setSrcNetwAddress(inet::L3Address(*netw_address));
   hello_info->setSrcMacAddress(mac);
   hello_info->setDstMacAddress(inet::MacAddress::BROADCAST_ADDRESS);
   hello_pkt->insertAtFront(hello_info);
@@ -93,17 +92,19 @@ void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
     );//
   EV_INFO << "Receive hello packet from " 
           << hello_header->getSrcMacAddress() << ' '
-          << hello_header->getHostId() << ' '
+          << hello_header->getSrcNetwAddress().toModuleId() << ' '
           << '\n';
   cache_register cache_reg;
   cache_reg.start_time = omnetpp::simTime();
-  cache_reg.netw_address = inet::ModuleIdAddress(hello_header->getHostId());
+  cache_reg.netw_address = hello_header->getSrcNetwAddress().toModuleId();
   cache_reg.mac_address = hello_header->getSrcMacAddress();
   cache_reg.last_contact_time = omnetpp::simTime();
   cache_reg.still_connected = true;
-  if (neighbor_cache->is_in_cache(hello_header->getHostId()))
+  if (
+    neighbor_cache->is_in_cache(hello_header->getSrcNetwAddress().toModuleId())
+  )
     neighbor_cache->update_last_contact_time(
-      hello_header->getHostId(),
+      hello_header->getSrcNetwAddress().toModuleId(),
       omnetpp::simTime()
     );
   else

@@ -23,7 +23,7 @@ protected: //IAPP attributes
   /** @brief the ID of the output gate */
   int output_gate_id;
   /** @brief The source of the information */
-  inet::L3Address* src_address;
+  std::unique_ptr<inet::ModuleIdAddress> src_address;
   /** @brief The socket to send information packets */
   inet::L3Socket* socket;
   /** @brief A pointer to access the neighbor cache */

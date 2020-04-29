@@ -27,7 +27,6 @@ void InfectionObserver::initialize(int stage) {
   static inet::ProbabilisticBroadcast* net_protocol(nullptr);
   static InformationPropagationApp* app_module(nullptr);
   if (stage == inet::INITSTAGE_LOCAL) {
-    std::cout << "p0\n";
     epsilon = par("epsilon").doubleValue();
     host_num = par("hostNumber").intValue();
     p = std::make_unique< std::vector<InformationPropagationApp::Status> >(host_num, InformationPropagationApp::NOT_INFECTED);
@@ -41,12 +40,10 @@ void InfectionObserver::initialize(int stage) {
       neighborhood_notification_signal,
       this
     );
-    std::cout << "p1\n";
     net_protocol = (inet::ProbabilisticBroadcast*) getSimulation()
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("net")->getSubmodule("np");
     app_module = (InformationPropagationApp*) getSimulation()
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("app");
-    std::cout << "p2\n";
     WATCH(infected_num);
     WATCH(rho);
     WATCH(mu);

@@ -31,10 +31,10 @@
 class NeighborDiscoveryProtocolBase : public INeighborDiscoveryProtocol {
 protected:
   /** 
-   * @brief The index of the host containg this module, it is assume the 
-   * simulation has a module vector of hosts 
+   * @brief The id of the host containg this module, it is assume the 
+   * simulation has a module vector of hosts, so the id equals index + 1
    * */
-  int node_index;
+  std::unique_ptr<inet::ModuleIdAddress> netw_address;
   /** @brief The MAC address of this host */
   inet::MacAddress mac;
   /** @brief A pointer to access the neighbor cache */
@@ -54,7 +54,7 @@ protected:
   virtual void process_hello_packet(omnetpp::cMessage*) = 0;
 public:
   NeighborDiscoveryProtocolBase()
-    : node_index(-1)
+    : netw_address(nullptr)
     , mac( )
     , neighbor_cache(nullptr)
     , packet_size(0)
@@ -83,10 +83,11 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     output_gate_id = gate("protocolPort")->getId();
     packet_size = par("packetSize").intValue();
     discovery_time = par("discoveryTime");
-    node_index = inet::getContainingNode(this)->getIndex();
+    auto node_index = inet::getContainingNode(this)->getIndex();
     auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node", node_index)->getSubmodule("net")->getSubmodule("cache");
     neighbor_cache = static_cast<NeighborCache*>(cache_module);    
     interface_table = inet::getModuleFromPar<inet::IInterfaceTable>(par("interfaceTableModule"), this);
+    netw_address = std::make_unique<inet::ModuleIdAddress>(node_index + 1);
   }
   else if (stage == inet::INITSTAGE_NETWORK_LAYER) {
     auto interface_name = par("interfaceName").stringValue();

@@ -19,6 +19,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.MacAddress;
+import inet.networklayer.common.L3Address;
 
 namespace inet;
 
@@ -32,8 +33,8 @@ class HelloPacket extends FieldsChunk
 {
     chunkLength = B(25);
     HelloPacketType type;
-    int hostId;
     int sequenceNum;
     MacAddress srcMacAddress;
     MacAddress dstMacAddress;
+    L3Address srcNetwAddress;
 }

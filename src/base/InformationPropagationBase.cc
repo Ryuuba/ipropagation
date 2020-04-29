@@ -27,7 +27,8 @@ omnetpp::simsignal_t InformationPropagationBase::infection_time_signal =
   registerSignal("infectionTime");
 
 InformationPropagationBase::InformationPropagationBase()
-  : mu(0.0)
+  : destination_list(std::make_shared<inet::DestinationList>())
+  , mu(0.0)
   , eta(0.0)
   , lambda(0)
   , step_time(0.0)
@@ -38,7 +39,7 @@ InformationPropagationBase::InformationPropagationBase()
   , received_messages(0)
   , step_timer(nullptr)
 {
-  // TODO Auto-generated constructor stub
+  
 }
 
 InformationPropagationBase::~InformationPropagationBase()
@@ -51,8 +52,6 @@ InformationPropagationBase::~InformationPropagationBase()
     delete socket;
     socket = nullptr;
   }
-  if (src_address)
-    delete src_address;
 }
 
 void InformationPropagationBase::initialize(int stage) {
@@ -68,57 +67,60 @@ void InformationPropagationBase::initialize(int stage) {
     netw_protocol = &inet::Protocol::probabilistic;
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
-    //Sets Socket
-    auto module_index = inet::getContainingNode(this)->getIndex();
-    src_address = new inet::L3Address( inet::ModuleIdAddress(module_index) );
+    auto id = inet::getContainingNode(this)->getIndex() + 1; //unicast address
+    src_address = std::make_unique<inet::ModuleIdAddress>(id);
     socket = new inet::L3Socket(netw_protocol, gate(output_gate_id));
-    socket->bind(&inet::Protocol::information, inet::ModuleIdAddress(module_index));
+    socket->bind(&inet::Protocol::information, inet::ModuleIdAddress(id));
     socket->setCallback(this);
   }
 }
 
-inet::L3Address InformationPropagationBase::draw_neighbor() {
-  auto cache = neighbor_cache->get();
-  inet::L3Address neighbor_address;
-  if (!cache->empty()) {
-    auto it = cache->begin();
-    std::advance(it, intuniform(0, cache->size() - 1));
-    neighbor_address.set(it->netw_address);
-  }
-  return neighbor_address;
-}
-
-std::list<inet::L3Address> InformationPropagationBase::draw_neighbor(size_t max) {
-  std::list<inet::L3Address> neighbor_list;
+void InformationPropagationBase::draw_neighbor(size_t max) {
+  destination_list->clear();
   if (max > 0) {
     std::list<cache_register> neighborhood = *(neighbor_cache->get());
     if (max < neighborhood.size())
-      while (neighbor_list.size() < max) {
+      while (destination_list->size() < max) {
         auto it = neighborhood.begin();
         std::advance(it, intuniform(0, neighborhood.size() - 1));
-        neighbor_list.push_back( it->netw_address );
+        destination_list->push_back( it->netw_address );
         neighborhood.erase(it);
       }
     else
       for (auto&& entry : neighborhood)
-        neighbor_list.push_back(entry.netw_address);
+        destination_list->push_back(entry.netw_address);
   }
-  return neighbor_list;
 }
 
 void InformationPropagationBase::socketDataArrived(
   inet::L3Socket* socket, 
   inet::Packet* pkt
 ) {
+
   auto pkt_protocol = pkt->getTag<inet::PacketProtocolTag>()->getProtocol();
-  EV_INFO << "InformationPropagationBase: Receiving packet with name " 
-          << pkt->getName() << '\n';
-  if (pkt_protocol == &inet::Protocol::information)
-    process_packet(pkt);
+  if (pkt_protocol == &inet::Protocol::information) {
+    auto pkt_header = inet::dynamicPtrCast<inet::InfoPacket>(
+      pkt->popAtFront<inet::InfoPacket>()->dupShared()
+    );
+    auto it = std::find(
+      pkt_header->getDestination_list_ptr()->begin(),
+      pkt_header->getDestination_list_ptr()->end(),
+      inet::L3Address(*src_address)
+    );
+    if (it != pkt_header->getDestination_list_ptr()->end()){
+      EV_INFO << "InformationPropagationBase: Node "<< src_address->getId() 
+              << " receives packet with name " << pkt->getName() 
+              << " from " << pkt_header->getSrc() << '\n';
+          process_packet(pkt_header);
+    }
+    else 
+      EV_INFO << "Discarting packet from " << pkt_header->getSrc() << '\n';
+  }
   else
     throw omnetpp::cRuntimeError(
       "InformationPropagationBase: Unaccepted packet %s(%s)", pkt->getName(), pkt->getClassName()
     );
+  delete pkt;
 }
 
 void InformationPropagationBase::socketClosed(inet::L3Socket* s) {
@@ -135,8 +137,10 @@ const char* InformationPropagationBase::status_to_string(Status s) {
   {
   case INFECTED:
     return "INFECTED";
+    break;
   case NOT_INFECTED:
     return "NOT_INFECTED";
+    break;
   default:
     throw omnetpp::cRuntimeError(
       "InformationPropagationBase: invalid conversion to string from status %d", s);

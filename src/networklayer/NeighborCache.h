@@ -70,7 +70,7 @@ public:
     return ptr;
   }
   /** @brief Indicates if an neighbor is in cache */
-  bool is_in_cache(int);
+  bool is_in_cache(const inet::ModuleIdAddress&);
   /** @brief Inserts a neighbor in cache, it is assumed that the entry will
    *  not be used by the calle
    */
@@ -80,7 +80,7 @@ public:
   /** @brief Removes a neighbor from cache by host_id*/
   virtual void erase_register(int);
   /** @brief Updates the last time a neighbor has been seen */
-  virtual void update_last_contact_time(int, omnetpp::simtime_t);
+  virtual void update_last_contact_time(const inet::ModuleIdAddress&, omnetpp::simtime_t);
   /** @brief Sets value is_updated of all entries to false */
   virtual void invalid_cache();
   /** @brief Flushes stale entries */

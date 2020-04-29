@@ -28,11 +28,13 @@ class HelloPacket;
 
 #include "inet/linklayer/common/MacAddress_m.h" // import inet.linklayer.common.MacAddress
 
+#include "inet/networklayer/common/L3Address_m.h" // import inet.networklayer.common.L3Address
+
 
 namespace inet {
 
 /**
- * Enum generated from <tt>msg/HelloPacket.msg:26</tt> by nedtool.
+ * Enum generated from <tt>msg/HelloPacket.msg:27</tt> by nedtool.
  * <pre>
  * enum HelloPacketType
  * {
@@ -47,16 +49,16 @@ enum HelloPacketType {
 };
 
 /**
- * Class generated from <tt>msg/HelloPacket.msg:32</tt> by nedtool.
+ * Class generated from <tt>msg/HelloPacket.msg:33</tt> by nedtool.
  * <pre>
  * class HelloPacket extends FieldsChunk
  * {
  *     chunkLength = B(25);
  *     HelloPacketType type;
- *     int hostId;
  *     int sequenceNum;
  *     MacAddress srcMacAddress;
  *     MacAddress dstMacAddress;
+ *     L3Address srcNetwAddress;
  * }
  * </pre>
  */
@@ -64,10 +66,10 @@ class HelloPacket : public ::inet::FieldsChunk
 {
   protected:
     inet::HelloPacketType type = static_cast<inet::HelloPacketType>(-1);
-    int hostId = 0;
     int sequenceNum = 0;
     MacAddress srcMacAddress;
     MacAddress dstMacAddress;
+    L3Address srcNetwAddress;
 
   private:
     void copy(const HelloPacket& other);
@@ -88,8 +90,6 @@ class HelloPacket : public ::inet::FieldsChunk
     // field getter/setter methods
     virtual inet::HelloPacketType getType() const;
     virtual void setType(inet::HelloPacketType type);
-    virtual int getHostId() const;
-    virtual void setHostId(int hostId);
     virtual int getSequenceNum() const;
     virtual void setSequenceNum(int sequenceNum);
     virtual const MacAddress& getSrcMacAddress() const;
@@ -98,6 +98,9 @@ class HelloPacket : public ::inet::FieldsChunk
     virtual const MacAddress& getDstMacAddress() const;
     virtual MacAddress& getDstMacAddressForUpdate() { handleChange();return const_cast<MacAddress&>(const_cast<HelloPacket*>(this)->getDstMacAddress());}
     virtual void setDstMacAddress(const MacAddress& dstMacAddress);
+    virtual const L3Address& getSrcNetwAddress() const;
+    virtual L3Address& getSrcNetwAddressForUpdate() { handleChange();return const_cast<L3Address&>(const_cast<HelloPacket*>(this)->getSrcNetwAddress());}
+    virtual void setSrcNetwAddress(const L3Address& srcNetwAddress);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const HelloPacket& obj) {obj.parsimPack(b);}

@@ -242,30 +242,30 @@ HelloPacket& HelloPacket::operator=(const HelloPacket& other)
 void HelloPacket::copy(const HelloPacket& other)
 {
     this->type = other.type;
-    this->hostId = other.hostId;
     this->sequenceNum = other.sequenceNum;
     this->srcMacAddress = other.srcMacAddress;
     this->dstMacAddress = other.dstMacAddress;
+    this->srcNetwAddress = other.srcNetwAddress;
 }
 
 void HelloPacket::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::inet::FieldsChunk::parsimPack(b);
     doParsimPacking(b,this->type);
-    doParsimPacking(b,this->hostId);
     doParsimPacking(b,this->sequenceNum);
     doParsimPacking(b,this->srcMacAddress);
     doParsimPacking(b,this->dstMacAddress);
+    doParsimPacking(b,this->srcNetwAddress);
 }
 
 void HelloPacket::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::inet::FieldsChunk::parsimUnpack(b);
     doParsimUnpacking(b,this->type);
-    doParsimUnpacking(b,this->hostId);
     doParsimUnpacking(b,this->sequenceNum);
     doParsimUnpacking(b,this->srcMacAddress);
     doParsimUnpacking(b,this->dstMacAddress);
+    doParsimUnpacking(b,this->srcNetwAddress);
 }
 
 inet::HelloPacketType HelloPacket::getType() const
@@ -277,17 +277,6 @@ void HelloPacket::setType(inet::HelloPacketType type)
 {
     handleChange();
     this->type = type;
-}
-
-int HelloPacket::getHostId() const
-{
-    return this->hostId;
-}
-
-void HelloPacket::setHostId(int hostId)
-{
-    handleChange();
-    this->hostId = hostId;
 }
 
 int HelloPacket::getSequenceNum() const
@@ -323,16 +312,27 @@ void HelloPacket::setDstMacAddress(const MacAddress& dstMacAddress)
     this->dstMacAddress = dstMacAddress;
 }
 
+const L3Address& HelloPacket::getSrcNetwAddress() const
+{
+    return this->srcNetwAddress;
+}
+
+void HelloPacket::setSrcNetwAddress(const L3Address& srcNetwAddress)
+{
+    handleChange();
+    this->srcNetwAddress = srcNetwAddress;
+}
+
 class HelloPacketDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertynames;
     enum FieldConstants {
         FIELD_type,
-        FIELD_hostId,
         FIELD_sequenceNum,
         FIELD_srcMacAddress,
         FIELD_dstMacAddress,
+        FIELD_srcNetwAddress,
     };
   public:
     HelloPacketDescriptor();
@@ -408,10 +408,10 @@ unsigned int HelloPacketDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,    // FIELD_type
-        FD_ISEDITABLE,    // FIELD_hostId
         FD_ISEDITABLE,    // FIELD_sequenceNum
         0,    // FIELD_srcMacAddress
         0,    // FIELD_dstMacAddress
+        0,    // FIELD_srcNetwAddress
     };
     return (field >= 0 && field < 5) ? fieldTypeFlags[field] : 0;
 }
@@ -426,10 +426,10 @@ const char *HelloPacketDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "type",
-        "hostId",
         "sequenceNum",
         "srcMacAddress",
         "dstMacAddress",
+        "srcNetwAddress",
     };
     return (field >= 0 && field < 5) ? fieldNames[field] : nullptr;
 }
@@ -439,10 +439,10 @@ int HelloPacketDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0] == 't' && strcmp(fieldName, "type") == 0) return base+0;
-    if (fieldName[0] == 'h' && strcmp(fieldName, "hostId") == 0) return base+1;
-    if (fieldName[0] == 's' && strcmp(fieldName, "sequenceNum") == 0) return base+2;
-    if (fieldName[0] == 's' && strcmp(fieldName, "srcMacAddress") == 0) return base+3;
-    if (fieldName[0] == 'd' && strcmp(fieldName, "dstMacAddress") == 0) return base+4;
+    if (fieldName[0] == 's' && strcmp(fieldName, "sequenceNum") == 0) return base+1;
+    if (fieldName[0] == 's' && strcmp(fieldName, "srcMacAddress") == 0) return base+2;
+    if (fieldName[0] == 'd' && strcmp(fieldName, "dstMacAddress") == 0) return base+3;
+    if (fieldName[0] == 's' && strcmp(fieldName, "srcNetwAddress") == 0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -456,10 +456,10 @@ const char *HelloPacketDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "inet::HelloPacketType",    // FIELD_type
-        "int",    // FIELD_hostId
         "int",    // FIELD_sequenceNum
         "inet::MacAddress",    // FIELD_srcMacAddress
         "inet::MacAddress",    // FIELD_dstMacAddress
+        "inet::L3Address",    // FIELD_srcNetwAddress
     };
     return (field >= 0 && field < 5) ? fieldTypeStrings[field] : nullptr;
 }
@@ -536,10 +536,10 @@ std::string HelloPacketDescriptor::getFieldValueAsString(void *object, int field
     HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
         case FIELD_type: return enum2string(pp->getType(), "inet::HelloPacketType");
-        case FIELD_hostId: return long2string(pp->getHostId());
         case FIELD_sequenceNum: return long2string(pp->getSequenceNum());
         case FIELD_srcMacAddress: return pp->getSrcMacAddress().str();
         case FIELD_dstMacAddress: return pp->getDstMacAddress().str();
+        case FIELD_srcNetwAddress: return pp->getSrcNetwAddress().str();
         default: return "";
     }
 }
@@ -555,7 +555,6 @@ bool HelloPacketDescriptor::setFieldValueAsString(void *object, int field, int i
     HelloPacket *pp = (HelloPacket *)object; (void)pp;
     switch (field) {
         case FIELD_type: pp->setType((inet::HelloPacketType)string2enum(value, "inet::HelloPacketType")); return true;
-        case FIELD_hostId: pp->setHostId(string2long(value)); return true;
         case FIELD_sequenceNum: pp->setSequenceNum(string2long(value)); return true;
         default: return false;
     }
@@ -586,6 +585,7 @@ void *HelloPacketDescriptor::getFieldStructValuePointer(void *object, int field,
     switch (field) {
         case FIELD_srcMacAddress: return toVoidPtr(&pp->getSrcMacAddress()); break;
         case FIELD_dstMacAddress: return toVoidPtr(&pp->getDstMacAddress()); break;
+        case FIELD_srcNetwAddress: return toVoidPtr(&pp->getSrcNetwAddress()); break;
         default: return nullptr;
     }
 }

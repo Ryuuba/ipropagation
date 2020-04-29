@@ -13,11 +13,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if !defined(INFORMTATION_PROPAGATION_APP_H)
-#define INFORMTATION_PROPAGATION_APP_H
+#if !defined(INFORMATION_PROPAGATION_APP_H)
+#define INFORMATION_PROPAGATION_APP_H
 
 #include "../base/InformationPropagationBase.h"
-#include "../msg/InfoPacket_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -39,19 +38,19 @@ protected: //App attributes
   COMM_MODE comm_mode;
 protected: //App member functions
   /** @brief Draws randomly a neighbor according to a communication scheme */
-  virtual std::list<inet::L3Address> draw_neighbor(COMM_MODE);
+  virtual void draw_neighbor(COMM_MODE);
   /** @brief Computes whether this node starts infected or not */
   virtual void compute_initial_state();
   /** @brief Encapsulates a message to send it via a L3 socket */
-  virtual void encapsulate(const inet::L3Address&);
+  virtual void encapsulate() override;
   /** @brief Sends an infectious message according to a communication scheme
    *  In case the communication scheme is unicast or multicast, then 
    *  destinations are randomly drawn */
-  virtual void send_message(omnetpp::cMessage*);
+  virtual void send_message(omnetpp::cMessage*) override;
   /** @brief Tries to recovery from an infection */
   virtual void try_recovery(omnetpp::cMessage*) override;
   /** @brief Process the received packet */
-  virtual void process_packet(inet::Packet*) override;
+  virtual void process_packet(inet::Ptr<inet::InfoPacket>) override;
   /** @brief Handle the timers of this application */
   virtual void handleMessage(omnetpp::cMessage*) override;
   /** @brief INET applications need 12 states to initialize all simulation 
@@ -75,4 +74,4 @@ InformationPropagationApp()
   ~InformationPropagationApp() { }
 };
 
-#endif // INFORMTATION_PROPAGATION_APP_H
+#endif // INFORMATION_PROPAGATION_APP_H

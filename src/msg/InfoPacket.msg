@@ -18,8 +18,20 @@
 //
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.networklayer.common.L3Address;
 
 namespace inet;
+
+cplusplus {{
+#include <list>
+#include <memory>
+typedef std::list<inet::L3Address> DestinationList;
+typedef std::shared_ptr<const DestinationList> DestinationListPtr;
+}}
+
+class DestinationList { @existingClass; }
+
+class DestinationListPtr { @existingClass; }
 
 enum InfoType
 {
@@ -32,6 +44,7 @@ class InfoPacket extends FieldsChunk
 {
     InfoType type;
     int identifer;
-    int host_id;
+    DestinationListPtr destination_list_ptr;
+    L3Address src;
     chunkLength = B(12);
 }

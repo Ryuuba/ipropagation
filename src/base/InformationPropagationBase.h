@@ -25,11 +25,13 @@
 class InformationPropagationBase : public IApp
 {
 public:
+  /** @brief The list of destinations */
+  std::shared_ptr<inet::DestinationList> destination_list;
   /** @brief The possible node status for this infection app. This enum could 
    *  be extended if the first you override it */
   enum Status {
     NOT_INFECTED = 0, //Nodes listen to the wireless channel
-    INFECTED = 1      //Nodes broadcasted infectious messages to its neighbors
+    INFECTED          //Nodes broadcasted infectious messages to its neighbors
   };
   /** @brief the sort of timers this app reacts */
   enum TimerKind {
@@ -71,19 +73,17 @@ protected: //App signals that carry statistics
                               last_status_signal,
                               infection_time_signal;
 protected:
-  /** @brief Draws a neighbor from neighbor cache if it is possible */
-  inet::L3Address draw_neighbor();
   /** @brief Draws a random set of neighbors from neighbor cache if it is 
-   *  possible */
-  std::list<inet::L3Address> draw_neighbor(size_t);
+   *  possible. The neighbor set is keep the in the destination list */
+  void draw_neighbor(size_t);
   /** @brief Encapsulates a message to send it via a L3 socket */
-  virtual void encapsulate(const inet::L3Address&) = 0;
+  virtual void encapsulate() = 0;
   /** @brief Sends infectious messages to nodes in N(x) */
   virtual void send_message(omnetpp::cMessage*) = 0;
   /** @brief Tries to recovery from an infection */
   virtual void try_recovery(omnetpp::cMessage*) = 0;
   /** @brief Process the received packet */
-  virtual void process_packet(inet::Packet*) = 0;
+  virtual void process_packet(inet::Ptr<inet::InfoPacket>) = 0;
 protected: //Member functions inherited from INetworkSocket::ICallBack
   /** @brief This memebr function is called back when data arrives thu the 
    *  socket, it process the received data */

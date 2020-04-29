@@ -95,13 +95,13 @@ void NeighborCache::erase_register(int neighbor_id) {
      address " << neighbor_id << '\n';
 }
 
-void NeighborCache::update_last_contact_time(int id, omnetpp::simtime_t time) {
+void NeighborCache::update_last_contact_time(const inet::ModuleIdAddress& addr, omnetpp::simtime_t time) {
   Enter_Method_Silent();
   cache_it it = std::find_if(
     cache->begin(),
     cache->end(), 
-    [id](const cache_register & entry) -> bool {
-      return entry.netw_address.getId() == id;
+    [addr](const cache_register & entry) -> bool {
+      return entry.netw_address == addr;
     }
   );
   if (it != cache->end()) {
@@ -113,16 +113,16 @@ void NeighborCache::update_last_contact_time(int id, omnetpp::simtime_t time) {
   }
   else
     EV_ERROR << "NeighborCache: there is not an entry that matches the host ID\
-     address " << id << '\n';
+     address " << addr.getId() << '\n';
 }
 
-bool NeighborCache::is_in_cache(int id) {
+bool NeighborCache::is_in_cache(const inet::ModuleIdAddress& addr) {
   bool result = false;
   cache_it it = std::find_if(
     cache->begin(),
     cache->end(), 
-    [id](const cache_register & entry) -> bool {
-      return entry.netw_address.getId() == id;
+    [addr](const cache_register & entry) -> bool {
+      return entry.netw_address == addr;
     }
   );
   if (it != cache->end()) {
