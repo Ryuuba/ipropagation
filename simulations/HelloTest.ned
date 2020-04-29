@@ -17,7 +17,7 @@ package informationpropagation.simulations;
 import informationpropagation.node.WirelessBroadcastNode;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 //
-// TODO select a realistic radio medium
+// 
 //
 network HelloTest
 {
