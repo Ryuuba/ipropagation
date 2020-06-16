@@ -35,8 +35,8 @@ public:
   };
   /** @brief the sort of timers this app reacts */
   enum TimerKind {
-    STEP = 100,   //Starts a new round
-    SEND_DATA     //Send a message trying to infect a neighbor
+    STEP = 100,         //Starts a new round
+    SEND_INFORMATION    //Send a message trying to infect a neighbor
   };
   /** @brief Returns a string indicating the host status */
   static const char* status_to_string(Status);

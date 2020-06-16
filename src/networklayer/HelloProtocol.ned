@@ -31,4 +31,6 @@ simple HelloProtocol extends NeighborDiscoveryProtocolBase
         double maximumBcastDelay @unit(s);
         // delay to flush the neighbor cache before emitting a hello msg
         double flushDelay @unit(s);
+        // Allows the module to emit hello message after the warm-up period
+        bool isMobileNode = default(false);
 }

@@ -142,13 +142,9 @@ void ProbabilisticCast::handleLowerPacket(inet::Packet *packet)
                   << " receives unseen message with ID = " 
                   << netw_header->getId() << " from node "
                   << macSrcAddr << endl;
-          std::cout << "Test\n";
           auto pkt_copy = packet->dup();
-          std::cout << "Packet size: " << pkt_copy->getDataLength() << "\n";
           decapsulate(pkt_copy);
-          std::cout << "OK1\n";
           sendUp(pkt_copy); //Pass packet to the application layer
-          std::cout << "OK2\n";
           recv_pkt_num++;
         }
         else{

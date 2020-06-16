@@ -26,6 +26,10 @@ protected:
     BACKOFF,
     FLUSH
   };
+  /** @brief Allows the exchanges of hello messages after the warm-up time. 
+   *  this is useful in mobile environments
+   */
+  bool is_mobile_node;
   /** @brief Maximum number of attempts a node must perform to consider a
    * a neighbor is out of range */
   int max_attemps;
@@ -48,6 +52,7 @@ public:
   /** @brief Default constructor */
   HelloProtocol()
     : NeighborDiscoveryProtocolBase()
+    , is_mobile_node(false)
     , max_attemps(0)
     , bcast_delay_max(0.0)
     , flush_delay(0.0)

@@ -6,6 +6,7 @@ Define_Module(HelloProtocol);
 void HelloProtocol::initialize(int stage) {
   NeighborDiscoveryProtocolBase::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
+    is_mobile_node = par("isMobileNode").boolValue();
     bcast_delay_max = par("maximumBcastDelay");
     max_attemps = par("maxAttemptNumber").intValue();
     flush_delay = par("flushDelay");
@@ -28,6 +29,10 @@ void HelloProtocol::initialize(int stage) {
 }
 
 void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
+  if (
+    !is_mobile_node && omnetpp::simTime() > getSimulation()->getWarmupPeriod()
+  )
+    return;
   if (msg->isSelfMessage()) {
     switch (msg->getKind()) {
       case TimerKind::DISCOVERY :

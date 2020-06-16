@@ -19,7 +19,7 @@ void InformationPropagationApp::initialize(int stage)
       : UNICAST; //The default mode is unicast
     step_timer->setKind(InformationPropagationBase::TimerKind::STEP);
     information_timer->setKind(
-      InformationPropagationBase::TimerKind::SEND_DATA
+      InformationPropagationBase::TimerKind::SEND_INFORMATION
     );
     // Step is most relevant than sending information
     step_timer->setSchedulingPriority(1);
@@ -29,11 +29,12 @@ void InformationPropagationApp::initialize(int stage)
     WATCH(received_messages);
     WATCH(status);
     WATCH(diff_time);
+    WATCH(trial_num);
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
     compute_initial_state();
     auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
-    scheduleAt(t0 + diff_time, information_timer);
+    scheduleAt(t0, step_timer);
   }
 }
 
@@ -42,22 +43,21 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
   if (msg->isSelfMessage()) {
     if (msg->getKind() == STEP) {
       EV_INFO << "The status of host " << src_address->getId() 
-              << " is " << status << '\n';
+              << " is " << status_to_string(status) << '\n';
       emit(last_status_signal, status);
-      try_recovery(msg);
-      scheduleAt(omnetpp::simTime() + diff_time, information_timer);
       scheduleAt(omnetpp::simTime() + step_time, step_timer);
-    }
-    else if (msg->getKind() == SEND_DATA) {
       if (status == INFECTED) {
-        send_message(msg);
-        if (trial_num < lambda) {
-          scheduleAt(omnetpp::simTime() + diff_time, information_timer);
-          trial_num++;
-        }
-        else
-          trial_num = 0;
+        scheduleAt(omnetpp::simTime() + diff_time, information_timer);
+        try_recovery(msg);
       }
+    }
+    else if (msg->getKind() == SEND_INFORMATION) {
+      send_message(msg);
+      trial_num++;
+      if (trial_num < lambda)
+        scheduleAt(omnetpp::simTime() + diff_time, information_timer);
+      else
+        trial_num = 0;
     }
   }
   else if(socket->belongsToSocket(msg)) {
@@ -82,7 +82,7 @@ void InformationPropagationApp::draw_neighbor(COMM_MODE mode)
         : 0;
       InformationPropagationBase::draw_neighbor(list_size);
     }
-    else 
+    else // UNICAST case
       InformationPropagationBase::draw_neighbor(1);
   }
   else 
@@ -144,12 +144,12 @@ void InformationPropagationApp::try_recovery(omnetpp::cMessage* msg)
     else
       EV_INFO << "Host " << src_address->getId() << " fails to recover from infection\n";
   }
-  else if (status == InformationPropagationBase::NOT_INFECTED)
-    EV_INFO << "Host " << src_address->getId() << " is not infected\n";
-  else
-    throw omnetpp::cRuntimeError(
-      "APP: not infected host %d tries to recover", src_address->getId()
-    );
+  // else if (status == InformationPropagationBase::NOT_INFECTED)
+  //   EV_INFO << "Host " << src_address->getId() << " is not infected\n";
+  // else
+  //   throw omnetpp::cRuntimeError(
+  //     "APP: not infected host %d tries to recover", src_address->getId()
+  //   );
 }
 
 void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)
