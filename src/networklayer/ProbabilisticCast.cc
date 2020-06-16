@@ -1,369 +1,384 @@
 /*
- * ProbabilisticBroadcast.cc
- *
- *  Created on: Nov 4, 2008
- *      Author: Damien Piguet
+ *  Based on: ProbabilisticBroadcast.h
+ *      by: Damien Piguet
+ *  Modified on: Apr, 2020
+ *      By: Adán G. Medrano-Chávez
+ * 
  */
+#include "ProbabilisticCast.h"
 
-#include <cassert>
-
-#include "inet/common/ProtocolGroup.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/probabilistic/ProbabilisticBroadcast.h"
-
-namespace inet {
 
 using std::make_pair;
 using std::endl;
 
-Define_Module(ProbabilisticBroadcast);
+long ProbabilisticCast::id_counter = 0;
+omnetpp::simsignal_t ProbabilisticCast::recv_pkt_signal 
+  = registerSignal("recvPktNum");
+omnetpp::simsignal_t ProbabilisticCast::sent_pkt_signal 
+  = registerSignal("sentPktNum");
+omnetpp::simsignal_t ProbabilisticCast::fwd_pkt_signal 
+  = registerSignal("fwdPktNum");
+omnetpp::simsignal_t ProbabilisticCast::hop_count_signal 
+  = registerSignal("hopCount");
+omnetpp::simsignal_t ProbabilisticCast::drp_pkt_signal 
+  = registerSignal("drpPktNum");
+omnetpp::simsignal_t ProbabilisticCast::qtime_signal 
+  = registerSignal("qTime");
 
-long ProbabilisticBroadcast::id_counter = 0;
+Define_Module(ProbabilisticCast);
 
-void ProbabilisticBroadcast::initialize(int stage)
-{
-    NetworkProtocolBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        broadcastPeriod = par("bcperiod");
-        beta = par("beta");
-        maxNbBcast = par("maxNbBcast");
-        headerLength = par("headerLength");
-        timeInQueueAfterDeath = par("timeInQueueAfterDeath");
-        timeToLive = par("timeToLive");
-        broadcastTimer = new cMessage("broadcastTimer");
-        maxFirstBcastBackoff = par("maxFirstBcastBackoff");
-        oneHopLatencies.setName("oneHopLatencies");
-        nbDataPacketsReceived = 0;
-        nbDataPacketsSent = 0;
-        debugNbMessageKnown = 0;
-        nbDataPacketsForwarded = 0;
-        nbHops = 0;
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        auto ie = interfaceTable->findFirstNonLoopbackInterface();
-        if (ie != nullptr)
-            myNetwAddr = ie->getNetworkAddress();
-        else
-            throw cRuntimeError("No non-loopback interface found!");
-    }
+ProbabilisticCast::ProbabilisticCast()
+  : forwarding(false)
+  , communication_mode()
+  , hop_limit(0)
+  , header_length(0)
+  , beta(1.0)
+  , eta(1.0)
+  , broadcast_period(0.0)
+  , max_first_bcast_backoff(0.0)
+  , src_address(nullptr)
+  , broadcast_timer(nullptr)
+  , forwarding_list(std::make_shared<DestinationList>())
+  , cache(nullptr)
+  , recv_pkt_num(0)
+  , sent_pkt_num(0)
+  , fwd_pkt_num(0)
+  , hop_count(0)
+  , drp_pkt_num(0)
+  , queueing_time(0.0)
+{ }
+
+ProbabilisticCast::~ProbabilisticCast() {
+  cancelAndDelete(broadcast_timer);
+  // if some messages are still in the queue, delete them.
+  for (auto&& item : msg_queue)
+    if (item.second)
+      delete item.second;
+  msg_queue.clear();
 }
 
-void ProbabilisticBroadcast::handleUpperPacket(Packet *packet)
+
+void ProbabilisticCast::initialize(int stage)
 {
-    // encapsulate message in a network layer packet.
-    encapsulate(packet);
-    auto macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
-    nbDataPacketsSent++;
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleUpperMsg(): Pkt ID = " << macHeader->getId() << " TTL = " << macHeader->getAppTtl() << endl;
-    // submit packet for first insertion in queue.
-    insertNewMessage(packet, true);
+  NetworkProtocolBase::initialize(stage);
+  if (stage == inet::INITSTAGE_LOCAL) {
+    forwarding = par("forwarding").boolValue();
+    auto comm_mode_str = par("communicationMode").stringValue();
+    communication_mode
+      = strcmp(comm_mode_str, "BROADCAST") == 0 ? BROADCAST
+      : strcmp(comm_mode_str, "MULTICAST") == 0 ? MULTICAST
+      : UNICAST; //The default mode is unicast
+    hop_limit = par("hopLimit").intValue();
+    header_length = par("headerLength").intValue();
+    beta = par("beta").doubleValue();
+    eta = par("eta").doubleValue();
+    broadcast_period = par("bcperiod");
+    max_first_bcast_backoff = par("maxFirstBcastBackoff");
+    broadcast_timer = new omnetpp::cMessage("broadcastTimer");
+    auto cache_module = getSimulation()->getSystemModule()->
+      getSubmodule("node", inet::getContainingNode(this)->getIndex())->
+      getSubmodule("net")->getSubmodule("cache");
+    cache = static_cast<NeighborCache*>(cache_module);
+  }
+  else if (stage == inet::INITSTAGE_NETWORK_LAYER) {
+    // unicast address
+    auto id = inet::getContainingNode(getParentModule())->getIndex() + 1;
+    src_address = std::make_unique<inet::ModuleIdAddress>(id);
+    // TODO get network_address in interface table
+  }
 }
 
-void ProbabilisticBroadcast::handleLowerPacket(Packet *packet)
+void ProbabilisticCast::handleUpperPacket(inet::Packet *packet)
 {
-    MacAddress macSrcAddr;
-    auto macHeader = dynamicPtrCast<ProbabilisticBroadcastHeader>(packet->popAtFront<ProbabilisticBroadcastHeader>()->dupShared());
-    packet->trim();
-    auto macAddressInd = packet->getTag<MacAddressInd>();
-    macHeader->setNbHops(macHeader->getNbHops() + 1);
-    macSrcAddr = macAddressInd->getSrcAddress();
-    delete packet->removeControlInfo();
-    ++nbDataPacketsReceived;
-    nbHops = nbHops + macHeader->getNbHops();
-    oneHopLatencies.record(SIMTIME_DBL(simTime() - packet->getTimestamp()));
-    // oneHopLatency gives us an estimate of how long the message spent in the MAC queue of
-    // its sender (compared to that, transmission delay is negligible). Use this value
-    // to update the TTL of the message. Dump it if it is dead.
-    //m->setAppTtl(m->getAppTtl().dbl() - oneHopLatency);
-    if (    /*(m->getAppTtl() <= 0) || */ (messageKnown(macHeader->getId()))) {
-        // we got this message already, ignore it.
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleLowerMsg(): Dead or Known message ID=" << macHeader->getId() << " from node "
-           << macSrcAddr << " TTL = " << macHeader->getAppTtl() << endl;
-        delete packet;
+  // encapsulate message in a network layer packet.
+  encapsulate(packet);
+  auto netw_header = packet->peekAtFront<inet::ProbabilisticCastHeader>();
+  EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+          << *src_address << "calls handleUpperPacket(): Pkt ID = " 
+          << netw_header->getId() << " hop count = " 
+          << netw_header->getHopCount() << endl;
+  omnetpp::simtime_t bcast_delay 
+    = broadcast_period < max_first_bcast_backoff ? broadcast_period
+    : uniform(0, max_first_bcast_backoff);
+  insert_msg(packet, bcast_delay);
+}
+
+void ProbabilisticCast::handleLowerPacket(inet::Packet *packet)
+{
+  inet::MacAddress macSrcAddr;
+  auto netw_header = 
+    inet::dynamicPtrCast<inet::ProbabilisticCastHeader>(
+      packet->peekAtFront<inet::ProbabilisticCastHeader>()->dupShared()
+    );
+  auto macAddressInd = packet->getTag<inet::MacAddressInd>();
+  netw_header->setHopCount(netw_header->getHopCount() + 1);
+  macSrcAddr = macAddressInd->getSrcAddress();
+  delete packet->removeControlInfo();
+  hop_count = netw_header->getHopCount();
+  // emit statistic
+  if (netw_header->getHopCount() < hop_limit) {
+    if (is_in_queue(netw_header->getId())) {
+      // we got this message already, ignore it.
+      EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+              << *src_address 
+              << " calls handleLowerPacket(): Dead or seen message ID = " 
+              << netw_header->getId() << " from node "
+              << macSrcAddr << " hop count = " << netw_header->getHopCount() 
+              << endl;
+      delete packet;
     }
-    else {
-        if (debugMessageKnown(macHeader->getId())) {
-            ++debugNbMessageKnown;
-            EV << "PBr: " << simTime() << " n" << myNetwAddr << " ERROR Message should be known TTL= " << macHeader->getAppTtl() << endl;
+    else { //hop limit is not superado
+      // Finds whether this node is in the destination list
+      auto it = std::find(
+        netw_header->getForwardingList()->begin(),
+        netw_header->getForwardingList()->end(),
+        inet::L3Address(*src_address)
+      );
+      if (it != netw_header->getForwardingList()->end()) {
+        if (bernoulli(eta)) {
+          // This host is in the forwarding list
+          EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+                  << *src_address
+                  << " receives unseen message with ID = " 
+                  << netw_header->getId() << " from node "
+                  << macSrcAddr << endl;
+          std::cout << "Test\n";
+          auto pkt_copy = packet->dup();
+          std::cout << "Packet size: " << pkt_copy->getDataLength() << "\n";
+          decapsulate(pkt_copy);
+          std::cout << "OK1\n";
+          sendUp(pkt_copy); //Pass packet to the application layer
+          std::cout << "OK2\n";
+          recv_pkt_num++;
         }
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleLowerMsg(): Unknown message ID=" << macHeader->getId() << " from node "
-           << macSrcAddr << endl;
-        // Unknown message. Insert message in queue with random backoff broadcast delay.
-        // Because we got the message from lower layer, we need to create and add a new
-        // control info with the MAC destination address = broadcast address.
-        setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
-        // before inserting message, update source address (for this hop, not the initial source)
-        macHeader->setSrcAddr(myNetwAddr);
-        packet->insertAtFront(macHeader);
-        insertNewMessage(packet);
-
-        // until a subscription mechanism is implemented, duplicate and pass all received packets
-        // to the application layer who will be able to compute statistics.
-        // TODO: implement an application subscription mechanism.
-        if (true) {
-            auto mCopy = packet->dup();
-            decapsulate(mCopy);
-            sendUp(mCopy);
+        else{
+          EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() 
+                  << " host " << *src_address
+                  << " discards message by a Bernoulli process\n"
+                  << " ID = " << netw_header->getId() << " from node "
+                  << macSrcAddr << endl;
+          drp_pkt_num++;
+          delete packet;
         }
-    }
-}
-
-void ProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
-{
-    if (msg == broadcastTimer) {
-        tMsgDesc *msgDesc;
-        // called method pops the first message from the message queue and
-        // schedules the message timer for the next one. The message is embedded
-        // into a container of type tMsgDesc.
-        msgDesc = popFirstMessageUpdateQueue();
-        auto packet = msgDesc->pkt;
-        auto macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
-        // if the packet is alive, duplicate it and insert the copy in the queue,
-        // then perform a broadcast attempt.
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " handleSelfMsg(): Message ID= " << macHeader->getId() << " TTL= " << macHeader->getAppTtl() << endl;
-        if (macHeader->getAppTtl() > 0) {
-            // check if we are allowed to re-transmit the message on more time.
-            if (msgDesc->nbBcast < maxNbBcast) {
-                bool sendForSure = msgDesc->initialSend;
-
-                // duplicate packet and insert the copy in the queue.
-                // two possibilities: the packet will be alive at next
-                // broadcast period => insert it with delay = broadcastPeriod.
-                // Or the packet will be dead at next broadcast period (TTL <= broadcastPeriod)
-                // => insert it with delay = TTL. So when the copy will be popped out of the
-                // queue, it will be considered as dead and discarded.
-                auto packetCopy = packet->dup();
-                auto macHeaderCopy = packetCopy->peekAtFront<ProbabilisticBroadcastHeader>();;
-                // control info is not duplicated with the message, so we have to re-create one here.
-                setDownControlInfo(packetCopy, MacAddress::BROADCAST_ADDRESS);
-                // it the copy that is re-inserted into the queue so update the container accordingly
-                msgDesc->pkt = packetCopy;
-                // increment nbBcast field of the descriptor because at this point, it is sure that
-                // the message will go through one more broadcast attempt.
-                msgDesc->nbBcast++;
-                // for sure next broadcast attempt will not be the initial one.
-                msgDesc->initialSend = false;
-                // if msg TTL > broadcast period, the message will be broadcasted one more
-                // time, insert it with delay = broadcast period. Otherwise, the message
-                // will be dead at next broadcast attempt. Keep it in the list with
-                // delay = TTL + timeInQueueAfterDeath. insertMessage() will update its
-                // TTL to -timeInQueueAfterDeath, a negative value. That way, the message
-                // is known to the system, de-synchronization between copies of the same message
-                // is therefore handled and when the message will be popped out, its TTL will
-                // be smaller than zero, thus the message will be discarded, not broadcasted.
-                if (macHeaderCopy->getAppTtl() > broadcastPeriod)
-                    insertMessage(broadcastPeriod, msgDesc);
-                else
-                    insertMessage(macHeaderCopy->getAppTtl() + timeInQueueAfterDeath, msgDesc);
-                // broadcast the message with probability beta
-                if (sendForSure) {
-                    EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Send packet down for sure." << endl;
-                    packet->setTimestamp();
-                    sendDown(packet);
-                    ++nbDataPacketsForwarded;
-                }
-                else {
-                    if (bernoulli(beta)) {
-                        EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Bernoulli test result: TRUE. Send packet down." << endl;
-                        packet->setTimestamp();
-                        sendDown(packet);
-                        ++nbDataPacketsForwarded;
-                    }
-                    else {
-                        EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Bernoulli test result: FALSE" << endl;
-                        delete packet;
-                    }
-                }
-            }
-            else {
-                // we can't re-transmit the message because maxNbBcast is reached.
-                // re-insert-it in the queue with delay = TTL so that its ID is still
-                // known by the system.
-                EV << "PBr: " << simTime() << " n" << myNetwAddr << "     maxNbBcast reached." << endl;
-                insertMessage(macHeader->getAppTtl() + timeInQueueAfterDeath, msgDesc);
-            }
+      }
+      else {
+        if (forwarding) {
+          EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() 
+                  << " host " << *src_address
+                  << " receices unseen message to forward it\n"
+                  << "ID = " << netw_header->getId() << " from node "
+                  << macSrcAddr << endl;
+          // Unseen message. Insert message in queue with random backoff 
+          // broadcast delay. Because we got the message from lower layer, we 
+          // need to create and add a new control info with the MAC destination 
+          // address = broadcast address.
+          set_ctrl_info(packet, inet::MacAddress::BROADCAST_ADDRESS);
+          // before inserting message, update source address
+          // increment the hop count
+          netw_header->setSourceAddress(*src_address);
+          netw_header->setHopCount(netw_header->getHopCount() + 1);
+          packet->insertAtFront(netw_header);
+          omnetpp::simtime_t bcast_delay 
+            = broadcast_period < max_first_bcast_backoff ? broadcast_period
+            : uniform(0, max_first_bcast_backoff);
+          insert_msg(packet, bcast_delay);
+          recv_pkt_num++;
         }
         else {
-            EV << "PBr: " << simTime() << " n" << myNetwAddr << "     Message TTL zero, discard." << endl;
-            delete msgDesc;
-            delete packet;
+          EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() 
+                  << " host " << *src_address
+                  << " discards message ID = " 
+                  << netw_header->getId() << " from node "
+                  << macSrcAddr << endl;
+          drp_pkt_num++;
+          delete packet;
         }
+      }
+    }
+  }
+  else {
+    EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+            << *src_address
+            << " discards message with ID " << netw_header->getId() << '\n'
+            << " hop count " << netw_header->getHopCount()  << '\n'
+            << " from node " << macSrcAddr << endl;
+    drp_pkt_num++;
+    delete packet;
+  }
+}
+
+void ProbabilisticCast::handleSelfMessage(omnetpp::cMessage *msg)
+{
+  if (msg == broadcast_timer) {
+    auto packet = pop_msg();
+    if (bernoulli(beta)) {
+      auto netwHeader = packet->peekAtFront<inet::ProbabilisticCastHeader>();
+      if (netwHeader->getHopCount() == 0)
+        fwd_pkt_num++;
+      else
+        sent_pkt_num++;
+      packet->setTimestamp();
+      sendDown(packet);
+      EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+              << *src_address 
+              << " pass the Bernoulli test. Send packet down." << endl;
     }
     else {
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " Received unexpected self message" << endl;
+      EV << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+      << *src_address << "does not pass the Benoulli test." << endl;
+      delete packet;
     }
+    if (!msg_queue.empty())
+      scheduleAt(msg_queue.begin()->first, broadcast_timer);
+  }
+  else
+    EV_ERROR << "ProbabilisticCast: at " << omnetpp::simTime() 
+             << " node " << *src_address << " received unexpected self message" 
+             << endl;
 }
 
-void ProbabilisticBroadcast::finish()
+bool ProbabilisticCast::is_in_queue(unsigned int msgId)
 {
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << " finish()" << endl;
-    cancelAndDelete(broadcastTimer);
-    // if some messages are still in the queue, delete them.
-    while (!msgQueue.empty()) {
-        auto pos = msgQueue.begin();
-        tMsgDesc *msgDesc = pos->second;
-        msgQueue.erase(pos);
-        delete msgDesc->pkt;
-        delete msgDesc;
-    }
-    recordScalar("nbDataPacketsReceived", nbDataPacketsReceived);
-    recordScalar("debugNbMessageKnown", debugNbMessageKnown);
-    recordScalar("nbDataPacketsForwarded", nbDataPacketsForwarded);
-    if (nbDataPacketsReceived > 0) {
-        recordScalar("meanNbHops", (double)nbHops / (double)nbDataPacketsReceived);
-    }
-    else {
-        recordScalar("meanNbHops", 0);
-    }
+  return msg_id_set.find(msgId) != msg_id_set.end();
 }
 
-bool ProbabilisticBroadcast::messageKnown(unsigned int msgId)
-{
-    auto pos = knownMsgIds.find(msgId);
-    return pos != knownMsgIds.end();
+void ProbabilisticCast::insert_msg(
+  inet::Packet* pkt,
+  omnetpp::simtime_t_cref bcast_delay
+) {
+  omnetpp::simtime_t bcast_time = omnetpp::simTime() + bcast_delay;
+  EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+          << *src_address << "inserts message assign it a broadcast delay\n" 
+          << " Msg ID = " << pkt->getId() << endl;
+  // insert message ID in ID list.
+  auto netw_header = pkt->peekAtFront<inet::ProbabilisticCastHeader>();
+  msg_id_set.insert(netw_header->getId());
+  // insert key value pair <broadcast time, pointer to message> in message queue.
+  auto pos = msg_queue.insert(make_pair(bcast_time, pkt));
+  // if the message has been inserted in the front of the list, it means that 
+  // it will be the next message to be broadcasted, therefore we have to 
+  // re-schedule the broadcast timer to the message's broadcast instant.
+  if (pos == msg_queue.begin()) {
+    EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+            << *src_address << "inserts at front, reschedule it." << endl;
+    cancelEvent(broadcast_timer);
+    scheduleAt(bcast_time, broadcast_timer);
+  }
 }
 
-bool ProbabilisticBroadcast::debugMessageKnown(unsigned int msgId)
+inet::Packet* ProbabilisticCast::pop_msg( )
 {
-    auto pos = debugMsgIdSet.find(msgId);
-    return pos != debugMsgIdSet.end();
-}
-
-void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *msgDesc)
-{
-    simtime_t bcastTime = simTime() + bcastDelay;
-
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << "         insertMessage() bcastDelay = " << bcastDelay << " Msg ID = " << msgDesc->pkt->getId() << endl;
-    // update TTL field of the message to the value it will have when taken out of the list
-    msgDesc->pkt->trim();
-    auto macHeader = msgDesc->pkt->removeAtFront<ProbabilisticBroadcastHeader>();
-    macHeader->setAppTtl(macHeader->getAppTtl() - bcastDelay);
-    msgDesc->pkt->insertAtFront(macHeader);
-    // insert message ID in ID list.
-    knownMsgIds.insert(macHeader->getId());
-    // insert key value pair <broadcast time, pointer to message> in message queue.
-    auto pos = msgQueue.insert(make_pair(bcastTime, msgDesc));
-    // if the message has been inserted in the front of the list, it means that it
-    // will be the next message to be broadcasted, therefore we have to re-schedule
-    // the broadcast timer to the message's broadcast instant.
-    if (pos == msgQueue.begin()) {
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << "         message inserted in the front, reschedule it." << endl;
-        cancelEvent(broadcastTimer);
-        scheduleAt(bcastTime, broadcastTimer);
-    }
-}
-
-ProbabilisticBroadcast::tMsgDesc *ProbabilisticBroadcast::popFirstMessageUpdateQueue(void)
-{
-    tMsgDesc *msgDesc;
-
-    // get first message.
-    ASSERT(!msgQueue.empty());
-    auto pos = msgQueue.begin();
-    msgDesc = pos->second;
+  inet::Packet* pkt(nullptr);
+  if (!msg_queue.empty()) {
+    auto it = msg_queue.begin();
+    pkt = it->second;
     // remove first message from message queue and from ID list
-    msgQueue.erase(pos);
-    knownMsgIds.erase(msgDesc->pkt->getId());
-    EV << "PBr: " << simTime() << " n" << myNetwAddr << "         pop(): just popped msg " << msgDesc->pkt->getId() << endl;
-    if (!msgQueue.empty()) {
-        // schedule broadcast of new first message
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << "         pop(): schedule next message." << endl;
-        pos = msgQueue.begin();
-        scheduleAt(pos->first, broadcastTimer);
-    }
-    return msgDesc;
+    msg_queue.erase(it);
+    auto netw_header = pkt->peekAtFront<inet::ProbabilisticCastHeader>();
+    msg_id_set.erase(netw_header->getId());
+
+    EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
+            << *src_address << " pops msg with ID" 
+            << netw_header->getId() << endl;
+  }
+  else
+    throw omnetpp::cRuntimeError(
+      "ProbabilisticCast: trying pop when queue is empty"
+    );
+  return pkt;
 }
 
-void ProbabilisticBroadcast::encapsulate(Packet *packet)
+void ProbabilisticCast::encapsulate(inet::Packet *packet)
 {
-    auto pkt = makeShared<ProbabilisticBroadcastHeader>(); // TODO: msg->getName());
-    cObject *controlInfo = packet->removeControlInfo();
-    L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
-
-    pkt->setChunkLength(B(headerLength));
-    pkt->setSrcAddr(myNetwAddr);
-    pkt->setDestAddr(broadcastAddress);
-    pkt->setInitialSrcAddr(myNetwAddr);
-    pkt->setFinalDestAddr(broadcastAddress);
-    pkt->setAppTtl(timeToLive);
-    pkt->setId(getNextID());
-    pkt->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
-    pkt->setPayloadLengthField(packet->getDataLength());
-    // clean-up
-    delete controlInfo;
-
-    //encapsulate the application packet
-    packet->insertAtFront(pkt);
-
-    setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
+  auto netw_header = inet::makeShared<inet::ProbabilisticCastHeader>();
+  compute_forwarding_list();
+  cObject *controlInfo = packet->removeControlInfo();
+  netw_header->setInitialSrcAddr(*src_address);
+  netw_header->setSourceAddress(*src_address);
+  netw_header->setForwardingList(forwarding_list);
+  netw_header->setId(getNextID());
+  netw_header->setHopCount(0);
+  netw_header->setChunkLength(inet::B(header_length));
+  netw_header->setProtocol(packet->getTag<inet::PacketProtocolTag>()->getProtocol());
+  netw_header->setPayloadLengthField(packet->getDataLength());
+  // cleans-up
+  delete controlInfo;
+  //encapsulates the application packet
+  packet->insertAtFront(netw_header);
+  set_ctrl_info(packet, inet::MacAddress::BROADCAST_ADDRESS);
 }
 
-void ProbabilisticBroadcast::insertNewMessage(Packet *packet, bool iAmInitialSender)
+void ProbabilisticCast::decapsulate(inet::Packet* packet)
 {
-    auto macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
-    simtime_t ttl = macHeader->getAppTtl();
-
-    if (ttl > 0) {
-        simtime_t bcastDelay;
-        tMsgDesc *msgDesc;
-
-        // insert packet in queue with delay in [0, min(TTL, broadcast period)].
-        // since the insertion schedules the message for its first broadcast attempt,
-        // we use a uniform random back-off taken between now and the broadcast delay
-        // to avoid having all nodes in the neighborhood forward the packet at the same
-        // time. Backoffs used at MAC layer are thought to be too short.
-        if (broadcastPeriod < maxFirstBcastBackoff)
-            bcastDelay = broadcastPeriod;
-        else
-            bcastDelay = maxFirstBcastBackoff;
-        if (bcastDelay > ttl)
-            bcastDelay = ttl;
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " insertNewMessage(): insert packet " << macHeader->getId() << " with delay "
-           << bcastDelay << endl;
-        // create container for message and initialize container's values.
-        msgDesc = new tMsgDesc;
-        msgDesc->pkt = packet;
-        msgDesc->nbBcast = 0;    // so far, pkt has been forwarded zero times.
-        msgDesc->initialSend = iAmInitialSender;
-        debugMsgIdSet.insert(macHeader->getId());
-        insertMessage(uniform(0, bcastDelay), msgDesc);
-    }
-    else {
-        EV << "PBr: " << simTime() << " n" << myNetwAddr << " insertNewMessage(): got new packet with TTL = 0." << endl;
-        delete packet;
-    }
-}
-
-void ProbabilisticBroadcast::decapsulate(Packet *packet)
-{
-    auto networkHeader = packet->popAtFront<ProbabilisticBroadcastHeader>();
-    auto payloadLength = networkHeader->getPayloadLengthField();
-    if (packet->getDataLength() < payloadLength) {
-        throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
-    }
-    if (packet->getDataLength() > payloadLength)
-        packet->setBackOffset(packet->getFrontOffset() + payloadLength);
-    auto payloadProtocol = networkHeader->getProtocol();
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&getProtocol());
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(networkHeader);
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-    packet->addTagIfAbsent<L3AddressInd>()->setSrcAddress(networkHeader->getSrcAddr());
+  //packet->peekAtFront<inet::ProbabilisticCastHeader>()->dupShared()
+  auto network_header = inet::dynamicPtrCast<inet::ProbabilisticCastHeader>(packet->popAtFront<inet::ProbabilisticCastHeader>()->dupShared());
+  packet->trim();
+  auto payload_length = network_header->getPayloadLengthField();
+  if (packet->getDataLength() < payload_length)
+    throw omnetpp::cRuntimeError("Data error: illegal payload length");
+  if (packet->getDataLength() > payload_length)
+    packet->setBackOffset(packet->getFrontOffset() + payload_length);
+  packet->addTagIfAbsent<inet::NetworkProtocolInd>()->setProtocol(&getProtocol());
+  packet->addTagIfAbsent<inet::NetworkProtocolInd>()
+    ->setNetworkProtocolHeader(network_header);
+  auto payload_protocol = network_header->getProtocol();
+  packet->addTagIfAbsent<inet::DispatchProtocolReq>()
+    ->setProtocol(payload_protocol);
+  packet->addTagIfAbsent<inet::PacketProtocolTag>()
+    ->setProtocol(payload_protocol);
+  packet->addTagIfAbsent<inet::L3AddressInd>()
+    ->setSrcAddress(network_header->getSourceAddress());
 }
 
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void ProbabilisticBroadcast::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
-{
-    pMsg->addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
-    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::probabilistic);
-    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::probabilistic);
+void ProbabilisticCast::set_ctrl_info(
+  inet::Packet *const pMsg, 
+  const inet::MacAddress& pDestAddr
+) {
+  pMsg->addTagIfAbsent<inet::MacAddressReq>()->setDestAddress(pDestAddr);
+  pMsg->addTagIfAbsent<inet::PacketProtocolTag>()
+    ->setProtocol(&inet::Protocol::probabilistic);
+  pMsg->addTagIfAbsent<inet::DispatchProtocolInd>()
+    ->setProtocol(&inet::Protocol::probabilistic);
 }
 
-} // namespace inet
 
+void ProbabilisticCast::compute_forwarding_list() {
+  auto cache_size = cache->size();
+  if (cache_size > 0) {
+    if (communication_mode == BROADCAST) {
+      draw_neighbor(cache_size); //Effectively, it modifies the fwd list
+    }
+    else if (communication_mode == MULTICAST) {
+      size_t list_size 
+        = cache->size() == 1 ? 1
+        : cache->size() == 2 ? 2
+        : cache->size()  > 2 ? intuniform(1, cache_size-1)
+        : 0;
+      draw_neighbor(list_size); //Effectively, it modifies the fwd list
+    }
+    else 
+      draw_neighbor(1); //Effectively, it modifies the fwd list
+  }
+  else 
+    forwarding_list->clear();
+}
+
+void ProbabilisticCast::draw_neighbor(size_t max) {
+  forwarding_list->clear();
+  if (max > 0) {
+    std::list<cache_register> neighborhood = *(cache->get());
+    if (max < neighborhood.size())
+      while (forwarding_list->size() < max) {
+        auto it = neighborhood.begin();
+        std::advance(it, intuniform(0, neighborhood.size() - 1));
+        forwarding_list->push_back( it->netw_address );
+        neighborhood.erase(it);
+      }
+    else
+      for (auto&& entry : neighborhood)
+        forwarding_list->push_back(entry.netw_address);
+  }
+}

@@ -17,6 +17,7 @@ package informationpropagation.networklayer;
 import inet.networklayer.common.SimpleNetworkLayer;
 import informationpropagation.contract.INeighborDiscoveryProtocol;
 import informationpropagation.contract.INeighborCache;
+import informationpropagation.networklayer.ProbabilisticCast;
 
 //
 // This class extends the INET simple network layer with two modules:
@@ -26,6 +27,7 @@ module ExtendedNetworkLayer extends SimpleNetworkLayer
 {
     parameters:
         @display("i=block/broadcast");
+        np.typename = "ProbabilisticCast";
     submodules:
         dp: <default("")> like INeighborDiscoveryProtocol if typename != "" {
             @display("p=450,300");

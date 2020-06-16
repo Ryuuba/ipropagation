@@ -65,10 +65,5 @@
     "editor.rulers": [
         80
     ],
-    "cSpell.enabled": false,
-    "workbench.colorCustomizations": {
-        "activityBar.background": "#1B3401",
-        "titleBar.activeBackground": "#264901",
-        "titleBar.activeForeground": "#F2FEE4"
-    }
+    "cSpell.enabled": false
 }

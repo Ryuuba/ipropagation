@@ -137,6 +137,7 @@ class INET_API Protocol
     //User-defined protocols
     static const Protocol information; //Information propagation apps
     static const Protocol neighborDiscovery; //Neighbor discovery protocols for ad-hoc networks
+    static const Protocol helloProtocol;    //John's hello protocol
 };
 
 inline std::ostream& operator << (std::ostream& o, const Protocol& t) { o << t.str(); return o; }

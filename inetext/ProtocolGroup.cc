@@ -77,6 +77,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x22F3, &Protocol::trill},
     { 0x22F4, &Protocol::l2isis},
     { 0x86DD, &Protocol::ipv6 },
+    { 0x36FA, &Protocol::helloProtocol }, // John's hello protocol
     { 0x36FB, &Protocol::neighborDiscovery }, // user-defined protocol
     { 0x36FC, &Protocol::flooding },         // ETHERTYPE_INET_FLOODING, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards

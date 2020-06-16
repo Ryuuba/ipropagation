@@ -19,7 +19,7 @@ import inet.networklayer.contract.INetworkProtocol;;
 
 
 // Author: Adán G. Medrano-Chávez
-// This module transmitwith probability beta a packet via L2 broadcast.
+// This module transmit with probability beta a packet via L2 broadcast.
 // Destinations could be a single node, several nodes or all nodes in 
 // the range of coverage. In this way, this protocol is able to perfom unicast,
 // multicast or broadcast communications taking advantage of the natural
@@ -36,23 +36,25 @@ import inet.networklayer.contract.INetworkProtocol;;
 simple ProbabilisticCast extends NetworkProtocolBase like INetworkProtocol {
     @class(ProbabilisticCast);
     // Enable L3 forwarding
-    bool forwading = default(false);
+    bool forwarding = default(false);
     // Routing communication scheme
     string communicationMode @enum("unicast", "multicast", "broadcast") = default("unicast");
     // The number of hops to discard a packet
     int hopLimit = default(5);
-    // length of the network packet header (in bits)
+    // length of the network packet header (in bytes)
     // (took from ProbabilisticBroadcast)
-    int headerLength @unit(b) = default(96b);
+    int headerLength @unit(B) = default(96B);
     // probability of broadcast for each attempt
     // (took from ProbabilisticBroadcast)
-    double beta = default(0.8);}
+    double beta = default(0.5);
+    // probability the network layer pass the packet to the app layer
+    double eta = default(1.0);
     // How many seconds the message should be kept in queue after its died.
     // That way the message is known if the node receives one of its
     // copy that isn't dead because of TTL de-synchronization due to
     // MAC backoff, propagation delay and clock drift.
     // (took from ProbabilisticBroadcast)
-    double timeInQueueAfterDeath @unit(s) = default(60 s);
+    //double dropTime @unit(s) = default(60 s);
     // period between two probabilistic broadcast
     // (took from ProbabilisticBroadcast)
     double bcperiod @unit(s) = default(2 s);
@@ -61,4 +63,34 @@ simple ProbabilisticCast extends NetworkProtocolBase like INetworkProtocol {
     // to a value that is greater than bcperiod.
     // (took from ProbabilisticBroadcast)
     double maxFirstBcastBackoff @unit(s) = default(1 s);
+    // @signal[recvPktNum](long)
+    // @statistic[recvPktNum](
+    //     title = "Number of received packets";
+    //     record = vector
+    // );
+    // @signal[sentPktNum](long)
+    // @statistic[sentPktNum](
+    //     title = "Number of sent packets";
+    //     record = vector
+    // );
+    // @signal[fwdPktNum](long)
+    // @statistic[fwdPktNum](
+    //     title = "Number of forwarded packets";
+    //     record = vector
+    // );
+    // @signal[hopCount](long)
+    // @statistic[fwdPktNum](
+    //     title = "Number of hops of forwarded packets";
+    //     record = vector
+    // );
+    // @signal[drpPktNum](long)
+    // @statistic[fwdPktNum](
+    //     title = "Number of dropped packets";
+    //     record = vector
+    // );
+    // @signal[qTime](simtime_t)
+    // @statistic[qTime](
+    //     title = "Queueing time";
+    //     record = vector
+    // );
 }

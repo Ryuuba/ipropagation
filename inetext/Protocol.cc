@@ -151,6 +151,7 @@ const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Netwo
 //User-defined protocol
 const Protocol Protocol::information("information", "Information propagation application");
 const Protocol Protocol::neighborDiscovery("neighbordiscovery", "Neighbor discovery protocol for ad-hoc networks");
+const Protocol Protocol::helloProtocol("helloprotocol", "John's hello protocol");
 
 } // namespace inet
 

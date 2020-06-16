@@ -1,3 +1,0 @@
-#!/bin/zsh
-cd `dirname $0`
-../src/info_propg_dbg -f omnetpp.ini -n .:../src/ -l ../../inet4/src/INET -c IEEE80211Radio -u Qtenv --sim-time-limit=120s $*
