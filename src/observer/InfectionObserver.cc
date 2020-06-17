@@ -27,6 +27,7 @@ void InfectionObserver::initialize(int stage) {
   static inet::ProbabilisticBroadcast* net_protocol(nullptr);
   static InformationPropagationApp* app_module(nullptr);
   if (stage == inet::INITSTAGE_LOCAL) {
+    step_time = par("step");
     epsilon = par("epsilon").doubleValue();
     host_num = par("hostNumber").intValue();
     p = std::make_unique< std::vector<InformationPropagationApp::Status> >(host_num, InformationPropagationApp::NOT_INFECTED);
@@ -44,6 +45,9 @@ void InfectionObserver::initialize(int stage) {
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("net")->getSubmodule("np");
     app_module = (InformationPropagationApp*) getSimulation()
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("app");
+    step_timer = new omnetpp::cMessage("Step Timer");
+    // Nodes emit their status before the observer compute probabilities
+    step_timer->setSchedulingPriority(10);
     WATCH(infected_num);
     WATCH(rho);
     WATCH(mu);
@@ -52,6 +56,7 @@ void InfectionObserver::initialize(int stage) {
   else if(stage == inet::INITSTAGE_APPLICATION_LAYER) {
     beta = net_protocol->par("beta").doubleValue();
     mu = app_module->par("recoveryProbability").doubleValue();
+    scheduleAt(omnetpp::simTime() + step_time, step_timer);
   }
 }
 
@@ -61,8 +66,6 @@ void InfectionObserver::receiveSignal(
   long value,                 //@param the node status {INFECTED, NOT_INFECTED}
   omnetpp::cObject* details   //@param details about the object
 ) {
-  static unsigned counter = 0;
-  //app->node
   unsigned host_id = src->getParentModule()->getIndex();
   InformationPropagationApp::Status status =  
     static_cast<InformationPropagationApp::Status>(value);
@@ -71,24 +74,7 @@ void InfectionObserver::receiveSignal(
     "Receiving status %s from host[%d]", InformationPropagationApp::status_to_string(status),
     host_id
   );
-  if (status == InformationPropagationApp::Status::INFECTED)
-    infected_num++;
-  if (counter < host_num - 1) //number of received signals is lt host_num - 1
-    counter++;
-  else {
-    double new_rho = compute_rho();
-    emit(infected_node_stat, infected_num);
-    emit(rho_stat, new_rho);
-    if (rho != 0.0 && fabs(rho - new_rho)/rho < epsilon){
-      endSimulation();
-    }
-    else {
-      rho = new_rho;
-      counter = 0;
-      infected_num = 0;
-    }
-  }
-  
+
 }
 
 void InfectionObserver::receiveSignal(
@@ -121,4 +107,23 @@ double InfectionObserver::compute_rho() {
     
   }
   return std::accumulate(next_p->begin(), next_p->end(), 0.0) / host_num; //rho
+}
+
+void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
+  if (msg->isSelfMessage()) {
+    double new_rho = compute_rho();
+    infected_num = std::accumulate(p->begin(), p->end(), 0.0);
+    emit(infected_node_stat, infected_num);
+    emit(rho_stat, new_rho);
+    if (rho != 0.0 && fabs(rho - new_rho)/rho < epsilon){
+      endSimulation();
+    }
+    else 
+      rho = new_rho;
+    scheduleAt(omnetpp::simTime() + step_time, step_timer);
+  }
+  else 
+    throw omnetpp::cRuntimeError(
+      "InfectionObserver: This module does not process messages from any module\n"
+    );
 }

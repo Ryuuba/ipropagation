@@ -25,6 +25,7 @@ simple InfectionObserver
 {
     double epsilon = default(0.001); //error tolerance
     int hostNumber;
+    double step; //the duration of a round
     @display("i=observer/infection_observer");
     @signal[infectedNodes](type = unsigned long);
     @statistic[infectedNodes](

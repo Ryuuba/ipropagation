@@ -19,7 +19,7 @@ import informationpropagation.contract.IApp;
 simple InformationPropagationBase like IApp{
     parameters:
         @display("i=block/infection_app");
-        volatile double step @unit(s);
+        double step @unit(s);
         double recoveryProbability;  //a.k.a. mu
         double infectionProbability; //a.k.a. eta
         int numberOfTrials;          //a.k.a. lambda

@@ -60,6 +60,10 @@ protected:
   std::unique_ptr < std::vector<double> > next_p;
   // @brief adjacency matrix at time t
   std::unique_ptr <std::vector<std::shared_ptr< const std::list<cache_register> > > >adjacency_matrix;
+  // @brief The duration of a round
+  omnetpp::simtime_t step_time;
+  // @brief Timer
+  omnetpp::cMessage* step_timer;
 protected:
   // @brief Computes the probability a node i gets infected
   virtual double compute_rho();
@@ -76,6 +80,8 @@ public:
     , q(nullptr)
     , next_p(nullptr)
     , adjacency_matrix(nullptr)
+    , step_time(0.0)
+    , step_timer(nullptr)
   { }
   // @brief Default destructor
   virtual ~InfectionObserver();
@@ -85,11 +91,7 @@ public:
   // @brief Initializes the module state
   virtual void initialize(int) override;
   // @brief This module only process self-messages
-  virtual void handleMessage(omnetpp::cMessage*) override {
-    throw omnetpp::cRuntimeError(
-      "InfectionObserver: This module does not process messages\n"
-    );
-  }
+  virtual void handleMessage(omnetpp::cMessage*);
   /** @brief Receives the node status and updates the average of infected nodes 
     * rho */
   virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
