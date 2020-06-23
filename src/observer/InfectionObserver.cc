@@ -115,9 +115,8 @@ void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
     infected_num = std::accumulate(p->begin(), p->end(), 0.0);
     emit(infected_node_stat, infected_num);
     emit(rho_stat, new_rho);
-    if (rho != 0.0 && fabs(rho - new_rho)/rho < epsilon){
+    if (rho != 0.0 && fabs(rho - new_rho)/rho < epsilon)
       endSimulation();
-    }
     else 
       rho = new_rho;
     scheduleAt(omnetpp::simTime() + step_time, step_timer);
