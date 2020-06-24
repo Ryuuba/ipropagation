@@ -74,6 +74,7 @@ void HelloProtocol::send_hello_packet(inet::HelloPacketType type) {
   hello_info->setChunkLength(inet::B(packet_size));
   hello_info->setType(type);
   hello_info->setSequenceNum(sequence_number++);
+  hello_info->setNodeIndex(node_index);
   hello_info->setSrcNetwAddress(inet::L3Address(*netw_address));
   hello_info->setSrcMacAddress(mac);
   hello_info->setDstMacAddress(inet::MacAddress::BROADCAST_ADDRESS);
@@ -96,11 +97,13 @@ void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
       hello_pkt->popAtFront<inet::HelloPacket>()->dupShared()
     );//
   EV_INFO << "Receive hello packet from " 
+          << hello_header->getNodeIndex() << ' '
           << hello_header->getSrcMacAddress() << ' '
           << hello_header->getSrcNetwAddress().toModuleId() << ' '
           << '\n';
   cache_register cache_reg;
   cache_reg.start_time = omnetpp::simTime();
+  cache_reg.node_index = hello_header->getNodeIndex();
   cache_reg.netw_address = hello_header->getSrcNetwAddress().toModuleId();
   cache_reg.mac_address = hello_header->getSrcMacAddress();
   cache_reg.last_contact_time = omnetpp::simTime();

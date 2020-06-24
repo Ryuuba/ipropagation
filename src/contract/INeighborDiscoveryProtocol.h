@@ -25,6 +25,8 @@ protected:
   omnetpp::simtime_t discovery_time;
   /** @brief Timer to trigger a discovery operation */
   omnetpp::cMessage* discovery_timer;
+  /** @brief The node index */
+  long node_index;
   /** @brief The ID of the input gate of this module */
   int input_gate_id;
   /** @brief The ID of the output gate of this module */

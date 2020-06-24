@@ -56,6 +56,7 @@ enum HelloPacketType {
  *     chunkLength = B(25);
  *     HelloPacketType type;
  *     int sequenceNum;
+ *     long nodeIndex;
  *     MacAddress srcMacAddress;
  *     MacAddress dstMacAddress;
  *     L3Address srcNetwAddress;
@@ -67,6 +68,7 @@ class HelloPacket : public ::inet::FieldsChunk
   protected:
     inet::HelloPacketType type = static_cast<inet::HelloPacketType>(-1);
     int sequenceNum = 0;
+    long nodeIndex = 0;
     MacAddress srcMacAddress;
     MacAddress dstMacAddress;
     L3Address srcNetwAddress;
@@ -92,6 +94,8 @@ class HelloPacket : public ::inet::FieldsChunk
     virtual void setType(inet::HelloPacketType type);
     virtual int getSequenceNum() const;
     virtual void setSequenceNum(int sequenceNum);
+    virtual long getNodeIndex() const;
+    virtual void setNodeIndex(long nodeIndex);
     virtual const MacAddress& getSrcMacAddress() const;
     virtual MacAddress& getSrcMacAddressForUpdate() { handleChange();return const_cast<MacAddress&>(const_cast<HelloPacket*>(this)->getSrcMacAddress());}
     virtual void setSrcMacAddress(const MacAddress& srcMacAddress);

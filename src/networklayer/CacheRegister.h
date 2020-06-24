@@ -7,6 +7,7 @@
 #include "inet/networklayer/common/ModuleIdAddress.h"
 
 struct CacheRegister {
+  long node_index;
   inet::ModuleIdAddress netw_address;
   inet::MacAddress mac_address;
   omnetpp::simtime_t start_time;

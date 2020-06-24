@@ -53,6 +53,8 @@ protected:
   omnetpp::simtime_t step_time;
   /** @brief The number of data sending trials during a step */
   int trial_num;
+  // @brief The number of rounds
+  long long round_num;
   /** @brief The time between two data sending trials */
   omnetpp::simtime_t diff_time;
   /** @brief Statistic: The duration of the infection period */

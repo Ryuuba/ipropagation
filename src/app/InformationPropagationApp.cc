@@ -33,6 +33,8 @@ void InformationPropagationApp::initialize(int stage)
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
     compute_initial_state();
+    EV_INFO << "The status of host " << src_address->getId() 
+            << " is " << status_to_string(status) << '\n';
     auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
     scheduleAt(t0, step_timer);
   }
@@ -42,14 +44,16 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
 {
   if (msg->isSelfMessage()) {
     if (msg->getKind() == STEP) {
-      EV_INFO << "The status of host " << src_address->getId() 
-              << " is " << status_to_string(status) << '\n';
-      emit(last_status_signal, status);
-      scheduleAt(omnetpp::simTime() + step_time, step_timer);
       if (status == INFECTED) {
         scheduleAt(omnetpp::simTime() + diff_time, information_timer);
-        try_recovery(msg);
+        if (round_num > 0)
+          try_recovery(msg);
       }
+      EV_INFO << "The status of host " << src_address->getId() 
+              << " is " << status_to_string(status) 
+              << " at round " << round_num++ << '\n';
+      emit(last_status_signal, status);
+      scheduleAt(omnetpp::simTime() + step_time, step_timer);
     }
     else if (msg->getKind() == SEND_INFORMATION) {
       send_message(msg);
@@ -135,7 +139,6 @@ void InformationPropagationApp::try_recovery(omnetpp::cMessage* msg)
       EV_INFO << "Host " << src_address->getId() << " recovers from infection\n";
       infection_time = omnetpp::simTime() - infection_time;
       emit(infection_time_signal, infection_time);
-      emit(last_status_signal, status);
       cancelEvent(information_timer);
       status = InformationPropagationBase::NOT_INFECTED;
       if (hasGUI())

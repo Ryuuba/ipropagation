@@ -83,7 +83,7 @@ void NeighborDiscoveryProtocolBase::initialize(int stage) {
     output_gate_id = gate("protocolPort")->getId();
     packet_size = par("packetSize").intValue();
     discovery_time = par("discoveryTime");
-    auto node_index = inet::getContainingNode(this)->getIndex();
+    node_index = inet::getContainingNode(this)->getIndex();
     auto cache_module = getSimulation()->getSystemModule()->getSubmodule("node", node_index)->getSubmodule("net")->getSubmodule("cache");
     neighbor_cache = static_cast<NeighborCache*>(cache_module);    
     interface_table = inet::getModuleFromPar<inet::IInterfaceTable>(par("interfaceTableModule"), this);

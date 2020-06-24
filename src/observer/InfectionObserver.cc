@@ -16,6 +16,8 @@ omnetpp::simsignal_t InfectionObserver::neighborhood_notification_signal =
 
 
 InfectionObserver::~InfectionObserver() {
+  if (step_timer)
+    cancelAndDelete(step_timer);
   getSimulation()->getSystemModule()->unsubscribe(
     neighborhood_notification_signal,
     this
@@ -56,7 +58,8 @@ void InfectionObserver::initialize(int stage) {
   else if(stage == inet::INITSTAGE_APPLICATION_LAYER) {
     beta = net_protocol->par("beta").doubleValue();
     mu = app_module->par("recoveryProbability").doubleValue();
-    scheduleAt(omnetpp::simTime() + step_time, step_timer);
+    auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
+    scheduleAt(t0, step_timer);
   }
 }
 
@@ -70,11 +73,12 @@ void InfectionObserver::receiveSignal(
   InformationPropagationApp::Status status =  
     static_cast<InformationPropagationApp::Status>(value);
   p->at(host_id) = status;
+  
   Enter_Method(
     "Receiving status %s from host[%d]", InformationPropagationApp::status_to_string(status),
     host_id
   );
-
+  infected_num = std::accumulate(p->begin(), p->end(), 0.0);
 }
 
 void InfectionObserver::receiveSignal(
@@ -98,13 +102,12 @@ double InfectionObserver::compute_rho() {
   for (size_t i = 0; i < host_num; i++) {
     (*q)[i] = 1.0; //not infected by a neighbor
     for (auto&& entry : *(adjacency_matrix->at(i)))
-      (*q)[i] *= (1 - beta * (*p)[entry.netw_address.getId()]);
+      (*q)[i] *= (1 - beta * (*p)[entry.node_index]);
     (*next_p)[i]                         //p(t+1)
       = (1 - (*q)[i]) * (1 - (*p)[i])    //infected by nbr & not infected
       + (1 - mu) * (*p)[i]               //not recovery & infected
       + mu * (1 - (*q)[i]) * (*p)[i];    //infected after recovery
     EV_INFO << "next_p[" << i << "] = " << (*next_p)[i] << '\n';
-    
   }
   return std::accumulate(next_p->begin(), next_p->end(), 0.0) / host_num; //rho
 }
@@ -115,10 +118,15 @@ void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
     infected_num = std::accumulate(p->begin(), p->end(), 0.0);
     emit(infected_node_stat, infected_num);
     emit(rho_stat, new_rho);
-    if (rho != 0.0 && fabs(rho - new_rho)/rho < epsilon)
-      endSimulation();
+    if (round_num != 0) {
+      if (new_rho == 0.0 || fabs(rho - new_rho)/rho < epsilon)
+        endSimulation();
+    }
     else 
       rho = new_rho;
+    EV_INFO << "Round number: " << round_num++ << '\n';
+    EV_INFO << "Number of infected nodes: " << infected_num << '\n';
+    EV_INFO << "Expected infection density: " << rho << '\n';
     scheduleAt(omnetpp::simTime() + step_time, step_timer);
   }
   else 

@@ -34,6 +34,7 @@ class HelloPacket extends FieldsChunk
     chunkLength = B(25);
     HelloPacketType type;
     int sequenceNum;
+    long nodeIndex;
     MacAddress srcMacAddress;
     MacAddress dstMacAddress;
     L3Address srcNetwAddress;

@@ -243,6 +243,7 @@ void HelloPacket::copy(const HelloPacket& other)
 {
     this->type = other.type;
     this->sequenceNum = other.sequenceNum;
+    this->nodeIndex = other.nodeIndex;
     this->srcMacAddress = other.srcMacAddress;
     this->dstMacAddress = other.dstMacAddress;
     this->srcNetwAddress = other.srcNetwAddress;
@@ -253,6 +254,7 @@ void HelloPacket::parsimPack(omnetpp::cCommBuffer *b) const
     ::inet::FieldsChunk::parsimPack(b);
     doParsimPacking(b,this->type);
     doParsimPacking(b,this->sequenceNum);
+    doParsimPacking(b,this->nodeIndex);
     doParsimPacking(b,this->srcMacAddress);
     doParsimPacking(b,this->dstMacAddress);
     doParsimPacking(b,this->srcNetwAddress);
@@ -263,6 +265,7 @@ void HelloPacket::parsimUnpack(omnetpp::cCommBuffer *b)
     ::inet::FieldsChunk::parsimUnpack(b);
     doParsimUnpacking(b,this->type);
     doParsimUnpacking(b,this->sequenceNum);
+    doParsimUnpacking(b,this->nodeIndex);
     doParsimUnpacking(b,this->srcMacAddress);
     doParsimUnpacking(b,this->dstMacAddress);
     doParsimUnpacking(b,this->srcNetwAddress);
@@ -288,6 +291,17 @@ void HelloPacket::setSequenceNum(int sequenceNum)
 {
     handleChange();
     this->sequenceNum = sequenceNum;
+}
+
+long HelloPacket::getNodeIndex() const
+{
+    return this->nodeIndex;
+}
+
+void HelloPacket::setNodeIndex(long nodeIndex)
+{
+    handleChange();
+    this->nodeIndex = nodeIndex;
 }
 
 const MacAddress& HelloPacket::getSrcMacAddress() const
@@ -330,6 +344,7 @@ class HelloPacketDescriptor : public omnetpp::cClassDescriptor
     enum FieldConstants {
         FIELD_type,
         FIELD_sequenceNum,
+        FIELD_nodeIndex,
         FIELD_srcMacAddress,
         FIELD_dstMacAddress,
         FIELD_srcNetwAddress,
@@ -395,7 +410,7 @@ const char *HelloPacketDescriptor::getProperty(const char *propertyname) const
 int HelloPacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount() : 5;
+    return basedesc ? 6+basedesc->getFieldCount() : 6;
 }
 
 unsigned int HelloPacketDescriptor::getFieldTypeFlags(int field) const
@@ -409,11 +424,12 @@ unsigned int HelloPacketDescriptor::getFieldTypeFlags(int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,    // FIELD_type
         FD_ISEDITABLE,    // FIELD_sequenceNum
+        FD_ISEDITABLE,    // FIELD_nodeIndex
         0,    // FIELD_srcMacAddress
         0,    // FIELD_dstMacAddress
         0,    // FIELD_srcNetwAddress
     };
-    return (field >= 0 && field < 5) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 6) ? fieldTypeFlags[field] : 0;
 }
 
 const char *HelloPacketDescriptor::getFieldName(int field) const
@@ -427,11 +443,12 @@ const char *HelloPacketDescriptor::getFieldName(int field) const
     static const char *fieldNames[] = {
         "type",
         "sequenceNum",
+        "nodeIndex",
         "srcMacAddress",
         "dstMacAddress",
         "srcNetwAddress",
     };
-    return (field >= 0 && field < 5) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 6) ? fieldNames[field] : nullptr;
 }
 
 int HelloPacketDescriptor::findField(const char *fieldName) const
@@ -440,9 +457,10 @@ int HelloPacketDescriptor::findField(const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0] == 't' && strcmp(fieldName, "type") == 0) return base+0;
     if (fieldName[0] == 's' && strcmp(fieldName, "sequenceNum") == 0) return base+1;
-    if (fieldName[0] == 's' && strcmp(fieldName, "srcMacAddress") == 0) return base+2;
-    if (fieldName[0] == 'd' && strcmp(fieldName, "dstMacAddress") == 0) return base+3;
-    if (fieldName[0] == 's' && strcmp(fieldName, "srcNetwAddress") == 0) return base+4;
+    if (fieldName[0] == 'n' && strcmp(fieldName, "nodeIndex") == 0) return base+2;
+    if (fieldName[0] == 's' && strcmp(fieldName, "srcMacAddress") == 0) return base+3;
+    if (fieldName[0] == 'd' && strcmp(fieldName, "dstMacAddress") == 0) return base+4;
+    if (fieldName[0] == 's' && strcmp(fieldName, "srcNetwAddress") == 0) return base+5;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -457,11 +475,12 @@ const char *HelloPacketDescriptor::getFieldTypeString(int field) const
     static const char *fieldTypeStrings[] = {
         "inet::HelloPacketType",    // FIELD_type
         "int",    // FIELD_sequenceNum
+        "long",    // FIELD_nodeIndex
         "inet::MacAddress",    // FIELD_srcMacAddress
         "inet::MacAddress",    // FIELD_dstMacAddress
         "inet::L3Address",    // FIELD_srcNetwAddress
     };
-    return (field >= 0 && field < 5) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 6) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **HelloPacketDescriptor::getFieldPropertyNames(int field) const
@@ -537,6 +556,7 @@ std::string HelloPacketDescriptor::getFieldValueAsString(void *object, int field
     switch (field) {
         case FIELD_type: return enum2string(pp->getType(), "inet::HelloPacketType");
         case FIELD_sequenceNum: return long2string(pp->getSequenceNum());
+        case FIELD_nodeIndex: return long2string(pp->getNodeIndex());
         case FIELD_srcMacAddress: return pp->getSrcMacAddress().str();
         case FIELD_dstMacAddress: return pp->getDstMacAddress().str();
         case FIELD_srcNetwAddress: return pp->getSrcNetwAddress().str();
@@ -556,6 +576,7 @@ bool HelloPacketDescriptor::setFieldValueAsString(void *object, int field, int i
     switch (field) {
         case FIELD_type: pp->setType((inet::HelloPacketType)string2enum(value, "inet::HelloPacketType")); return true;
         case FIELD_sequenceNum: pp->setSequenceNum(string2long(value)); return true;
+        case FIELD_nodeIndex: pp->setNodeIndex(string2long(value)); return true;
         default: return false;
     }
 }
