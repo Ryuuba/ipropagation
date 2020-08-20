@@ -94,7 +94,7 @@ void ProbabilisticCast::handleUpperPacket(inet::Packet *packet)
   encapsulate(packet);
   auto netw_header = packet->peekAtFront<inet::ProbabilisticCastHeader>();
   EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
-          << *src_address << "calls handleUpperPacket(): Pkt ID = " 
+          << *src_address << " calls handleUpperPacket(): Pkt ID = " 
           << netw_header->getId() << " hop count = " 
           << netw_header->getHopCount() << endl;
   omnetpp::simtime_t bcast_delay 
@@ -129,6 +129,10 @@ void ProbabilisticCast::handleLowerPacket(inet::Packet *packet)
     }
     else { //hop limit is not superado
       // Finds whether this node is in the destination list
+      EV_INFO << "Forwarding list: ";
+      for (auto& id: *(netw_header->getForwardingList()))
+        EV_INFO << id << ' ';
+      EV_INFO << '\n';
       auto it = std::find(
         netw_header->getForwardingList()->begin(),
         netw_header->getForwardingList()->end(),
@@ -221,7 +225,7 @@ void ProbabilisticCast::handleSelfMessage(omnetpp::cMessage *msg)
     }
     else {
       EV << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
-      << *src_address << "does not pass the Benoulli test." << endl;
+      << *src_address << " doesn't pass the Benoulli test." << endl;
       delete packet;
     }
     if (!msg_queue.empty())
@@ -244,7 +248,7 @@ void ProbabilisticCast::insert_msg(
 ) {
   omnetpp::simtime_t bcast_time = omnetpp::simTime() + bcast_delay;
   EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
-          << *src_address << "inserts message assign it a broadcast delay\n" 
+          << *src_address << " inserts message assign it a broadcast delay\n" 
           << " Msg ID = " << pkt->getId() << endl;
   // insert message ID in ID list.
   auto netw_header = pkt->peekAtFront<inet::ProbabilisticCastHeader>();
