@@ -62,7 +62,7 @@ public:
     , interface_table(nullptr)
     , interface_id(0)
     { }
-  virtual ~NeighborDiscoveryProtocolBase(){}
+  virtual ~NeighborDiscoveryProtocolBase(){ }
   /**  
    * @brief Returns the number of stages needed to initalize an INET node
    */

@@ -56,7 +56,7 @@ protected:
   // @brief Data structure to store the ID of received messages
   typedef std::set<long> MsgIdSet;
   // @brief Data structure to store pairs <time, msg>
-  typedef std::multimap<omnetpp::simtime_t, inet::Packet*> TimeMsgMap;
+  typedef std::multimap<omnetpp::simtime_t, std::unique_ptr<inet::Packet> > TimeMsgMap;
 protected:
   // @brief Enables L3 forwading
   bool forwarding;

@@ -49,11 +49,7 @@ ProbabilisticCast::ProbabilisticCast()
 
 ProbabilisticCast::~ProbabilisticCast() {
   cancelAndDelete(broadcast_timer);
-  // if some messages are still in the queue, delete them.
-  for (auto&& item : msg_queue)
-    if (item.second)
-      delete item.second;
-  msg_queue.clear();
+  // msg_queue.clear();
 }
 
 void ProbabilisticCast::initialize(int stage)
@@ -148,6 +144,7 @@ void ProbabilisticCast::handleLowerPacket(inet::Packet *packet)
           decapsulate(pkt_copy);
           sendUp(pkt_copy); //Pass packet to the application layer
           recv_pkt_num++;
+          delete packet;
         }
         else{
           EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() 
@@ -280,7 +277,7 @@ inet::Packet* ProbabilisticCast::pop_msg( )
   inet::Packet* pkt(nullptr);
   if (!msg_queue.empty()) {
     auto it = msg_queue.begin();
-    pkt = it->second;
+    pkt = it->second.release(); //it->second is no longer owned by unique_ptr
     // remove first message from message queue and from ID list
     msg_queue.erase(it);
     auto netw_header = pkt->peekAtFront<inet::ProbabilisticCastHeader>();

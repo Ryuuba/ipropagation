@@ -45,10 +45,8 @@ InformationPropagationBase::InformationPropagationBase()
 
 InformationPropagationBase::~InformationPropagationBase()
 {
-  if (step_timer)
-    cancelAndDelete(step_timer);
-  if (information_timer)
-    cancelAndDelete(information_timer);
+  cancelAndDelete(step_timer);
+  cancelAndDelete(information_timer);
   if (socket) {
     delete socket;
     socket = nullptr;

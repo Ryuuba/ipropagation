@@ -48,22 +48,22 @@ network SmallGrid
         @display("bgb=250,160;bgg=,,grey10");
         double simulationStep @unit(s);
     submodules:
-      node[16]: WirelessBroadcastNode {
-          @display("p=200,200;is=s");
-          mobility.numHosts = 16;
-          app.step = simulationStep;
-      }
+        node[16]: WirelessBroadcastNode {
+            @display("p=200,200;is=s");
+            mobility.numHosts = 16;
+            app.step = simulationStep;
+        }
         radioMedium: <> like IRadioMedium {
             @display("p=200,20;is=s");
         }
-        connectivityobserver: ConnectivityObserver {
-            @display("p=200,60;is=s");
-            hostNumber = 16;
-        }
-        infectionobserver: InfectionObserver {
-            @display("p=200,100;is=s");
-            hostNumber = 16;
-            step = simulationStep;
-        }
+        // connectivityobserver: ConnectivityObserver {
+        //     @display("p=200,60;is=s");
+        //     hostNumber = 16;
+        // }
+        // infectionobserver: InfectionObserver {
+        //     @display("p=200,100;is=s");
+        //     hostNumber = 16;
+        //     step = simulationStep;
+        // }
     connections allowunconnected:
 }

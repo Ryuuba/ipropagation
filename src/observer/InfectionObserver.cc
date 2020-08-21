@@ -16,8 +16,7 @@ omnetpp::simsignal_t InfectionObserver::neighborhood_notification_signal =
 
 
 InfectionObserver::~InfectionObserver() {
-  if (step_timer)
-    cancelAndDelete(step_timer);
+  cancelAndDelete(step_timer);
   getSimulation()->getSystemModule()->unsubscribe(
     neighborhood_notification_signal,
     this
