@@ -23,29 +23,15 @@
 
 class InformationPropagationApp : public InformationPropagationBase
 {
-public:
-  enum COMM_MODE {
-    UNICAST = 0,
-    MULTICAST,
-    BROADCAST
-  };
 protected: //App attributes
   /** @brief The name of the infectious packet */
   const char* packet_name;
   /** @brief The length in bytes of the data within an infectious packet */
   int payload;
-  /** @brief Communication scheme */
-  COMM_MODE comm_mode;
 protected: //App member functions
-  /** @brief Draws randomly a neighbor according to a communication scheme */
-  virtual void draw_neighbor(COMM_MODE);
-  /** @brief Computes whether this node starts infected or not */
-  virtual void compute_initial_state();
   /** @brief Encapsulates a message to send it via a L3 socket */
   virtual void encapsulate() override;
-  /** @brief Sends an infectious message according to a communication scheme
-   *  In case the communication scheme is unicast or multicast, then 
-   *  destinations are randomly drawn */
+  /** @brief Sends a message to a random destination drawn by the L3 layer */
   virtual void send_message(omnetpp::cMessage*) override;
   /** @brief Tries to recovery from an infection */
   virtual void try_recovery(omnetpp::cMessage*) override;
@@ -68,7 +54,6 @@ public:
 InformationPropagationApp()
   : packet_name("")
   , payload(0)
-  , comm_mode(UNICAST)
   { }
   /** @brief Default destructor */
   ~InformationPropagationApp() { }

@@ -21,8 +21,8 @@ simple InformationPropagationBase like IApp{
         @display("i=block/infection_app");
         double step @unit(s);
         double recoveryProbability;  //a.k.a. mu
-        double infectionProbability; //a.k.a. eta
         int numberOfTrials;          //a.k.a. lambda
+        double initialInfectionProbability; //a.k.a rho0
         @signal[sentMessage](type = long);
         @statistic[sentMessage](title = "number of sent infectios messages"; record = vector);
         @signal[receivedMessage](type = long);

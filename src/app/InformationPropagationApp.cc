@@ -6,17 +6,8 @@ void InformationPropagationApp::initialize(int stage)
 {
   InformationPropagationBase::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
-    InformationPropagationBase::mu = par("recoveryProbability");
-    InformationPropagationBase::eta = par("infectionProbability");
-    InformationPropagationBase::lambda = par("numberOfTrials").intValue();
-    InformationPropagationBase::step_time = par("step");
     payload = par("payload");
     packet_name = par("packetName").stringValue();
-    auto mode = par("communicationMode").stringValue();
-    comm_mode 
-      = strcmp(mode, "BROADCAST") == 0 ? BROADCAST
-      : strcmp(mode, "MULTICAST") == 0 ? MULTICAST
-      : UNICAST; //The default mode is unicast
     step_timer->setKind(InformationPropagationBase::TimerKind::STEP);
     information_timer->setKind(
       InformationPropagationBase::TimerKind::SEND_INFORMATION
@@ -32,9 +23,6 @@ void InformationPropagationApp::initialize(int stage)
     WATCH(trial_num);
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
-    compute_initial_state();
-    EV_INFO << "The status of host " << src_address->getId() 
-            << " is " << status_to_string(status) << '\n';
     auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
     scheduleAt(t0, step_timer);
   }
@@ -71,43 +59,36 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
     throw omnetpp::cRuntimeError("App: Invalid message %s", msg->getName());
 }
 
-void InformationPropagationApp::draw_neighbor(COMM_MODE mode) 
-{
-  auto cache_size = neighbor_cache->size();
-  if (cache_size > 0) {
-    if (mode == BROADCAST) {
-      InformationPropagationBase::draw_neighbor(cache_size);
-    }
-    else if (mode == MULTICAST) {
-      size_t list_size 
-        = neighbor_cache->size() == 1 ? 1
-        : neighbor_cache->size() == 2 ? 2
-        : neighbor_cache->size()  > 2 ? intuniform(1, cache_size-1)
-        : 0;
-      InformationPropagationBase::draw_neighbor(list_size);
-    }
-    else // UNICAST case
-      InformationPropagationBase::draw_neighbor(1);
-  }
-  else 
-    destination_list->clear();
-}
+// void InformationPropagationApp::draw_neighbor(COMM_MODE mode) 
+// {
+//   auto cache_size = neighbor_cache->size();
+//   if (cache_size > 0) {
+//     if (mode == BROADCAST) {
+//       InformationPropagationBase::draw_neighbor(cache_size);
+//     }
+//     else if (mode == MULTICAST) {
+//       size_t list_size 
+//         = neighbor_cache->size() == 1 ? 1
+//         : neighbor_cache->size() == 2 ? 2
+//         : neighbor_cache->size()  > 2 ? intuniform(1, cache_size-1)
+//         : 0;
+//       InformationPropagationBase::draw_neighbor(list_size);
+//     }
+//     else // UNICAST case
+//       InformationPropagationBase::draw_neighbor(1);
+//   }
+//   else 
+//     destination_list->clear();
+// }
 
 
 void InformationPropagationApp::send_message(omnetpp::cMessage* msg)
 {
-  draw_neighbor(comm_mode);
-  if (!destination_list->empty()) {
     encapsulate();
-    socket->sendTo(information, *src_address);//L2 broadcast is used
+    // App layer requests the L3 layer to draw a random destination
+    socket->sendTo(information, inet::L3Address(unspecified_address));
     emit(sent_message_signal, ++sent_messages);
-    EV_INFO << "InformationPropagationApp: Sending infectious message to: "; 
-    for (auto& neighbor_address : (*destination_list))
-      EV_INFO << neighbor_address << ' ';
-    EV_INFO << '\n';
-  }
-  else
-    EV_INFO << "InformationPropagationApp: This node can't send any msg since it doesn't have any neighbor\n";
+    EV_INFO << "InformationPropagationApp: Sending infectious message\n"; 
 }
 
 void InformationPropagationApp::encapsulate() {
@@ -118,11 +99,10 @@ void InformationPropagationApp::encapsulate() {
   header->setChunkLength(inet::B(payload));
   header->setType(inet::VIRUS);
   header->setIdentifer(555);
-  header->setDestination_list_ptr(destination_list);
   information->insertAtBack(data);
   information->insertAtFront(header);
   information->addTagIfAbsent<inet::L3AddressInd>()->setSrcAddress(*src_address);
-  information->addTagIfAbsent<inet::L3AddressInd>()->setDestAddress(inet::ModuleIdAddress());
+  information->addTagIfAbsent<inet::L3AddressInd>()->setDestAddress(inet::ModuleIdAddress()); //unspecified address
   information->addTagIfAbsent<inet::PacketProtocolTag>()->
     setProtocol(&inet::Protocol::information);
   auto addressReq = information->addTag<inet::L3AddressReq>();
@@ -147,32 +127,20 @@ void InformationPropagationApp::try_recovery(omnetpp::cMessage* msg)
     else
       EV_INFO << "Host " << src_address->getId() << " fails to recover from infection\n";
   }
-  // else if (status == InformationPropagationBase::NOT_INFECTED)
-  //   EV_INFO << "Host " << src_address->getId() << " is not infected\n";
-  // else
-  //   throw omnetpp::cRuntimeError(
-  //     "APP: not infected host %d tries to recover", src_address->getId()
-  //   );
 }
 
 void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)
 {
   if (status == InformationPropagationBase::NOT_INFECTED) {
-    if (bernoulli(eta)) {
-      EV_INFO << "Host " << src_address->getId() 
-              << " received an infectious message from " 
-              << pkt->getSrc() << "\n";
-      infection_time = omnetpp::simTime() - infection_time;
-      status = InformationPropagationBase::INFECTED;
-      emit(infection_time_signal, infection_time);
-      emit(last_status_signal, status);
-      if (hasGUI())
-       getParentModule()->bubble("Get infected!");
-    }
-    else 
-      EV_INFO << "Host " << src_address->getId() 
-              << " dropped an infectious message from " 
-              << pkt->getSrc() << '\n';
+    EV_INFO << "Host " << src_address->getId() 
+            << " received an infectious message from " 
+            << pkt->getSrc() << "\n";
+    infection_time = omnetpp::simTime() - infection_time;
+    status = InformationPropagationBase::INFECTED;
+    emit(infection_time_signal, infection_time);
+    emit(last_status_signal, status);
+    if (hasGUI())
+      getParentModule()->bubble("Get infected!");
   }
   else 
     EV_INFO << "Host " << src_address->getId()
@@ -196,20 +164,3 @@ void InformationPropagationApp::finish() {
   emit(last_status_signal, status);
 }
 
-void InformationPropagationApp::compute_initial_state() {
-    auto coin = uniform(0.0, 1.0);
-    EV_INFO << "Host " << src_address->getId() << " gets " 
-            << coin << '\n';
-    if (
-      coin < 
-      par("initialInfectionProbability").doubleValue()
-    ) {
-      status = InformationPropagationBase::INFECTED;
-      if (hasGUI())
-        getParentModule()->bubble("Get infected!");
-    }
-    else
-      status = InformationPropagationBase::NOT_INFECTED;
-    EV_INFO << "Initial status of host " << src_address->getId() 
-            << " is " << status << '\n';
-}

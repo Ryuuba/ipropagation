@@ -207,440 +207,6 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
     return out;
 }
 
-class DestinationListDescriptor : public omnetpp::cClassDescriptor
-{
-  private:
-    mutable const char **propertynames;
-    enum FieldConstants {
-    };
-  public:
-    DestinationListDescriptor();
-    virtual ~DestinationListDescriptor();
-
-    virtual bool doesSupport(omnetpp::cObject *obj) const override;
-    virtual const char **getPropertyNames() const override;
-    virtual const char *getProperty(const char *propertyname) const override;
-    virtual int getFieldCount() const override;
-    virtual const char *getFieldName(int field) const override;
-    virtual int findField(const char *fieldName) const override;
-    virtual unsigned int getFieldTypeFlags(int field) const override;
-    virtual const char *getFieldTypeString(int field) const override;
-    virtual const char **getFieldPropertyNames(int field) const override;
-    virtual const char *getFieldProperty(int field, const char *propertyname) const override;
-    virtual int getFieldArraySize(void *object, int field) const override;
-
-    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override;
-    virtual std::string getFieldValueAsString(void *object, int field, int i) const override;
-    virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override;
-
-    virtual const char *getFieldStructName(int field) const override;
-    virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
-};
-
-Register_ClassDescriptor(DestinationListDescriptor)
-
-DestinationListDescriptor::DestinationListDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::DestinationList)), "")
-{
-    propertynames = nullptr;
-}
-
-DestinationListDescriptor::~DestinationListDescriptor()
-{
-    delete[] propertynames;
-}
-
-bool DestinationListDescriptor::doesSupport(omnetpp::cObject *obj) const
-{
-    return dynamic_cast<DestinationList *>(obj)!=nullptr;
-}
-
-const char **DestinationListDescriptor::getPropertyNames() const
-{
-    if (!propertynames) {
-        static const char *names[] = { "existingClass",  nullptr };
-        omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-        const char **basenames = basedesc ? basedesc->getPropertyNames() : nullptr;
-        propertynames = mergeLists(basenames, names);
-    }
-    return propertynames;
-}
-
-const char *DestinationListDescriptor::getProperty(const char *propertyname) const
-{
-    if (!strcmp(propertyname, "existingClass")) return "";
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? basedesc->getProperty(propertyname) : nullptr;
-}
-
-int DestinationListDescriptor::getFieldCount() const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 0+basedesc->getFieldCount() : 0;
-}
-
-unsigned int DestinationListDescriptor::getFieldTypeFlags(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldTypeFlags(field);
-        field -= basedesc->getFieldCount();
-    }
-    return 0;
-}
-
-const char *DestinationListDescriptor::getFieldName(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldName(field);
-        field -= basedesc->getFieldCount();
-    }
-    return nullptr;
-}
-
-int DestinationListDescriptor::findField(const char *fieldName) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? basedesc->findField(fieldName) : -1;
-}
-
-const char *DestinationListDescriptor::getFieldTypeString(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldTypeString(field);
-        field -= basedesc->getFieldCount();
-    }
-    return nullptr;
-}
-
-const char **DestinationListDescriptor::getFieldPropertyNames(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldPropertyNames(field);
-        field -= basedesc->getFieldCount();
-    }
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
-const char *DestinationListDescriptor::getFieldProperty(int field, const char *propertyname) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldProperty(field, propertyname);
-        field -= basedesc->getFieldCount();
-    }
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
-int DestinationListDescriptor::getFieldArraySize(void *object, int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldArraySize(object, field);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationList *pp = (DestinationList *)object; (void)pp;
-    switch (field) {
-        default: return 0;
-    }
-}
-
-const char *DestinationListDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldDynamicTypeString(object,field,i);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationList *pp = (DestinationList *)object; (void)pp;
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
-std::string DestinationListDescriptor::getFieldValueAsString(void *object, int field, int i) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldValueAsString(object,field,i);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationList *pp = (DestinationList *)object; (void)pp;
-    switch (field) {
-        default: return "";
-    }
-}
-
-bool DestinationListDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->setFieldValueAsString(object,field,i,value);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationList *pp = (DestinationList *)object; (void)pp;
-    switch (field) {
-        default: return false;
-    }
-}
-
-const char *DestinationListDescriptor::getFieldStructName(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldStructName(field);
-        field -= basedesc->getFieldCount();
-    }
-    return nullptr;
-}
-
-void *DestinationListDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldStructValuePointer(object, field, i);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationList *pp = (DestinationList *)object; (void)pp;
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
-class DestinationListPtrDescriptor : public omnetpp::cClassDescriptor
-{
-  private:
-    mutable const char **propertynames;
-    enum FieldConstants {
-    };
-  public:
-    DestinationListPtrDescriptor();
-    virtual ~DestinationListPtrDescriptor();
-
-    virtual bool doesSupport(omnetpp::cObject *obj) const override;
-    virtual const char **getPropertyNames() const override;
-    virtual const char *getProperty(const char *propertyname) const override;
-    virtual int getFieldCount() const override;
-    virtual const char *getFieldName(int field) const override;
-    virtual int findField(const char *fieldName) const override;
-    virtual unsigned int getFieldTypeFlags(int field) const override;
-    virtual const char *getFieldTypeString(int field) const override;
-    virtual const char **getFieldPropertyNames(int field) const override;
-    virtual const char *getFieldProperty(int field, const char *propertyname) const override;
-    virtual int getFieldArraySize(void *object, int field) const override;
-
-    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override;
-    virtual std::string getFieldValueAsString(void *object, int field, int i) const override;
-    virtual bool setFieldValueAsString(void *object, int field, int i, const char *value) const override;
-
-    virtual const char *getFieldStructName(int field) const override;
-    virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
-};
-
-Register_ClassDescriptor(DestinationListPtrDescriptor)
-
-DestinationListPtrDescriptor::DestinationListPtrDescriptor() : omnetpp::cClassDescriptor(omnetpp::opp_typename(typeid(inet::DestinationListPtr)), "")
-{
-    propertynames = nullptr;
-}
-
-DestinationListPtrDescriptor::~DestinationListPtrDescriptor()
-{
-    delete[] propertynames;
-}
-
-bool DestinationListPtrDescriptor::doesSupport(omnetpp::cObject *obj) const
-{
-    return dynamic_cast<DestinationListPtr *>(obj)!=nullptr;
-}
-
-const char **DestinationListPtrDescriptor::getPropertyNames() const
-{
-    if (!propertynames) {
-        static const char *names[] = { "existingClass",  nullptr };
-        omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-        const char **basenames = basedesc ? basedesc->getPropertyNames() : nullptr;
-        propertynames = mergeLists(basenames, names);
-    }
-    return propertynames;
-}
-
-const char *DestinationListPtrDescriptor::getProperty(const char *propertyname) const
-{
-    if (!strcmp(propertyname, "existingClass")) return "";
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? basedesc->getProperty(propertyname) : nullptr;
-}
-
-int DestinationListPtrDescriptor::getFieldCount() const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 0+basedesc->getFieldCount() : 0;
-}
-
-unsigned int DestinationListPtrDescriptor::getFieldTypeFlags(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldTypeFlags(field);
-        field -= basedesc->getFieldCount();
-    }
-    return 0;
-}
-
-const char *DestinationListPtrDescriptor::getFieldName(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldName(field);
-        field -= basedesc->getFieldCount();
-    }
-    return nullptr;
-}
-
-int DestinationListPtrDescriptor::findField(const char *fieldName) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? basedesc->findField(fieldName) : -1;
-}
-
-const char *DestinationListPtrDescriptor::getFieldTypeString(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldTypeString(field);
-        field -= basedesc->getFieldCount();
-    }
-    return nullptr;
-}
-
-const char **DestinationListPtrDescriptor::getFieldPropertyNames(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldPropertyNames(field);
-        field -= basedesc->getFieldCount();
-    }
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
-const char *DestinationListPtrDescriptor::getFieldProperty(int field, const char *propertyname) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldProperty(field, propertyname);
-        field -= basedesc->getFieldCount();
-    }
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
-int DestinationListPtrDescriptor::getFieldArraySize(void *object, int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldArraySize(object, field);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationListPtr *pp = (DestinationListPtr *)object; (void)pp;
-    switch (field) {
-        default: return 0;
-    }
-}
-
-const char *DestinationListPtrDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldDynamicTypeString(object,field,i);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationListPtr *pp = (DestinationListPtr *)object; (void)pp;
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
-std::string DestinationListPtrDescriptor::getFieldValueAsString(void *object, int field, int i) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldValueAsString(object,field,i);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationListPtr *pp = (DestinationListPtr *)object; (void)pp;
-    switch (field) {
-        default: return "";
-    }
-}
-
-bool DestinationListPtrDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->setFieldValueAsString(object,field,i,value);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationListPtr *pp = (DestinationListPtr *)object; (void)pp;
-    switch (field) {
-        default: return false;
-    }
-}
-
-const char *DestinationListPtrDescriptor::getFieldStructName(int field) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldStructName(field);
-        field -= basedesc->getFieldCount();
-    }
-    return nullptr;
-}
-
-void *DestinationListPtrDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
-{
-    omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    if (basedesc) {
-        if (field < basedesc->getFieldCount())
-            return basedesc->getFieldStructValuePointer(object, field, i);
-        field -= basedesc->getFieldCount();
-    }
-    DestinationListPtr *pp = (DestinationListPtr *)object; (void)pp;
-    switch (field) {
-        default: return nullptr;
-    }
-}
-
 EXECUTE_ON_STARTUP(
     omnetpp::cEnum *e = omnetpp::cEnum::find("inet::InfoType");
     if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::InfoType"));
@@ -678,7 +244,6 @@ void InfoPacket::copy(const InfoPacket& other)
 {
     this->type = other.type;
     this->identifer = other.identifer;
-    this->destination_list_ptr = other.destination_list_ptr;
     this->src = other.src;
 }
 
@@ -687,7 +252,6 @@ void InfoPacket::parsimPack(omnetpp::cCommBuffer *b) const
     ::inet::FieldsChunk::parsimPack(b);
     doParsimPacking(b,this->type);
     doParsimPacking(b,this->identifer);
-    doParsimPacking(b,this->destination_list_ptr);
     doParsimPacking(b,this->src);
 }
 
@@ -696,7 +260,6 @@ void InfoPacket::parsimUnpack(omnetpp::cCommBuffer *b)
     ::inet::FieldsChunk::parsimUnpack(b);
     doParsimUnpacking(b,this->type);
     doParsimUnpacking(b,this->identifer);
-    doParsimUnpacking(b,this->destination_list_ptr);
     doParsimUnpacking(b,this->src);
 }
 
@@ -722,17 +285,6 @@ void InfoPacket::setIdentifer(int identifer)
     this->identifer = identifer;
 }
 
-const DestinationListPtr& InfoPacket::getDestination_list_ptr() const
-{
-    return this->destination_list_ptr;
-}
-
-void InfoPacket::setDestination_list_ptr(const DestinationListPtr& destination_list_ptr)
-{
-    handleChange();
-    this->destination_list_ptr = destination_list_ptr;
-}
-
 const L3Address& InfoPacket::getSrc() const
 {
     return this->src;
@@ -751,7 +303,6 @@ class InfoPacketDescriptor : public omnetpp::cClassDescriptor
     enum FieldConstants {
         FIELD_type,
         FIELD_identifer,
-        FIELD_destination_list_ptr,
         FIELD_src,
     };
   public:
@@ -815,7 +366,7 @@ const char *InfoPacketDescriptor::getProperty(const char *propertyname) const
 int InfoPacketDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
 unsigned int InfoPacketDescriptor::getFieldTypeFlags(int field) const
@@ -829,10 +380,9 @@ unsigned int InfoPacketDescriptor::getFieldTypeFlags(int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,    // FIELD_type
         FD_ISEDITABLE,    // FIELD_identifer
-        FD_ISCOMPOUND,    // FIELD_destination_list_ptr
         0,    // FIELD_src
     };
-    return (field >= 0 && field < 4) ? fieldTypeFlags[field] : 0;
+    return (field >= 0 && field < 3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *InfoPacketDescriptor::getFieldName(int field) const
@@ -846,10 +396,9 @@ const char *InfoPacketDescriptor::getFieldName(int field) const
     static const char *fieldNames[] = {
         "type",
         "identifer",
-        "destination_list_ptr",
         "src",
     };
-    return (field >= 0 && field < 4) ? fieldNames[field] : nullptr;
+    return (field >= 0 && field < 3) ? fieldNames[field] : nullptr;
 }
 
 int InfoPacketDescriptor::findField(const char *fieldName) const
@@ -858,8 +407,7 @@ int InfoPacketDescriptor::findField(const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0] == 't' && strcmp(fieldName, "type") == 0) return base+0;
     if (fieldName[0] == 'i' && strcmp(fieldName, "identifer") == 0) return base+1;
-    if (fieldName[0] == 'd' && strcmp(fieldName, "destination_list_ptr") == 0) return base+2;
-    if (fieldName[0] == 's' && strcmp(fieldName, "src") == 0) return base+3;
+    if (fieldName[0] == 's' && strcmp(fieldName, "src") == 0) return base+2;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -874,10 +422,9 @@ const char *InfoPacketDescriptor::getFieldTypeString(int field) const
     static const char *fieldTypeStrings[] = {
         "inet::InfoType",    // FIELD_type
         "int",    // FIELD_identifer
-        "inet::DestinationListPtr",    // FIELD_destination_list_ptr
         "inet::L3Address",    // FIELD_src
     };
-    return (field >= 0 && field < 4) ? fieldTypeStrings[field] : nullptr;
+    return (field >= 0 && field < 3) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **InfoPacketDescriptor::getFieldPropertyNames(int field) const
@@ -953,7 +500,6 @@ std::string InfoPacketDescriptor::getFieldValueAsString(void *object, int field,
     switch (field) {
         case FIELD_type: return enum2string(pp->getType(), "inet::InfoType");
         case FIELD_identifer: return long2string(pp->getIdentifer());
-        case FIELD_destination_list_ptr: {std::stringstream out; out << pp->getDestination_list_ptr(); return out.str();}
         case FIELD_src: return pp->getSrc().str();
         default: return "";
     }
@@ -984,7 +530,6 @@ const char *InfoPacketDescriptor::getFieldStructName(int field) const
         field -= basedesc->getFieldCount();
     }
     switch (field) {
-        case FIELD_destination_list_ptr: return omnetpp::opp_typename(typeid(DestinationListPtr));
         default: return nullptr;
     };
 }
@@ -999,7 +544,6 @@ void *InfoPacketDescriptor::getFieldStructValuePointer(void *object, int field, 
     }
     InfoPacket *pp = (InfoPacket *)object; (void)pp;
     switch (field) {
-        case FIELD_destination_list_ptr: return toVoidPtr(&pp->getDestination_list_ptr()); break;
         case FIELD_src: return toVoidPtr(&pp->getSrc()); break;
         default: return nullptr;
     }

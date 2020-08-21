@@ -21,7 +21,6 @@ package informationpropagation.contract;
 moduleinterface IApp
 {
     parameters:
-        //TODO: Change icon to infection app
         @display("i=block/infection_app");
     gates:
         input inputSocket @labels(from TransportLayerDispatcher);

@@ -26,8 +26,6 @@ protected: //IAPP attributes
   std::unique_ptr<inet::ModuleIdAddress> src_address;
   /** @brief The socket to send information packets */
   inet::L3Socket* socket;
-  /** @brief A pointer to access the neighbor cache */
-  const NeighborCache* neighbor_cache;
   /** @brief The network protocol */
   const inet::Protocol* netw_protocol;
 protected: //Member functions inherited from INetworkSocket::ICallBack
@@ -41,7 +39,6 @@ public:
     , output_gate_id(-1)
     , src_address(nullptr)
     , socket(nullptr)
-    , neighbor_cache(nullptr)
     , netw_protocol(nullptr)
   { }
   virtual ~IApp () { }

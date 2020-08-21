@@ -25,8 +25,6 @@
 class InformationPropagationBase : public IApp
 {
 public:
-  /** @brief The list of destinations */
-  std::shared_ptr<inet::DestinationList> destination_list;
   /** @brief The possible node status for this infection app. This enum could 
    *  be extended if the first you override it */
   enum Status {
@@ -41,12 +39,12 @@ public:
   /** @brief Returns a string indicating the host status */
   static const char* status_to_string(Status);
 protected:
+  /** L3 broadcast address */
+  static inet::ModuleIdAddress unspecified_address;
   /** @brief The current status of nodes running the infection app */
   Status status;
   /** @brief The probability of recovery of an infection */
   double mu;
-  /** @brief The probability of getting infected after receiving a msg */
-  double eta;
   /** @brief the number of trials per time step */
   int lambda;
   /** @brief The duration of a round */
@@ -75,9 +73,8 @@ protected: //App signals that carry statistics
                               last_status_signal,
                               infection_time_signal;
 protected:
-  /** @brief Draws a random set of neighbors from neighbor cache if it is 
-   *  possible. The neighbor set is keep the in the destination list */
-  void draw_neighbor(size_t);
+  /** @brief Computes whether this node starts infected or not */
+  virtual void compute_initial_state();
   /** @brief Encapsulates a message to send it via a L3 socket */
   virtual void encapsulate() = 0;
   /** @brief Sends infectious messages to nodes in N(x) */

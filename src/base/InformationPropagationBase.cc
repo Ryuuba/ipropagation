@@ -17,6 +17,8 @@
 
 Register_Abstract_Class(InformationPropagationBase);
 
+inet::ModuleIdAddress InformationPropagationBase::unspecified_address(0);
+
 omnetpp::simsignal_t InformationPropagationBase::sent_message_signal = 
   registerSignal("sentMessage");
 omnetpp::simsignal_t InformationPropagationBase::received_message_signal = 
@@ -27,9 +29,7 @@ omnetpp::simsignal_t InformationPropagationBase::infection_time_signal =
   registerSignal("infectionTime");
 
 InformationPropagationBase::InformationPropagationBase()
-  : destination_list(std::make_shared<inet::DestinationList>())
-  , mu(0.0)
-  , eta(0.0)
+  : mu(0.0)
   , lambda(0)
   , step_time(0.0)
   , trial_num(0)
@@ -61,11 +61,10 @@ void InformationPropagationBase::initialize(int stage) {
     output_gate_id = gate("outputSocket")->getId();
     step_timer = new omnetpp::cMessage("step timer");
     information_timer = new omnetpp::cMessage("information timer");
-    auto cache_module = getSimulation()->getSystemModule()->
-      getSubmodule("node", inet::getContainingNode(this)->getIndex())->
-      getSubmodule("net")->getSubmodule("cache");
-    neighbor_cache = static_cast<NeighborCache*>(cache_module);
     netw_protocol = &inet::Protocol::probabilistic;
+    mu = par("recoveryProbability");
+    lambda = par("numberOfTrials").intValue();
+    step_time = par("step");
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
     auto id = inet::getContainingNode(this)->getIndex() + 1; //unicast address
@@ -73,23 +72,9 @@ void InformationPropagationBase::initialize(int stage) {
     socket = new inet::L3Socket(netw_protocol, gate(output_gate_id));
     socket->bind(&inet::Protocol::information, inet::ModuleIdAddress(id));
     socket->setCallback(this);
-  }
-}
-
-void InformationPropagationBase::draw_neighbor(size_t max) {
-  destination_list->clear();
-  if (max > 0) {
-    std::list<cache_register> neighborhood = *(neighbor_cache->get());
-    if (max < neighborhood.size())
-      while (destination_list->size() < max) {
-        auto it = neighborhood.begin();
-        std::advance(it, intuniform(0, neighborhood.size() - 1));
-        destination_list->push_back( it->netw_address );
-        neighborhood.erase(it);
-      }
-    else
-      for (auto&& entry : neighborhood)
-        destination_list->push_back(entry.netw_address);
+    compute_initial_state();
+    EV_INFO << "The status of host " << src_address->getId() 
+            << " is " << status_to_string(status) << '\n';
   }
 }
 
@@ -103,19 +88,10 @@ void InformationPropagationBase::socketDataArrived(
     auto pkt_header = inet::dynamicPtrCast<inet::InfoPacket>(
       pkt->popAtFront<inet::InfoPacket>()->dupShared()
     );
-    auto it = std::find(
-      pkt_header->getDestination_list_ptr()->begin(),
-      pkt_header->getDestination_list_ptr()->end(),
-      inet::L3Address(*src_address)
-    );
-    if (it != pkt_header->getDestination_list_ptr()->end()){
-      EV_INFO << "InformationPropagationBase: Node "<< src_address->getId() 
-              << " receives packet with name " << pkt->getName() 
-              << " from " << pkt_header->getSrc() << '\n';
-          process_packet(pkt_header);
-    }
-    else 
-      EV_INFO << "Discarting packet from " << pkt_header->getSrc() << '\n';
+    EV_INFO << "InformationPropagationBase: Node "<< src_address->getId() 
+            << " receives packet with name " << pkt->getName() 
+            << " from " << pkt_header->getSrc() << '\n';
+    process_packet(pkt_header);
   }
   else
     throw omnetpp::cRuntimeError(
@@ -147,4 +123,22 @@ const char* InformationPropagationBase::status_to_string(Status s) {
       "InformationPropagationBase: invalid conversion to string from status %d", s);
     break;
   } 
+}
+
+void InformationPropagationBase::compute_initial_state() {
+    auto coin = uniform(0.0, 1.0);
+    EV_INFO << "Host " << src_address->getId() << " gets " 
+            << coin << '\n';
+    if (
+      coin < 
+      par("initialInfectionProbability").doubleValue()
+    ) {
+      status = InformationPropagationBase::INFECTED;
+      if (hasGUI())
+        getParentModule()->bubble("Get infected!");
+    }
+    else
+      status = InformationPropagationBase::NOT_INFECTED;
+    EV_INFO << "Initial status of host " << src_address->getId() 
+            << " is " << status << '\n';
 }

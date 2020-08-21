@@ -42,9 +42,5 @@ simple InformationPropagationApp extends InformationPropagationBase
         @class(InformationPropagationApp);
         //The payload of the information packet
         volatile int payload @unit(B); // length in bytes
-        //probability that node start infected
-        double initialInfectionProbability;
-        // Random operation mode
-        string communicationMode @enum("unicast", "multicast", "broadcast") = default("unicast");
-        string packetName;
+        string packetName = default("virus");
 }

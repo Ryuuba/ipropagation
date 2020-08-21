@@ -7,7 +7,6 @@
  */
 #include "ProbabilisticCast.h"
 
-
 using std::make_pair;
 using std::endl;
 
@@ -56,7 +55,6 @@ ProbabilisticCast::~ProbabilisticCast() {
       delete item.second;
   msg_queue.clear();
 }
-
 
 void ProbabilisticCast::initialize(int stage)
 {
@@ -212,20 +210,31 @@ void ProbabilisticCast::handleSelfMessage(omnetpp::cMessage *msg)
   if (msg == broadcast_timer) {
     auto packet = pop_msg();
     if (bernoulli(beta)) {
-      auto netwHeader = packet->peekAtFront<inet::ProbabilisticCastHeader>();
-      if (netwHeader->getHopCount() == 0)
-        fwd_pkt_num++;
-      else
-        sent_pkt_num++;
-      packet->setTimestamp();
-      sendDown(packet);
       EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
-              << *src_address 
-              << " pass the Bernoulli test. Send packet down." << endl;
+              << *src_address << " passes the Bernoulli test." << endl;
+      compute_forwarding_list();
+      if (!forwarding_list->empty()) {
+        EV_INFO << "Destination(s): ";
+        for (auto& id : *forwarding_list)
+          EV_INFO << id << ' ';
+        EV_INFO << '\n';
+        auto netwHeader = packet->peekAtFront<inet::ProbabilisticCastHeader>();
+        if (netwHeader->getHopCount() == 0)
+          fwd_pkt_num++;
+        else
+          sent_pkt_num++;
+        packet->setTimestamp();
+        sendDown(packet);
+      }
+      else
+      {
+        EV_INFO << "Node " << *src_address << " is isolated, dropping packet\n";
+        delete packet;
+      }
     }
     else {
       EV << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
-      << *src_address << " doesn't pass the Benoulli test." << endl;
+      << *src_address << " doesn't pass the Benoulli test, dropping packet\n";
       delete packet;
     }
     if (!msg_queue.empty())
@@ -233,7 +242,7 @@ void ProbabilisticCast::handleSelfMessage(omnetpp::cMessage *msg)
   }
   else
     EV_ERROR << "ProbabilisticCast: at " << omnetpp::simTime() 
-             << " node " << *src_address << " received unexpected self message" 
+             << " node " << *src_address << " received unexpected self-message" 
              << endl;
 }
 
@@ -260,7 +269,7 @@ void ProbabilisticCast::insert_msg(
   // re-schedule the broadcast timer to the message's broadcast instant.
   if (pos == msg_queue.begin()) {
     EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
-            << *src_address << "inserts at front, reschedule it." << endl;
+            << *src_address << " inserts at front, reschedule it." << endl;
     cancelEvent(broadcast_timer);
     scheduleAt(bcast_time, broadcast_timer);
   }
@@ -291,7 +300,6 @@ inet::Packet* ProbabilisticCast::pop_msg( )
 void ProbabilisticCast::encapsulate(inet::Packet *packet)
 {
   auto netw_header = inet::makeShared<inet::ProbabilisticCastHeader>();
-  compute_forwarding_list();
   cObject *controlInfo = packet->removeControlInfo();
   netw_header->setInitialSrcAddr(*src_address);
   netw_header->setSourceAddress(*src_address);
@@ -354,9 +362,7 @@ void ProbabilisticCast::compute_forwarding_list() {
     else if (communication_mode == MULTICAST) {
       size_t list_size 
         = cache->size() == 1 ? 1
-        : cache->size() == 2 ? 2
-        : cache->size()  > 2 ? intuniform(1, cache_size-1)
-        : 0;
+        : intuniform(1, cache_size);
       draw_neighbor(list_size); //Effectively, it modifies the fwd list
     }
     else 

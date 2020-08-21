@@ -31,15 +31,8 @@ class InfoPacket;
 
 namespace inet {
 
-// cplusplus {{
-#include <list>
-#include <memory>
-typedef std::list<inet::L3Address> DestinationList;
-typedef std::shared_ptr<const DestinationList> DestinationListPtr;
-// }}
-
 /**
- * Enum generated from <tt>msg/InfoPacket.msg:37</tt> by nedtool.
+ * Enum generated from <tt>msg/InfoPacket.msg:26</tt> by nedtool.
  * <pre>
  * enum InfoType
  * {
@@ -56,13 +49,12 @@ enum InfoType {
 };
 
 /**
- * Class generated from <tt>msg/InfoPacket.msg:44</tt> by nedtool.
+ * Class generated from <tt>msg/InfoPacket.msg:33</tt> by nedtool.
  * <pre>
  * class InfoPacket extends FieldsChunk
  * {
  *     InfoType type;
  *     int identifer;
- *     DestinationListPtr destination_list_ptr;
  *     L3Address src;
  *     chunkLength = B(12);
  * }
@@ -73,7 +65,6 @@ class InfoPacket : public ::inet::FieldsChunk
   protected:
     inet::InfoType type = static_cast<inet::InfoType>(-1);
     int identifer = 0;
-    DestinationListPtr destination_list_ptr;
     L3Address src;
 
   private:
@@ -97,9 +88,6 @@ class InfoPacket : public ::inet::FieldsChunk
     virtual void setType(inet::InfoType type);
     virtual int getIdentifer() const;
     virtual void setIdentifer(int identifer);
-    virtual const DestinationListPtr& getDestination_list_ptr() const;
-    virtual DestinationListPtr& getDestination_list_ptrForUpdate() { handleChange();return const_cast<DestinationListPtr&>(const_cast<InfoPacket*>(this)->getDestination_list_ptr());}
-    virtual void setDestination_list_ptr(const DestinationListPtr& destination_list_ptr);
     virtual const L3Address& getSrc() const;
     virtual L3Address& getSrcForUpdate() { handleChange();return const_cast<L3Address&>(const_cast<InfoPacket*>(this)->getSrc());}
     virtual void setSrc(const L3Address& src);
