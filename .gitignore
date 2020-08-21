@@ -7,3 +7,4 @@ src/Makefile
 src/ipropagation*
 out/
 simulations/frames
+simulations/results

@@ -143,7 +143,7 @@ void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)
       getParentModule()->bubble("Get infected!");
   }
   else 
-    EV_INFO << "Host " << src_address->getId()
+    EV_INFO << "App: Host " << src_address->getId()
             << " is already infected\n";
   emit(received_message_signal, ++received_messages);
 }
