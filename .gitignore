@@ -3,6 +3,7 @@
 *.vci
 *.dat
 *.pdf
+*.mat
 src/Makefile
 src/ipropagation*
 out/

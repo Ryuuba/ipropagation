@@ -114,14 +114,14 @@ double InfectionObserver::compute_rho() {
 void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
   if (msg->isSelfMessage()) {
     infected_num = std::accumulate(p->begin(), p->end(), 0.0);
-    rho = infected_num / host_num;
+    rho = double(infected_num) / host_num;
     emit(infected_node_stat, infected_num);
     emit(rho_stat, rho);
     EV_INFO << "Round number: " << round_counter << '\n';
     EV_INFO << "Number of infected nodes: " << infected_num << '\n';
     EV_INFO << "Expected infection density: " << rho << '\n';
     scheduleAt(omnetpp::simTime() + step_time, step_timer);
-    bool stop_condition = (round_counter > round_num) || (rho == 1);
+    bool stop_condition = (round_counter > round_num) || (rho == 0.0);
     if (stop_condition)
       endSimulation();    
     round_counter++;
