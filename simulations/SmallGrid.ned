@@ -56,14 +56,14 @@ network SmallGrid
         radioMedium: <> like IRadioMedium {
             @display("p=200,20;is=s");
         }
-        // connectivityobserver: ConnectivityObserver {
-        //     @display("p=200,60;is=s");
-        //     hostNumber = 16;
-        // }
-        // infectionobserver: InfectionObserver {
-        //     @display("p=200,100;is=s");
-        //     hostNumber = 16;
-        //     step = simulationStep;
-        // }
+        connectivityobserver: ConnectivityObserver {
+            @display("p=200,60;is=s");
+            hostNumber = 16;
+        }
+        infectionobserver: InfectionObserver {
+            @display("p=200,100;is=s");
+            hostNumber = 16;
+            step = simulationStep;
+        }
     connections allowunconnected:
 }

@@ -23,7 +23,7 @@ package informationpropagation.observer;
 //
 simple InfectionObserver
 {
-    double epsilon = default(0.001); //error tolerance
+    int roundNumber; // Number of rounds
     int hostNumber;
     double step @unit(s); //the duration of a round
     @display("i=observer/infection_observer");

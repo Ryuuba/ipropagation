@@ -32,8 +32,8 @@ class InfectionObserver
   , public omnetpp::cListener
 {
 protected:
-  // @brief The error tolerance
-  double epsilon;
+  // @brief The number of rounds to be observed
+  long long round_num;
   // @brief The expected infection density
   double rho;
   // @brief Transmission probability from network layer
@@ -44,8 +44,8 @@ protected:
   size_t host_num;
   // @brief The total of infected nodes
   size_t infected_num;
-  // @brief The number of rounds
-  long long round_num;
+  // @brief The actual number of rounds
+  long long round_counter;
   // @brief The node status
   static omnetpp::simsignal_t status_signal;
   // @brief The number of infected nodes
@@ -72,13 +72,13 @@ protected:
 public:
   // @brief Default constructor
   InfectionObserver()
-    : epsilon(0.0)
+    : round_num(0)
     , rho(0.0)
     , beta(0.0)
     , mu(0.0)
     , host_num(0)
     , infected_num(0)
-    , round_num(0)
+    , round_counter(0)
     , p(nullptr)
     , q(nullptr)
     , next_p(nullptr)

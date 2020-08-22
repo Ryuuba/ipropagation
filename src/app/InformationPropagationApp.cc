@@ -37,9 +37,10 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
         if (round_num > 0)
           try_recovery(msg);
       }
+      round_num++;
       EV_INFO << "The status of host " << src_address->getId() 
               << " is " << status_to_string(status) 
-              << " at round " << round_num++ << '\n';
+              << " at round " << round_num << '\n';
       emit(last_status_signal, status);
       scheduleAt(omnetpp::simTime() + step_time, step_timer);
     }
@@ -58,28 +59,6 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
   else
     throw omnetpp::cRuntimeError("App: Invalid message %s", msg->getName());
 }
-
-// void InformationPropagationApp::draw_neighbor(COMM_MODE mode) 
-// {
-//   auto cache_size = neighbor_cache->size();
-//   if (cache_size > 0) {
-//     if (mode == BROADCAST) {
-//       InformationPropagationBase::draw_neighbor(cache_size);
-//     }
-//     else if (mode == MULTICAST) {
-//       size_t list_size 
-//         = neighbor_cache->size() == 1 ? 1
-//         : neighbor_cache->size() == 2 ? 2
-//         : neighbor_cache->size()  > 2 ? intuniform(1, cache_size-1)
-//         : 0;
-//       InformationPropagationBase::draw_neighbor(list_size);
-//     }
-//     else // UNICAST case
-//       InformationPropagationBase::draw_neighbor(1);
-//   }
-//   else 
-//     destination_list->clear();
-// }
 
 
 void InformationPropagationApp::send_message(omnetpp::cMessage* msg)

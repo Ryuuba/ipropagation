@@ -28,8 +28,8 @@ void InfectionObserver::initialize(int stage) {
   static inet::ProbabilisticBroadcast* net_protocol(nullptr);
   static InformationPropagationApp* app_module(nullptr);
   if (stage == inet::INITSTAGE_LOCAL) {
+    round_num = par("roundNumber").intValue();
     step_time = par("step");
-    epsilon = par("epsilon").doubleValue();
     host_num = par("hostNumber").intValue();
     p = std::make_unique< std::vector<InformationPropagationApp::Status> >(host_num, InformationPropagationApp::NOT_INFECTED);
     q = std::make_unique < std::vector<double> >(host_num, 1.0);
@@ -83,7 +83,7 @@ void InfectionObserver::receiveSignal(
 void InfectionObserver::receiveSignal(
   omnetpp::cComponent* src,   //@param the module emitting the signal 
   omnetpp::simsignal_t id,    //@param the signal id
-  omnetpp::cObject* obj,      //@param the object carried by the signal
+  omnetpp::cObject* obj,      //@param the node neighborhood
   omnetpp::cObject* details   //@param details about the object
 ) {
   //hello->netlayer->node
@@ -113,20 +113,18 @@ double InfectionObserver::compute_rho() {
 
 void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
   if (msg->isSelfMessage()) {
-    double new_rho = compute_rho();
     infected_num = std::accumulate(p->begin(), p->end(), 0.0);
+    rho = infected_num / host_num;
     emit(infected_node_stat, infected_num);
-    emit(rho_stat, new_rho);
-    if (round_num != 0) {
-      if (new_rho == 0.0 || fabs(rho - new_rho)/rho < epsilon)
-        endSimulation();
-    }
-    else 
-      rho = new_rho;
-    EV_INFO << "Round number: " << round_num++ << '\n';
+    emit(rho_stat, rho);
+    EV_INFO << "Round number: " << round_counter << '\n';
     EV_INFO << "Number of infected nodes: " << infected_num << '\n';
     EV_INFO << "Expected infection density: " << rho << '\n';
     scheduleAt(omnetpp::simTime() + step_time, step_timer);
+    bool stop_condition = (round_counter > round_num) || (rho == 1);
+    if (stop_condition)
+      endSimulation();    
+    round_counter++;
   }
   else 
     throw omnetpp::cRuntimeError(
