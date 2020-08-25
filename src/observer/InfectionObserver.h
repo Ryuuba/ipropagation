@@ -34,6 +34,8 @@ class InfectionObserver
 protected:
   // @brief The number of rounds to be observed
   long long round_num;
+  // @brief The error
+  double epsilon;
   // @brief The expected infection density
   double rho;
   // @brief Transmission probability from network layer
@@ -73,6 +75,7 @@ public:
   // @brief Default constructor
   InfectionObserver()
     : round_num(0)
+    , epsilon(0.0)
     , rho(0.0)
     , beta(0.0)
     , mu(0.0)

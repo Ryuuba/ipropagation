@@ -1,5 +1,5 @@
 [General]
-last-configname=GridPosition
+last-configname=SmallGrid
 last-runnumber=0
 
 [RunModeProfiles]
@@ -12,4 +12,4 @@ run-max-animation-speed=nan
 run-max-playback-speed=100
 run-min-animation-speed=nan
 run-min-playback-speed=0.01
-run-playback-speed=2.8183829312644537
+run-playback-speed=33.884415613920254

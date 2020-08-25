@@ -28,6 +28,7 @@ void InfectionObserver::initialize(int stage) {
   static inet::ProbabilisticBroadcast* net_protocol(nullptr);
   static InformationPropagationApp* app_module(nullptr);
   if (stage == inet::INITSTAGE_LOCAL) {
+    epsilon = par("epsilon");
     round_num = par("roundNumber").intValue();
     step_time = par("step");
     host_num = par("hostNumber").intValue();
@@ -78,6 +79,7 @@ void InfectionObserver::receiveSignal(
     host_id
   );
   infected_num = std::accumulate(p->begin(), p->end(), 0.0);
+  rho = double(infected_num) / host_num;
 }
 
 void InfectionObserver::receiveSignal(
@@ -114,17 +116,20 @@ double InfectionObserver::compute_rho() {
 void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
   if (msg->isSelfMessage()) {
     infected_num = std::accumulate(p->begin(), p->end(), 0.0);
-    rho = double(infected_num) / host_num;
+    double new_rho = double(infected_num) / host_num;
+    if (fabs(new_rho - rho) < epsilon) {
+      round_counter++; // Increments rounds in possible stationaty state
+      EV_INFO << "Round number (steady state): " << round_counter << '\n';
+    }
+    rho = new_rho;
     emit(infected_node_stat, infected_num);
     emit(rho_stat, rho);
-    EV_INFO << "Round number: " << round_counter << '\n';
     EV_INFO << "Number of infected nodes: " << infected_num << '\n';
     EV_INFO << "Expected infection density: " << rho << '\n';
     scheduleAt(omnetpp::simTime() + step_time, step_timer);
-    bool stop_condition = (round_counter > round_num) || (rho == 0.0);
-    if (stop_condition)
-      endSimulation();    
-    round_counter++;
+    // bool stop_condition = (round_counter > round_num) || (rho == 0.0);
+    if (round_counter > round_num)
+      endSimulation();
   }
   else 
     throw omnetpp::cRuntimeError(

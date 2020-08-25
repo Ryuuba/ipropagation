@@ -25,13 +25,13 @@ import slaw.map.SelfSimilarWaypointMap;
 network PropagationInformationStationary
 {
     parameters:
-        @display("bgb=700,600;bgg=,,grey10");
+        @display("bgb=700,700;bgg=,,grey10");
         int hostNumber = default(2);
         bool hasSelfSimilarMap = default(false);
         double simulationStep @unit(s);
     submodules:
         radioMedium: <> like IRadioMedium {
-            @display("p=650,20;is=s");
+            @display("p=640,20;is=s");
         }
         node[hostNumber]: WirelessBroadcastNode {
             @display("p=250,250;is=s");
@@ -39,16 +39,16 @@ network PropagationInformationStationary
             app.step = simulationStep;
         }
         connectivityobserver: ConnectivityObserver {
-            @display("p=650,80;is=s");
+            @display("p=640,80;is=s");
             hostNumber = hostNumber;
         }
         infectionobserver: InfectionObserver {
-            @display("p=650,140;is=s");
+            @display("p=640,140;is=s");
             hostNumber = hostNumber;
             step = simulationStep;
         }
         map: SelfSimilarWaypointMap if hasSelfSimilarMap {
-            @display("p=650,200;is=s");
+            @display("p=640,200;is=s");
         }
     connections allowunconnected:
 }
