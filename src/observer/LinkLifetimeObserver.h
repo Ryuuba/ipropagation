@@ -13,8 +13,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if !defined(DYNAMIC_CONNECTIVITY_OBSERVER_H)
-#define DYNAMIC_CONNECTIVITY_OBSERVER_H
+#if !defined(LINK_LIFETIME_OBSERVER_H)
+#define LINK_LIFETIME_OBSERVER_H
 
 #include <fstream>
 #include <functional>
@@ -28,7 +28,7 @@
 #include "../signal/NeighborNotification.h"
 #include "../common/ConnectivityObserverCell.h"
 
-class DynamicConnectivityObserver
+class LinkLifetimeObserver
   : public omnetpp::cSimpleModule
   , public omnetpp::cListener
 {
@@ -43,11 +43,11 @@ public:
     return inet::NUM_INIT_STAGES;
   }
   /** @brief Default constructor */
-  DynamicConnectivityObserver()
+  LinkLifetimeObserver()
     : host_number(0)
     , adjacency_matrix(nullptr)
   { }
-  ~DynamicConnectivityObserver() 
+  ~LinkLifetimeObserver() 
   { 
     getSimulation()->getSystemModule()->unsubscribe(
       neighborhood_notification_signal,
@@ -74,4 +74,4 @@ public:
 
 
 
-#endif // DYNAMIC_CONNECTIVITY_OBSERVER_H
+#endif // LINK_LIFETIME_OBSERVER_H

@@ -1,12 +1,12 @@
-#include "DynamicConnectivityObserver.h"
+#include "LinkLifetimeObserver.h"
 #include "inet/common/ModuleAccess.h"
 
-Define_Module(DynamicConnectivityObserver);
+Define_Module(LinkLifetimeObserver);
 
-omnetpp::simsignal_t DynamicConnectivityObserver::neighborhood_notification_signal =
+omnetpp::simsignal_t LinkLifetimeObserver::neighborhood_notification_signal =
   registerSignal("neighborhood");
 
-void DynamicConnectivityObserver::initialize(int stage) {
+void LinkLifetimeObserver::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     host_number = par("hostNumber").intValue();
     adjacency_matrix = std::make_shared< SquareMatrix<cell_t> >(host_number);
@@ -17,14 +17,14 @@ void DynamicConnectivityObserver::initialize(int stage) {
   }
 }
 
-void DynamicConnectivityObserver::handleMessage(omnetpp::cMessage* msg) {
+void LinkLifetimeObserver::handleMessage(omnetpp::cMessage* msg) {
   throw omnetpp::cRuntimeError(
     "DynamicConnectivityObserver: This module does not receive any messages\
     (name = %s)\n", msg->getName()
   );
 }
 
-void DynamicConnectivityObserver::receiveSignal(
+void LinkLifetimeObserver::receiveSignal(
   omnetpp::cComponent* src,   //@param the module emitting the signal 
   omnetpp::simsignal_t id,    //@param the signal id
   omnetpp::cObject* obj,      //@param the object carried by the signal
@@ -51,7 +51,7 @@ void DynamicConnectivityObserver::receiveSignal(
   counter++;
 }
 
-void DynamicConnectivityObserver::finish() {
+void LinkLifetimeObserver::finish() {
   std::string result_file {
     omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${seedset}")
   };

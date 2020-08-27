@@ -24,7 +24,7 @@ package informationpropagation.observer;
 // This observer is particularly useful when nodes move
 //
 
-simple DynamicConnectivityObserver
+simple LinkLifetimeObserver
 {
     parameters:
         @display("i=observer/connectivity_observer");
