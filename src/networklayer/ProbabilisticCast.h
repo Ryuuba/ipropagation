@@ -33,6 +33,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 #include "NeighborCache.h"
+#include "../signal/ForwardingListNotification.h"
 #include "../msg/ProbabilisticCastHeader_m.h"
 
 
@@ -110,6 +111,7 @@ protected:
   static omnetpp::simsignal_t hop_count_signal;
   static omnetpp::simsignal_t drp_pkt_signal;
   static omnetpp::simsignal_t qtime_signal;
+  static omnetpp::simsignal_t forwarding_list_signal;
 protected:
   static long getNextID()
   {

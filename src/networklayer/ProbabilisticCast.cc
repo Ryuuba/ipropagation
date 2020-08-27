@@ -23,6 +23,8 @@ omnetpp::simsignal_t ProbabilisticCast::drp_pkt_signal
   = registerSignal("drpPktNum");
 omnetpp::simsignal_t ProbabilisticCast::qtime_signal 
   = registerSignal("qTime");
+omnetpp::simsignal_t ProbabilisticCast::forwarding_list_signal
+  = registerSignal("fwdList");
 
 Define_Module(ProbabilisticCast);
 
@@ -49,7 +51,6 @@ ProbabilisticCast::ProbabilisticCast()
 
 ProbabilisticCast::~ProbabilisticCast() {
   cancelAndDelete(broadcast_timer);
-  // msg_queue.clear();
 }
 
 void ProbabilisticCast::initialize(int stage)
@@ -211,6 +212,10 @@ void ProbabilisticCast::handleSelfMessage(omnetpp::cMessage *msg)
               << *src_address << " passes the Bernoulli test." << endl;
       compute_forwarding_list();
       if (!forwarding_list->empty()) {
+        ForwardingListNotificacion notification(
+          std::shared_ptr<const DestinationList>(forwarding_list)
+        );
+        emit(forwarding_list_signal, &notification);
         EV_INFO << "Destination(s): ";
         for (auto& id : *forwarding_list)
           EV_INFO << id << ' ';

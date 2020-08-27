@@ -21,7 +21,7 @@ import inet.networklayer.contract.INetworkProtocol;;
 // Author: Adán G. Medrano-Chávez
 // This module transmit with probability beta a packet via L2 broadcast.
 // Destinations could be a single node, several nodes or all nodes in 
-// the range of coverage. In this way, this protocol is able to perfom unicast,
+// the collision domain. In this way, this protocol is able to perfom unicast,
 // multicast or broadcast communications taking advantage of the natural
 // L2 broadcast. The communication scheme is configurable. Destinations are
 // drawn in a random way. This protocol forwarding packets only if the option
@@ -63,34 +63,37 @@ simple ProbabilisticCast extends NetworkProtocolBase like INetworkProtocol {
     // to a value that is greater than bcperiod.
     // (took from ProbabilisticBroadcast)
     double maxFirstBcastBackoff @unit(s) = default(1 s);
-    // @signal[recvPktNum](long)
-    // @statistic[recvPktNum](
-    //     title = "Number of received packets";
-    //     record = vector
-    // );
-    // @signal[sentPktNum](long)
-    // @statistic[sentPktNum](
-    //     title = "Number of sent packets";
-    //     record = vector
-    // );
-    // @signal[fwdPktNum](long)
-    // @statistic[fwdPktNum](
-    //     title = "Number of forwarded packets";
-    //     record = vector
-    // );
-    // @signal[hopCount](long)
-    // @statistic[fwdPktNum](
-    //     title = "Number of hops of forwarded packets";
-    //     record = vector
-    // );
-    // @signal[drpPktNum](long)
-    // @statistic[fwdPktNum](
-    //     title = "Number of dropped packets";
-    //     record = vector
-    // );
-    // @signal[qTime](simtime_t)
-    // @statistic[qTime](
-    //     title = "Queueing time";
-    //     record = vector
-    // );
+    // This signal carries the forwading list the routing protocol computes
+    // when an upper layer request the probabilistic cast service
+    @signal[fwdList](type=ForwadingListNotification?);
+    @signal[recvPktNum](long)
+    @statistic[recvPktNum](
+        title = "Number of received packets";
+        record = vector
+    );
+    @signal[sentPktNum](long)
+    @statistic[sentPktNum](
+        title = "Number of sent packets";
+        record = vector
+    );
+    @signal[fwdPktNum](long)
+    @statistic[fwdPktNum](
+        title = "Number of forwarded packets";
+        record = vector
+    );
+    @signal[hopCount](long)
+    @statistic[fwdPktNum](
+        title = "Number of hops of forwarded packets";
+        record = vector
+    );
+    @signal[drpPktNum](long)
+    @statistic[fwdPktNum](
+        title = "Number of dropped packets";
+        record = vector
+    );
+    @signal[qTime](simtime_t)
+    @statistic[qTime](
+        title = "Queueing time";
+        record = vector
+    );
 }
