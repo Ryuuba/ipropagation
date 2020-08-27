@@ -21,6 +21,8 @@ package informationpropagation.observer;
 // periodically, each time the neighbor cache in the network layer emits
 // a neighborhood notification
 //
+// This observer is particularly useful when nodes move
+//
 
 simple ConnectivityObserver
 {
