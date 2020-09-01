@@ -65,33 +65,33 @@ simple ProbabilisticCast extends NetworkProtocolBase like INetworkProtocol {
     double maxFirstBcastBackoff @unit(s) = default(1 s);
     // This signal carries the forwading list the routing protocol computes
     // when an upper layer request the probabilistic cast service
-    @signal[fwdList](type=ForwadingListNotification?);
-    @signal[recvPktNum](long)
+    @signal[fwdList](type=ForwardingListNotification?);
+    @signal[recvPktNum](long);
     @statistic[recvPktNum](
         title = "Number of received packets";
         record = vector
     );
-    @signal[sentPktNum](long)
+    @signal[sentPktNum](long);
     @statistic[sentPktNum](
         title = "Number of sent packets";
         record = vector
     );
-    @signal[fwdPktNum](long)
+    @signal[fwdPktNum](long);
     @statistic[fwdPktNum](
         title = "Number of forwarded packets";
         record = vector
     );
-    @signal[hopCount](long)
+    @signal[hopCount](long);
     @statistic[fwdPktNum](
         title = "Number of hops of forwarded packets";
         record = vector
     );
-    @signal[drpPktNum](long)
+    @signal[drpPktNum](long);
     @statistic[fwdPktNum](
         title = "Number of dropped packets";
         record = vector
     );
-    @signal[qTime](simtime_t)
+    @signal[qTime](simtime_t);
     @statistic[qTime](
         title = "Queueing time";
         record = vector

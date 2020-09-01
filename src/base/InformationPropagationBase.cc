@@ -19,14 +19,17 @@ Register_Abstract_Class(InformationPropagationBase);
 
 inet::ModuleIdAddress InformationPropagationBase::unspecified_address(0);
 
-omnetpp::simsignal_t InformationPropagationBase::sent_message_signal = 
-  registerSignal("sentMessage");
-omnetpp::simsignal_t InformationPropagationBase::received_message_signal = 
-  registerSignal("receivedMessage");
-omnetpp::simsignal_t InformationPropagationBase::last_status_signal = 
-  registerSignal("lastStatus");
-omnetpp::simsignal_t InformationPropagationBase::infection_time_signal = 
-  registerSignal("infectionTime");
+
+omnetpp::simsignal_t InformationPropagationBase::sent_message_signal 
+  = registerSignal("sentMessage");
+omnetpp::simsignal_t InformationPropagationBase::recv_msg_signal
+  = registerSignal("recvMessage");
+omnetpp::simsignal_t InformationPropagationBase::last_status_signal
+  = registerSignal("lastStatus");
+omnetpp::simsignal_t InformationPropagationBase::infection_time_signal
+  = registerSignal("infectionTime");
+omnetpp::simsignal_t InformationPropagationBase::src_id_signal
+  = registerSignal("srcId");
 
 InformationPropagationBase::InformationPropagationBase()
   : mu(0.0)
@@ -36,8 +39,8 @@ InformationPropagationBase::InformationPropagationBase()
   , round_num(0)
   , diff_time(0.0)
   , infection_time(0.0)
-  , sent_messages(0)
-  , received_messages(0)
+  , sent_msg(0)
+  , recv_msg(0)
   , step_timer(nullptr)
 {
   

@@ -16,8 +16,8 @@ void InformationPropagationApp::initialize(int stage)
     step_timer->setSchedulingPriority(1);
     information_timer->setSchedulingPriority(2);
     diff_time = step_time / double(lambda + 1);
-    WATCH(sent_messages);
-    WATCH(received_messages);
+    WATCH(sent_msg);
+    WATCH(recv_msg); //from IApp
     WATCH(status);
     WATCH(diff_time);
     WATCH(trial_num);
@@ -66,7 +66,7 @@ void InformationPropagationApp::send_message(omnetpp::cMessage* msg)
     encapsulate();
     // App layer requests the L3 layer to draw a random destination
     socket->sendTo(information, inet::L3Address(unspecified_address));
-    emit(sent_message_signal, ++sent_messages);
+    emit(sent_message_signal, ++sent_msg);
     EV_INFO << "InformationPropagationApp: Sending infectious message\n"; 
 }
 
@@ -124,7 +124,8 @@ void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)
   else 
     EV_INFO << "App: Host " << src_address->getId()
             << " is already infected\n";
-  emit(received_message_signal, ++received_messages);
+  emit(src_id_signal, pkt->getSrc().toModuleId().getId());
+  emit(recv_msg_signal, ++recv_msg);
 }
 
 void InformationPropagationApp::refreshDisplay() const
@@ -137,7 +138,8 @@ void InformationPropagationApp::refreshDisplay() const
     display_str.setTagArg("i", 1, "");
 }
 
-void InformationPropagationApp::finish() {
+void InformationPropagationApp::finish()
+{
   infection_time = omnetpp::simTime() - infection_time;
   emit(infection_time_signal, infection_time);
   emit(last_status_signal, status);

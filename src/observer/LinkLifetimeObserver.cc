@@ -19,7 +19,7 @@ void LinkLifetimeObserver::initialize(int stage) {
 
 void LinkLifetimeObserver::handleMessage(omnetpp::cMessage* msg) {
   throw omnetpp::cRuntimeError(
-    "DynamicConnectivityObserver: This module does not receive any messages\
+    "LinkLifetimeObserver: This module does not receive any messages\
     (name = %s)\n", msg->getName()
   );
 }

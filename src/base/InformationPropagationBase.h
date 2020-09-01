@@ -58,9 +58,9 @@ protected:
   /** @brief Statistic: The duration of the infection period */
   omnetpp::simtime_t infection_time;
   /** @brief Statistic: The number of sent messages */
-  long sent_messages;
+  uint64_t sent_msg;
   /** @brief Statistic: The number of received messages */
-  long received_messages;
+  uint64_t recv_msg;
   /** @brief Timer defining when a round starts */
   omnetpp::cMessage* step_timer;
 protected: //App signals that carry statistics
@@ -68,10 +68,11 @@ protected: //App signals that carry statistics
    *         2) Signal carrying the number of received messages
    *         3) Signal carrying the host status
    */
-  static omnetpp::simsignal_t sent_message_signal, 
-                              received_message_signal,
+  static omnetpp::simsignal_t recv_msg_signal,
+                              sent_message_signal,
                               last_status_signal,
-                              infection_time_signal;
+                              infection_time_signal,
+                              src_id_signal;
 protected:
   /** @brief Computes whether this node starts infected or not */
   virtual void compute_initial_state();

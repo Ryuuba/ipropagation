@@ -20,7 +20,10 @@
 #include <omnetpp.h>
 #include "../networklayer/CacheRegister.h"
 
-class NeighborhoodNotificacion : public omnetpp::cObject, omnetpp::noncopyable {
+class NeighborhoodNotificacion
+  : public omnetpp::cObject
+  , omnetpp::noncopyable
+{
 public:
   std::shared_ptr< const std::list<cache_register> > neighborhood;
 public:
@@ -31,8 +34,5 @@ public:
     : neighborhood(neighborhood_)
   { }
 };
-
-Register_Class(NeighborhoodNotificacion);
-
 
 #endif // NEIGHBORHOOD_NOTIFICATION_H

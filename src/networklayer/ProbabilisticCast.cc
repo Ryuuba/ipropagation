@@ -212,9 +212,7 @@ void ProbabilisticCast::handleSelfMessage(omnetpp::cMessage *msg)
               << *src_address << " passes the Bernoulli test." << endl;
       compute_forwarding_list();
       if (!forwarding_list->empty()) {
-        ForwardingListNotificacion notification(
-          std::shared_ptr<const DestinationList>(forwarding_list)
-        );
+        ForwardingListNotification notification(forwarding_list);
         emit(forwarding_list_signal, &notification);
         EV_INFO << "Destination(s): ";
         for (auto& id : *forwarding_list)

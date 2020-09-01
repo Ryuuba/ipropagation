@@ -24,7 +24,7 @@ package informationpropagation.observer;
 // This observer is particularly useful when nodes are static
 //
 
-simple StaticConnectivityObserver
+simple ConnectivityObserver
 {
     parameters:
         @display("i=observer/connectivity_observer");

@@ -23,7 +23,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/probabilistic/ProbabilisticBroadcast.h"
 #include "../app/InformationPropagationApp.h"
-#include "../signal/NeighborNotification.h"
+#include "../signal/NeighborhoodNotification.h"
 #include "../networklayer/CacheRegister.h"
 
 

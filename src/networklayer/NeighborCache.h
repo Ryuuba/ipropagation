@@ -24,7 +24,7 @@
 #include <omnetpp.h>
 
 #include "CacheRegister.h"
-#include "../signal/NeighborNotification.h"
+#include "../signal/NeighborhoodNotification.h"
 
 class NeighborCache : public omnetpp::cSimpleModule {
 public:

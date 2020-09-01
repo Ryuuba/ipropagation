@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <omnetpp.h>
+#include <cstdint>
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/L3Socket.h"
@@ -12,8 +13,10 @@
 
 class IApp
   : public omnetpp::cSimpleModule
-  , public inet::L3Socket::ICallback {
+  , public inet::L3Socket::ICallback
+{
 protected: //IAPP attributes
+
   /** @brief the packet containing the information to be broadcasted */
   inet::Packet* information;
   /** @brief the timer indicating when to send an information packet */
@@ -43,5 +46,6 @@ public:
   { }
   virtual ~IApp () { }
 };
+
 
 #endif // I_APP_H

@@ -25,7 +25,7 @@
 #include <iomanip>
 #include "inet/common/INETDefs.h"
 #include "../common/SquareMatrix.h"
-#include "../signal/NeighborNotification.h"
+#include "../signal/NeighborhoodNotification.h"
 #include "../common/ConnectivityObserverCell.h"
 
 class LinkLifetimeObserver

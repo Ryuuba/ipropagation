@@ -13,26 +13,31 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if !defined(FORWARDING_LIST_H)
-#define FORWARDING_LIST_H
+#if !defined(FORWARDING_LIST_NOTIFICATION_H)
+#define FORWARDING_LIST_NOFITICATION_H
 
 #include <memory>
 #include <omnetpp.h>
 #include "../msg/ProbabilisticCastHeader_m.h"
 
-class ForwardingListNotificacion : public omnetpp::cObject, omnetpp::noncopyable {
+class ForwardingListNotification 
+  : public omnetpp::cObject
+  , omnetpp::noncopyable
+{
 public:
-  std::shared_ptr<const DestinationList> forwarding_list;
+  DestinationListPtr forwarding_list;
 public:
-  ForwardingListNotificacion() : forwarding_list(nullptr) {}
-  ForwardingListNotificacion(
+  ForwardingListNotification() 
+    : forwarding_list(nullptr)
+  { }
+  
+  ForwardingListNotification(
     const std::shared_ptr<const DestinationList> _forwarding_list
   )
     : forwarding_list(_forwarding_list)
   { }
 };
 
-Register_Class(ForwardingListNotificacion);
 
 
-#endif // FORWARDING_LIST_H
+#endif // FORWARDING_LIST_NOTIFICATION_H

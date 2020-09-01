@@ -13,8 +13,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if !defined(STATIC_CONNECTIVITY_OBSERVER_H)
-#define STATIC_CONNECTIVITY_OBSERVER_H
+#if !defined(CONNECTIVITY_OBSERVER_H)
+#define CONNECTIVITY_OBSERVER_H
 
 #include <fstream>
 #include <functional>
@@ -26,20 +26,26 @@
 #include <cstdint>
 #include "inet/common/INETDefs.h"
 #include "../common/SquareMatrix.h"
-#include "../signal/NeighborNotification.h"
+#include "../signal/ForwardingListNotification.h"
 #include "../common/ConnectivityObserverCell.h"
 
-class StaticConnectivityObserver
+class ConnectivityObserver
   : public omnetpp::cSimpleModule
   , public omnetpp::cListener
 {
 protected:
   /** @brief The number of host in a simulation */
   size_t host_number;
-  /** @brief This adjacency matrix records the times a link has been used */
-  std::shared_ptr<SquareMatrix<uint64_t>> r_matrix;
+  /** @brief This adjacency matrix records the number of times a link is drawn 
+   *  to forward a packet */
+  std::unique_ptr<SquareMatrix<uint64_t>> r_matrix;
+  /** @brief This adjacency matrix records the times a reception is 
+   *  effective */
+  std::unique_ptr<SquareMatrix<uint64_t>> e_matrix;
   /** @brief This signal carries the ID of neighbors being contacted in a round */
-  static omnetpp::simsignal_t neighborhood_notification_signal;
+  static omnetpp::simsignal_t forwarding_list_signal;
+  /** @brief This signal carries the source of app-layer received messages */
+  static omnetpp::simsignal_t src_id_signal;
 protected:
   /** @brief Writes the adjacency matrix when finish is invoked at the end of a 
    * simulation*/
@@ -49,14 +55,19 @@ public:
     return inet::NUM_INIT_STAGES;
   }
   /** @brief Default constructor */
-  StaticConnectivityObserver()
+  ConnectivityObserver()
     : host_number(0)
     , r_matrix(nullptr)
+    , e_matrix(nullptr)
   { }
-  ~StaticConnectivityObserver() 
+  ~ConnectivityObserver() 
   { 
     getSimulation()->getSystemModule()->unsubscribe(
-      neighborhood_notification_signal,
+      forwarding_list_signal,
+      this
+    );
+    getSimulation()->getSystemModule()->unsubscribe(
+      src_id_signal,
       this
     );
   }
@@ -64,18 +75,14 @@ public:
   virtual void initialize(int) override;
   /** @brief This module does not process messages */
   virtual void handleMessage(omnetpp::cMessage*) override;
-  /** @brief Writes the adjacency matrix in a file when the simulation ends */
+  /** @brief Writes the r matrix, the f matrix and the difference between such matrices in a file when the simulation ends */
   virtual void finish() override;
-  /** @brief Receives the one-hop neighborhood and updates the adjacency matrix */
+  /** @brief Receives the forwarding list the routing protocol computes. */
   virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
-    omnetpp::cObject*, omnetpp::cObject*);
-  /** @brief Returns a shared pointer to the adjacency matrix
-   *  @params host id
-  */
-  virtual std::shared_ptr<const SquareMatrix<uint64_t> > get_adjacency_matrix() {
-    std::shared_ptr<const SquareMatrix<uint64_t> > m = r_matrix;
-    return m;
-  }
+    omnetpp::cObject*, omnetpp::cObject*) override;
+  /** @brief Receives the message source's ID */
+  virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
+    long, omnetpp::cObject*) override;
 };
 
 

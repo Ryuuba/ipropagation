@@ -48,6 +48,11 @@ public:
 
   ~SquareMatrix() { }
 
+  std::shared_ptr<const T[]> operator()(size_t i) {
+    std::shared_ptr<const T[]> ptr = matrix[i];
+    return ptr;
+  }
+
   T& operator()(size_t x, size_t y) {
     return matrix[x][y];
   }
