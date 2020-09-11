@@ -9,3 +9,4 @@ src/ipropagation*
 out/
 simulations/frames
 simulations/results
+simulations/data_analysis
