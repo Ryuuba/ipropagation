@@ -33,8 +33,9 @@ public:
   };
   /** @brief the sort of timers this app reacts */
   enum TimerKind {
-    STEP = 100,         //Starts a new round
-    SEND_INFORMATION    //Send a message trying to infect a neighbor
+    RECOVERY = 100,         //Starts a new round
+    TRANSMISSION,       //Send a message trying to infect a neighbor
+    SEND_STATS
   };
   /** @brief Returns a string indicating the host status */
   static const char* status_to_string(Status);
@@ -47,14 +48,14 @@ protected:
   double mu;
   /** @brief the number of trials per time step */
   int lambda;
-  /** @brief The duration of a round */
-  omnetpp::simtime_t step_time;
-  /** @brief The number of data sending trials during a step */
-  int trial_num;
   // @brief The number of rounds
   long long round_num;
-  /** @brief The time between two data sending trials */
-  omnetpp::simtime_t diff_time;
+  /** @brief The duration of a transmission */
+  omnetpp::simtime_t unit_time;
+  // /** @brief The number trials during a step */
+  // int trial_num;
+  /** @brief The time between two simulation steps*/
+  omnetpp::simtime_t step_time;
   /** @brief Statistic: The duration of the infection period */
   omnetpp::simtime_t infection_time;
   /** @brief Statistic: The number of sent messages */
@@ -62,7 +63,9 @@ protected:
   /** @brief Statistic: The number of received messages */
   uint64_t recv_msg;
   /** @brief Timer defining when a round starts */
-  omnetpp::cMessage* step_timer;
+  omnetpp::cMessage* recovery_timer;
+  /** @brief Timer to trigger the send of statistics */
+  omnetpp::cMessage* stat_timer;
 protected: //App signals that carry statistics
   /** @brief 1) Signal carrying the number of sent messages 
    *         2) Signal carrying the number of received messages
@@ -81,7 +84,7 @@ protected:
   /** @brief Sends infectious messages to nodes in N(x) */
   virtual void send_message(omnetpp::cMessage*) = 0;
   /** @brief Tries to recovery from an infection */
-  virtual void try_recovery(omnetpp::cMessage*) = 0;
+  virtual void try_recovery() = 0;
   /** @brief Process the received packet */
   virtual void process_packet(inet::Ptr<inet::InfoPacket>) = 0;
 protected: //Member functions inherited from INetworkSocket::ICallBack

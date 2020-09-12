@@ -16,7 +16,7 @@ omnetpp::simsignal_t InfectionObserver::neighborhood_notification_signal =
 
 
 InfectionObserver::~InfectionObserver() {
-  cancelAndDelete(step_timer);
+  cancelAndDelete(recovery_timer);
   getSimulation()->getSystemModule()->unsubscribe(
     neighborhood_notification_signal,
     this
@@ -30,7 +30,9 @@ void InfectionObserver::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     epsilon = par("epsilon");
     round_num = par("roundNumber").intValue();
-    step_time = par("step");
+    trial_num = par("lambda");
+    step_time = par("unitTime"); //TODO: update round
+    step_time *= trial_num;
     host_num = par("hostNumber").intValue();
     p = std::make_unique< std::vector<InformationPropagationApp::Status> >(host_num, InformationPropagationApp::NOT_INFECTED);
     q = std::make_unique < std::vector<double> >(host_num, 1.0);
@@ -47,9 +49,9 @@ void InfectionObserver::initialize(int stage) {
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("net")->getSubmodule("np");
     app_module = (InformationPropagationApp*) getSimulation()
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("app");
-    step_timer = new omnetpp::cMessage("Step Timer");
+    recovery_timer = new omnetpp::cMessage("Step Timer");
     // Nodes emit their status before the observer compute probabilities
-    step_timer->setSchedulingPriority(10);
+    recovery_timer->setSchedulingPriority(10);
     WATCH(infected_num);
     WATCH(rho);
     WATCH(mu);
@@ -59,7 +61,7 @@ void InfectionObserver::initialize(int stage) {
     beta = net_protocol->par("beta").doubleValue();
     mu = app_module->par("recoveryProbability").doubleValue();
     auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
-    scheduleAt(t0, step_timer);
+    scheduleAt(t0, recovery_timer);
   }
 }
 
@@ -126,7 +128,7 @@ void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
     emit(rho_stat, rho);
     EV_INFO << "Number of infected nodes: " << infected_num << '\n';
     EV_INFO << "Expected infection density: " << rho << '\n';
-    scheduleAt(omnetpp::simTime() + step_time, step_timer);
+    scheduleAt(omnetpp::simTime() + step_time, recovery_timer);
     // bool stop_condition = (round_counter > round_num) || (rho == 0.0);
     if (round_counter > round_num)
       endSimulation();

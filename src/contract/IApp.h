@@ -20,7 +20,7 @@ protected: //IAPP attributes
   /** @brief the packet containing the information to be broadcasted */
   inet::Packet* information;
   /** @brief the timer indicating when to send an information packet */
-  omnetpp::cMessage* information_timer;
+  omnetpp::cMessage* transmission_timer;
   /** @brief the ID of the input gate */
   int input_gate_id;
   /** @brief the ID of the output gate */
@@ -37,7 +37,7 @@ protected: //Member functions inherited from INetworkSocket::ICallBack
 public:
   IApp ()
     : information(nullptr)
-    , information_timer(nullptr)
+    , transmission_timer(nullptr)
     , input_gate_id(-1)
     , output_gate_id(-1)
     , src_address(nullptr)

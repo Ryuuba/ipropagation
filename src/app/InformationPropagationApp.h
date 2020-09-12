@@ -34,7 +34,7 @@ protected: //App member functions
   /** @brief Sends a message to a random destination drawn by the L3 layer */
   virtual void send_message(omnetpp::cMessage*) override;
   /** @brief Tries to recovery from an infection */
-  virtual void try_recovery(omnetpp::cMessage*) override;
+  virtual void try_recovery() override;
   /** @brief Process the received packet */
   virtual void process_packet(inet::Ptr<inet::InfoPacket>) override;
   /** @brief Handle the timers of this application */

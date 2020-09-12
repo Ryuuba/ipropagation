@@ -28,7 +28,8 @@ network PropagationInformationStationary
         @display("bgb=700,700;bgg=,,grey10");
         int hostNumber = default(2);
         bool hasSelfSimilarMap = default(false);
-        double simulationStep @unit(s);
+        double unitTime @unit(s);
+        int lambda;
     submodules:
         radioMedium: <> like IRadioMedium {
             @display("p=640,20;is=s");
@@ -36,7 +37,8 @@ network PropagationInformationStationary
         node[hostNumber]: WirelessBroadcastNode {
             @display("p=250,250;is=s");
             mobility.numHosts = hostNumber;
-            app.step = simulationStep;
+            app.unitTime = unitTime;
+            app.lambda = lambda;
         }
         connectivityobserver: ConnectivityObserver {
             @display("p=640,80;is=s");
@@ -45,7 +47,8 @@ network PropagationInformationStationary
         infectionobserver: InfectionObserver {
             @display("p=640,140;is=s");
             hostNumber = hostNumber;
-            step = simulationStep;
+            unitTime = unitTime;
+            lambda = lambda;
         }
         map: SelfSimilarWaypointMap if hasSelfSimilarMap {
             @display("p=640,200;is=s");

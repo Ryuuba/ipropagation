@@ -52,7 +52,7 @@ void ConnectivityObserver::receiveSignal(
 void ConnectivityObserver::receiveSignal(
   omnetpp::cComponent* src,   //@param the module emitting the signal 
   omnetpp::simsignal_t id,    //@param the signal id
-  long src_id,                   //@param the object the signal carries
+  long src_id,                //@param the object the signal carries
   omnetpp::cObject* details   //@param details about the object
 ) {
   auto netw_layer = dynamic_cast<omnetpp::cModule*>(src)->getParentModule();

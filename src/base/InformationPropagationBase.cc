@@ -34,22 +34,23 @@ omnetpp::simsignal_t InformationPropagationBase::src_id_signal
 InformationPropagationBase::InformationPropagationBase()
   : mu(0.0)
   , lambda(0)
-  , step_time(0.0)
-  , trial_num(0)
   , round_num(0)
-  , diff_time(0.0)
+  , unit_time(0.0)
+  , step_time(0.0)
   , infection_time(0.0)
   , sent_msg(0)
   , recv_msg(0)
-  , step_timer(nullptr)
+  , recovery_timer(nullptr)
+  , stat_timer(nullptr)
 {
   
 }
 
 InformationPropagationBase::~InformationPropagationBase()
 {
-  cancelAndDelete(step_timer);
-  cancelAndDelete(information_timer);
+  cancelAndDelete(recovery_timer);
+  cancelAndDelete(stat_timer);
+  cancelAndDelete(transmission_timer);
   if (socket) {
     delete socket;
     socket = nullptr;
@@ -60,12 +61,14 @@ void InformationPropagationBase::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     input_gate_id = gate("inputSocket")->getId();
     output_gate_id = gate("outputSocket")->getId();
-    step_timer = new omnetpp::cMessage("step timer");
-    information_timer = new omnetpp::cMessage("information timer");
+    recovery_timer = new omnetpp::cMessage("recovery timer");
+    stat_timer = new omnetpp::cMessage("stat timer");
+    transmission_timer = new omnetpp::cMessage("transmission timer");
     netw_protocol = &inet::Protocol::probabilistic;
     mu = par("recoveryProbability");
-    lambda = par("numberOfTrials").intValue();
-    step_time = par("step");
+    lambda = par("lambda").intValue();
+    unit_time = par("unitTime");
+    step_time = lambda * unit_time;
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
     auto id = inet::getContainingNode(this)->getIndex() + 1; //unicast address

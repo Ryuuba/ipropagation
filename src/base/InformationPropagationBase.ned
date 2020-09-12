@@ -19,9 +19,9 @@ import informationpropagation.contract.IApp;
 simple InformationPropagationBase like IApp{
     parameters:
         @display("i=block/infection_app");
-        double step @unit(s);
+        double unitTime @unit(s);
         double recoveryProbability;  //a.k.a. mu
-        int numberOfTrials;          //a.k.a. lambda
+        int lambda;          //a.k.a. lambda
         double initialInfectionProbability; //a.k.a rho0
         @signal[sentMessage](type = unsigned long);
         @statistic[sentMessage](title = "number of sent infectious messages"; record = vector);

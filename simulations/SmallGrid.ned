@@ -46,12 +46,14 @@ network SmallGrid
 {
     parameters:
         @display("bgb=250,160;bgg=,,grey10");
-        double simulationStep @unit(s);
+        double unitTime @unit(s);
+        int lambda;
     submodules:
         node[16]: WirelessBroadcastNode {
             @display("p=200,200;is=s");
             mobility.numHosts = 16;
-            app.step = simulationStep;
+            app.unitTime = unitTime;
+            app.lambda = lambda;
         }
         radioMedium: <> like IRadioMedium {
             @display("p=200,20;is=s");
@@ -63,7 +65,8 @@ network SmallGrid
         infectionobserver: InfectionObserver {
             @display("p=200,100;is=s");
             hostNumber = 16;
-            step = simulationStep;
+            unitTime = unitTime;
+            lambda = lambda;
         }
     connections allowunconnected:
 }

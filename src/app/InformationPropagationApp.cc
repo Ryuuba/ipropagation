@@ -8,49 +8,56 @@ void InformationPropagationApp::initialize(int stage)
   if (stage == inet::INITSTAGE_LOCAL) {
     payload = par("payload");
     packet_name = par("packetName").stringValue();
-    step_timer->setKind(InformationPropagationBase::TimerKind::STEP);
-    information_timer->setKind(
-      InformationPropagationBase::TimerKind::SEND_INFORMATION
+    recovery_timer->setKind(InformationPropagationBase::TimerKind::RECOVERY);
+    stat_timer->setKind(InformationPropagationBase::TimerKind::SEND_STATS);
+    transmission_timer->setKind(
+      InformationPropagationBase::TimerKind::TRANSMISSION
     );
     // Step is most relevant than sending information
-    step_timer->setSchedulingPriority(1);
-    information_timer->setSchedulingPriority(2);
-    diff_time = step_time / double(lambda + 1);
+    recovery_timer->setSchedulingPriority(1);
+    transmission_timer->setSchedulingPriority(2);
+    stat_timer->setSchedulingPriority(3);
     WATCH(sent_msg);
     WATCH(recv_msg); //from IApp
-    WATCH(status);
-    WATCH(diff_time);
-    WATCH(trial_num);
+    WATCH(status);;
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
     auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
-    scheduleAt(t0, step_timer);
+    auto t1 = t0 + step_time;
+    scheduleAt(t0 + unit_time, transmission_timer);
+    scheduleAt(t1, recovery_timer);
+    scheduleAt(t0, stat_timer);
   }
 }
 
 void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
 {
   if (msg->isSelfMessage()) {
-    if (msg->getKind() == STEP) {
-      if (status == INFECTED) {
-        scheduleAt(omnetpp::simTime() + diff_time, information_timer);
-        if (round_num > 0)
-          try_recovery(msg);
-      }
+    switch (msg->getKind())
+    {
+    case RECOVERY:
+      if (status == INFECTED)
+        try_recovery();
+      scheduleAt(omnetpp::simTime() + step_time, msg);
+      break;
+    case TRANSMISSION:
+      if (status == INFECTED)
+        send_message(msg);
+      scheduleAt(omnetpp::simTime() + unit_time, msg);
+      break;
+    case SEND_STATS:
       round_num++;
       EV_INFO << "The status of host " << src_address->getId() 
               << " is " << status_to_string(status) 
               << " at round " << round_num << '\n';
       emit(last_status_signal, status);
-      scheduleAt(omnetpp::simTime() + step_time, step_timer);
-    }
-    else if (msg->getKind() == SEND_INFORMATION) {
-      send_message(msg);
-      trial_num++;
-      if (trial_num < lambda)
-        scheduleAt(omnetpp::simTime() + diff_time, information_timer);
-      else
-        trial_num = 0;
+      scheduleAt(omnetpp::simTime() + step_time, msg);
+      break;
+    default:
+      throw omnetpp::cRuntimeError(
+        "App: Invalid message kind %s", msg->getName()
+      );
+      break;
     }
   }
   else if(socket->belongsToSocket(msg)) {
@@ -89,23 +96,21 @@ void InformationPropagationApp::encapsulate() {
   addressReq->setDestAddress(inet::ModuleIdAddress());
 }
 
-void InformationPropagationApp::try_recovery(omnetpp::cMessage* msg)
+void InformationPropagationApp::try_recovery()
 {
   EV_INFO << "Status of node " << src_address->getId()
           << " is " << status_to_string(status) << '\n';
-  if (status == InformationPropagationBase::INFECTED) {
-    if (bernoulli(mu)) {
-      EV_INFO << "Host " << src_address->getId() << " recovers from infection\n";
-      infection_time = omnetpp::simTime() - infection_time;
-      emit(infection_time_signal, infection_time);
-      cancelEvent(information_timer);
-      status = InformationPropagationBase::NOT_INFECTED;
-      if (hasGUI())
-        getParentModule()->bubble("Get not infected!");
-    }
-    else
-      EV_INFO << "Host " << src_address->getId() << " fails to recover from infection\n";
+  if (bernoulli(mu)) {
+    EV_INFO << "Host " << src_address->getId() << " recovers from infection\n";
+    infection_time = omnetpp::simTime() - infection_time;
+    emit(infection_time_signal, infection_time);
+    status = InformationPropagationBase::NOT_INFECTED;
+    if (hasGUI())
+      getParentModule()->bubble("Get not infected!");
   }
+  else
+    EV_INFO << "Host " << src_address->getId() << " fails to recover from infection\n";
+
 }
 
 void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)

@@ -25,7 +25,8 @@ simple InfectionObserver
 {
     int roundNumber; // Number of rounds
     int hostNumber;
-    double step @unit(s); //the duration of a round
+    int lambda; //Number of trials per round
+    double unitTime @unit(s); //the duration of a round
     double epsilon = default(0.001);
     @display("i=observer/infection_observer");
     @signal[infectedNodes](type = unsigned long);
