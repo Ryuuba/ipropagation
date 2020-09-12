@@ -69,15 +69,17 @@ void ConnectivityObserver::finish() {
   std::ofstream ofs( result_file + "-rij" + ".mat" );
   //Computes the number of attempts of transmissions per node
   std::vector<uint64_t> msg_tx(host_number, 0);
+  double r_ij;
   for (size_t i = 0; i < r_matrix->size(); i++)
     for (size_t j = 0; j < r_matrix->size(); j++)
       msg_tx[i] += (*r_matrix)(i, j);
   //Writes rij (attempt)
   try {
     for (size_t i = 0; i < r_matrix->size(); i++) {
-      for (size_t j = 0; j < r_matrix->size(); j++)
-        ofs << std::fixed << std::setprecision(2) 
-            << double((*r_matrix)(i, j))/msg_tx[i] <<  ' ';
+      for (size_t j = 0; j < r_matrix->size(); j++) {
+        r_ij = (msg_tx[i] == 0) ? 0.0 : double((*r_matrix)(i, j))/msg_tx[i];
+        ofs << std::fixed << std::setprecision(2) << r_ij <<  ' ';
+        }
       ofs << '\n';
     }
   }
@@ -89,9 +91,10 @@ void ConnectivityObserver::finish() {
   ofs.open(result_file + "-eff" + ".mat");
   try {
     for (size_t i = 0; i < e_matrix->size(); i++) {
-      for (size_t j = 0; j < e_matrix->size(); j++)
-        ofs << std::fixed << std::setprecision(2) 
-            << double((*e_matrix)(i, j))/msg_tx[i] << ' ';
+      for (size_t j = 0; j < e_matrix->size(); j++) {
+        r_ij = (msg_tx[i] == 0) ? 0.0 : double((*e_matrix)(i, j))/msg_tx[i];
+        ofs << std::fixed << std::setprecision(2) << r_ij << ' ';
+        }
       ofs << '\n';
     }
   }
