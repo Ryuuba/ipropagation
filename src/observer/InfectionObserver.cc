@@ -16,7 +16,7 @@ omnetpp::simsignal_t InfectionObserver::neighborhood_notification_signal =
 
 
 InfectionObserver::~InfectionObserver() {
-  cancelAndDelete(recovery_timer);
+  cancelAndDelete(round_timer);
   getSimulation()->getSystemModule()->unsubscribe(
     neighborhood_notification_signal,
     this
@@ -30,9 +30,10 @@ void InfectionObserver::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     epsilon = par("epsilon");
     round_num = par("roundNumber").intValue();
+    std::cout << "Number of rounds: " << round_num << '\n';
     trial_num = par("lambda");
-    step_time = par("unitTime"); //TODO: update round
-    step_time *= trial_num;
+    unit_time = par("unitTime");
+    round_time = unit_time * trial_num;
     host_num = par("hostNumber").intValue();
     p = std::make_unique< std::vector<InformationPropagationApp::Status> >(host_num, InformationPropagationApp::NOT_INFECTED);
     q = std::make_unique < std::vector<double> >(host_num, 1.0);
@@ -49,19 +50,20 @@ void InfectionObserver::initialize(int stage) {
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("net")->getSubmodule("np");
     app_module = (InformationPropagationApp*) getSimulation()
       ->getSystemModule()->getSubmodule("node", 0)->getSubmodule("app");
-    recovery_timer = new omnetpp::cMessage("Step Timer");
+    round_timer = new omnetpp::cMessage("Round Timer");
     // Nodes emit their status before the observer compute probabilities
-    recovery_timer->setSchedulingPriority(10);
+    round_timer->setSchedulingPriority(10);
     WATCH(infected_num);
     WATCH(rho);
     WATCH(mu);
     WATCH(beta);
+    WATCH(round_counter);
   }
   else if(stage == inet::INITSTAGE_APPLICATION_LAYER) {
     beta = net_protocol->par("beta").doubleValue();
     mu = app_module->par("recoveryProbability").doubleValue();
     auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
-    scheduleAt(t0, recovery_timer);
+    scheduleAt(t0, round_timer);
   }
 }
 
@@ -119,18 +121,19 @@ void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
   if (msg->isSelfMessage()) {
     infected_num = std::accumulate(p->begin(), p->end(), 0.0);
     double new_rho = double(infected_num) / host_num;
-    if (fabs(new_rho - rho) < epsilon) {
-      round_counter++; // Increments rounds in possible stationaty state
-      EV_INFO << "Round number (steady state): " << round_counter << '\n';
-    }
+    round_counter++; // Increments rounds in possible stationaty state
+    // if (fabs(new_rho - rho) < epsilon) {
+    //   round_counter++; // Increments rounds in possible stationaty state
+    //   EV_INFO << "Round number (steady state): " << round_counter << '\n';
+    // }
     rho = new_rho;
     emit(infected_node_stat, infected_num);
     emit(rho_stat, rho);
     EV_INFO << "Number of infected nodes: " << infected_num << '\n';
     EV_INFO << "Expected infection density: " << rho << '\n';
-    scheduleAt(omnetpp::simTime() + step_time, recovery_timer);
+    scheduleAt(omnetpp::simTime() + round_time, round_timer);
     // bool stop_condition = (round_counter > round_num) || (rho == 0.0);
-    if (round_counter > round_num)
+    if (round_counter > round_num || rho == 0.0)
       endSimulation();
   }
   else 

@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-fileset="results/*.vec"
-result_dir=$1
-mkdir -p $1
+fileset=$1"/*.vec"
+result_dir=$2
+mkdir -p $2
 
 for file in $fileset; do
-  suffix=$(echo $file | cut -d'-' -f 2)
+  suffix=$(echo $file | cut -d'-' -f 3)
   suffix=$(echo $suffix | cut -d'.' -f 1)
+  echo $suffix
   result_file=$1$"/r_"$suffix".txt"
   echo $result_file
   read index <<< $( awk -F $' ' '/rho/{print $2}' $file )

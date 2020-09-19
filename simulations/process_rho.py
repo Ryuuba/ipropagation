@@ -6,6 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt 
 import numpy as np 
 import sys
+import glob
 
 
 def main():
@@ -15,11 +16,11 @@ def main():
     except IndexError:
         plt_name = ''
     print('Reading files from', result_dir)
-    file_set = listdir(result_dir)
+    file_set = glob.glob(result_dir + '/*.txt')
     accum = []
     i = 0
     for file in file_set:
-        with open(result_dir + '/' + file) as f:
+        with open(file) as f:
             j = 0
             for line in f.readlines():
                 if i == 0:
@@ -29,8 +30,12 @@ def main():
                 j += 1
         i += 1
     avg = []
+    rho_file = open('rho.txt', 'w')
     for val in accum:
-        avg.append(val / len(file_set))
+        rho = val / len(file_set)
+        rho_file.write(str(rho) + '\n')
+        avg.append(rho)
+
     matplotlib.use('Qt5Agg')
     plt.plot(avg, '-', color='chartreuse')
     if plt_name != '':

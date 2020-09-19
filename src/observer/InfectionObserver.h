@@ -66,10 +66,12 @@ protected:
   std::unique_ptr <std::vector<std::shared_ptr< const std::list<cache_register> > > >adjacency_matrix;
   // @brief The number of transmission trials per round
   int trial_num;
+  // @brief The time between transmissions
+  omnetpp::simtime_t unit_time;
   // @brief The duration of a round
-  omnetpp::simtime_t step_time;
+  omnetpp::simtime_t round_time;
   // @brief Timer
-  omnetpp::cMessage* recovery_timer;
+  omnetpp::cMessage* round_timer;
 protected:
   // @brief Computes the probability a node i gets infected
   virtual double compute_rho();
@@ -89,8 +91,9 @@ public:
     , next_p(nullptr)
     , adjacency_matrix(nullptr)
     , trial_num(0)
-    , step_time(0.0)
-    , recovery_timer(nullptr)
+    , unit_time(0.0)
+    , round_time(0.0)
+    , round_timer(nullptr)
   { }
   // @brief Default destructor
   virtual ~InfectionObserver();
