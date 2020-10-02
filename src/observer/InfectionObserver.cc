@@ -30,7 +30,6 @@ void InfectionObserver::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     epsilon = par("epsilon");
     round_num = par("roundNumber").intValue();
-    std::cout << "Number of rounds: " << round_num << '\n';
     trial_num = par("lambda");
     unit_time = par("unitTime");
     round_time = unit_time * trial_num;

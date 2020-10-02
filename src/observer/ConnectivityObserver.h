@@ -24,9 +24,11 @@
 #include <string>
 #include <iomanip>
 #include <cstdint>
+#include <set>
 #include "inet/common/INETDefs.h"
 #include "../common/SquareMatrix.h"
 #include "../signal/ForwardingListNotification.h"
+#include "../signal/SourceNotification.h"
 #include "../common/ConnectivityObserverCell.h"
 
 class ConnectivityObserver
@@ -36,16 +38,27 @@ class ConnectivityObserver
 protected:
   /** @brief The number of host in a simulation */
   size_t host_number;
+  /** @brief The number of times a node with ID 'i' is infected */
+  std::unique_ptr<std::vector<uint64_t>> contact_cnt;
   /** @brief This adjacency matrix records the number of times a link is drawn 
    *  to forward a packet */
   std::unique_ptr<SquareMatrix<uint64_t>> r_matrix;
-  /** @brief This adjacency matrix records the times a reception is 
-   *  effective */
-  std::unique_ptr<SquareMatrix<uint64_t>> e_matrix;
+  /** @brief This matrix records the number of times node i contacts node j */
+  std::unique_ptr<SquareMatrix<uint64_t>> c_matrix;
+  /** @brief The IDs of source node in a round */
+  std::set<int> global_src_set;
+  // @brief The number of transmission trials per round
+  int trial_num;
+  // @brief The time between transmissions
+  omnetpp::simtime_t unit_time;
+  // @brief The duration of a round
+  omnetpp::simtime_t round_time;
+  // @brief Timer
+  omnetpp::cMessage* round_timer;
   /** @brief This signal carries the ID of neighbors being contacted in a round */
   static omnetpp::simsignal_t forwarding_list_signal;
   /** @brief This signal carries the source of app-layer received messages */
-  static omnetpp::simsignal_t src_id_signal;
+  static omnetpp::simsignal_t src_set_signal;
 protected:
   /** @brief Writes the adjacency matrix when finish is invoked at the end of a 
    * simulation*/
@@ -57,8 +70,10 @@ public:
   /** @brief Default constructor */
   ConnectivityObserver()
     : host_number(0)
+    , contact_cnt(nullptr)
     , r_matrix(nullptr)
-    , e_matrix(nullptr)
+    , c_matrix(nullptr)
+    , round_timer(nullptr)
   { }
   ~ConnectivityObserver() 
   { 
@@ -67,9 +82,10 @@ public:
       this
     );
     getSimulation()->getSystemModule()->unsubscribe(
-      src_id_signal,
+      src_set_signal,
       this
     );
+    cancelAndDelete(round_timer);
   }
   /** @brief Initializes the module state */
   virtual void initialize(int) override;
@@ -80,9 +96,6 @@ public:
   /** @brief Receives the forwarding list the routing protocol computes. */
   virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
     omnetpp::cObject*, omnetpp::cObject*) override;
-  /** @brief Receives the message source's ID */
-  virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
-    long, omnetpp::cObject*) override;
 };
 
 

@@ -17,7 +17,10 @@
 #define INFORMATION_PROPAGATION_BASE_H
 
 #include <omnetpp.h>
+#include <set>
+#include <memory>
 #include "../contract/IApp.h"
+#include "../signal/SourceNotification.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -66,6 +69,8 @@ protected:
   omnetpp::cMessage* recovery_timer;
   /** @brief Timer to trigger the send of statistics */
   omnetpp::cMessage* stat_timer;
+  /** @brief The netw address of nodes contacting this one */
+  std::shared_ptr<std::set<int>> src_set;
 protected: //App signals that carry statistics
   /** @brief 1) Signal carrying the number of sent messages 
    *         2) Signal carrying the number of received messages
@@ -75,7 +80,7 @@ protected: //App signals that carry statistics
                               sent_message_signal,
                               last_status_signal,
                               infection_time_signal,
-                              src_id_signal;
+                              src_set_signal;
 protected:
   /** @brief Computes whether this node starts infected or not */
   virtual void compute_initial_state();

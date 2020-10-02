@@ -23,12 +23,11 @@ simple InformationPropagationBase like IApp{
         double recoveryProbability;  //a.k.a. mu
         int lambda;          //a.k.a. lambda
         double initialInfectionProbability; //a.k.a rho0
+        @signal[srcSet](type=SourceNotification?);
         @signal[sentMessage](type = unsigned long);
         @statistic[sentMessage](title = "number of sent infectious messages"; record = vector);
         @signal[recvMessage](type = unsigned long);
         @statistic[recvMessage](title = "number of received infectious messages"; record = vector);
-        @signal[srcId](type = long);
-        @statistic[srcId](title = "ID of the infection source"; record = vector);
         @signal[infectionTime](type = simtime_t);
         @statistic[infectionTime](title = "infection time"; record = vector);
         @signal[lastStatus](type = long);

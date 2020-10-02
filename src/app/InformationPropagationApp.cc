@@ -46,13 +46,18 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
       scheduleAt(omnetpp::simTime() + unit_time, msg);
       break;
     case SEND_STATS:
+    {
       round_num++;
       EV_INFO << "The status of host " << src_address->getId() 
               << " is " << status_to_string(status) 
               << " at round " << round_num << '\n';
       emit(last_status_signal, status);
+      SourceNotification notification(src_set);
+      emit(src_set_signal, &notification);
+      src_set->clear();
       scheduleAt(omnetpp::simTime() + step_time, msg);
       break;
+    }
     default:
       throw omnetpp::cRuntimeError(
         "App: Invalid message kind %s", msg->getName()
@@ -129,7 +134,8 @@ void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)
   else 
     EV_INFO << "App: Host " << src_address->getId()
             << " is already infected\n";
-  emit(src_id_signal, pkt->getSrc().toModuleId().getId());
+  int src_id = pkt->getSrc().toModuleId().getId();
+  src_set->insert(src_id);
   emit(recv_msg_signal, ++recv_msg);
 }
 

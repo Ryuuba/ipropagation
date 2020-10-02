@@ -28,8 +28,8 @@ omnetpp::simsignal_t InformationPropagationBase::last_status_signal
   = registerSignal("lastStatus");
 omnetpp::simsignal_t InformationPropagationBase::infection_time_signal
   = registerSignal("infectionTime");
-omnetpp::simsignal_t InformationPropagationBase::src_id_signal
-  = registerSignal("srcId");
+omnetpp::simsignal_t InformationPropagationBase::src_set_signal
+  = registerSignal("srcSet");
 
 InformationPropagationBase::InformationPropagationBase()
   : mu(0.0)
@@ -42,6 +42,7 @@ InformationPropagationBase::InformationPropagationBase()
   , recv_msg(0)
   , recovery_timer(nullptr)
   , stat_timer(nullptr)
+  , src_set(nullptr)
 {
   
 }
@@ -64,6 +65,7 @@ void InformationPropagationBase::initialize(int stage) {
     recovery_timer = new omnetpp::cMessage("recovery timer");
     stat_timer = new omnetpp::cMessage("stat timer");
     transmission_timer = new omnetpp::cMessage("transmission timer");
+    src_set = std::make_shared<std::set<int>>();
     netw_protocol = &inet::Protocol::probabilistic;
     mu = par("recoveryProbability");
     lambda = par("lambda").intValue();
