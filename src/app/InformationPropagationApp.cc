@@ -13,7 +13,7 @@ void InformationPropagationApp::initialize(int stage)
     transmission_timer->setKind(
       InformationPropagationBase::TimerKind::TRANSMISSION
     );
-    // Step is most relevant than sending information
+    // Recovery is most relevant than sending information
     recovery_timer->setSchedulingPriority(1);
     transmission_timer->setSchedulingPriority(2);
     stat_timer->setSchedulingPriority(3);
@@ -33,20 +33,23 @@ void InformationPropagationApp::initialize(int stage)
 void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
 {
   if (msg->isSelfMessage()) {
-    switch (msg->getKind())
-    {
-    case RECOVERY:
+    if (msg->getKind() == RECOVERY) {
+      if (hasGUI())
+        getParentModule()->bubble("Recovery");
       if (status == INFECTED)
         try_recovery();
       scheduleAt(omnetpp::simTime() + step_time, msg);
-      break;
-    case TRANSMISSION:
+    }
+    else if (msg->getKind() == TRANSMISSION) {
+      if (hasGUI())
+        getParentModule()->bubble("Transmission");
       if (status == INFECTED)
         send_message(msg);
       scheduleAt(omnetpp::simTime() + unit_time, msg);
-      break;
-    case SEND_STATS:
-    {
+    }
+    else if (msg->getKind() == SEND_STATS) {
+      if (hasGUI())
+        getParentModule()->bubble("Send stats");
       round_num++;
       EV_INFO << "The status of host " << src_address->getId() 
               << " is " << status_to_string(status) 
@@ -55,15 +58,16 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
       SourceNotification notification(src_set);
       emit(src_set_signal, &notification);
       src_set->clear();
-      scheduleAt(omnetpp::simTime() + step_time, msg);
-      break;
+      // It's assumed the maximum delay is constrained
+      if (omnetpp::simTime() == getSimulation()->getWarmupPeriod())
+        scheduleAt(omnetpp::simTime() + step_time + max_bcast_delay, msg);
+      else
+        scheduleAt(omnetpp::simTime() + step_time, msg);
     }
-    default:
+    else
       throw omnetpp::cRuntimeError(
         "App: Invalid message kind %s", msg->getName()
       );
-      break;
-    }
   }
   else if(socket->belongsToSocket(msg)) {
     socket->processMessage(msg);

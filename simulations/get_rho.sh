@@ -5,10 +5,10 @@ result_dir=$2
 mkdir -p $2
 
 for file in $fileset; do
-  suffix=$(echo $file | cut -d'-' -f 3)
-  suffix=$(echo $suffix | cut -d'.' -f 1)
+  suffix=$(echo $file | cut -d'_' -f 2)
+  suffix=$(echo $suffix | cut -d'.' -f 4 --complement)
   echo $suffix
-  result_file=$1$"/r_"$suffix".txt"
+  result_file=$2$"/rho_"$suffix".txt"
   echo $result_file
   read index <<< $( awk -F $' ' '/rho/{print $2}' $file )
   awk -F $'\t' -v i=$index '{if($1 == i) print $3, $4}' $file > $result_file

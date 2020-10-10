@@ -19,7 +19,8 @@ def read_file(filename):
 
 def plot(x, y, plt_name = ''):
     matplotlib.use('Qt5Agg')
-    plt.plot(x, y, '-', color='chartreuse')
+    # plt.plot(x, y, '-', color='chartreuse')
+    plt.plot(y, '-', color='chartreuse')
     if plt_name != '':
         plt.savefig(plt_name)
     plt.show()

@@ -43,8 +43,11 @@ public:
   /** @brief Returns a string indicating the host status */
   static const char* status_to_string(Status);
 protected:
-  /** L3 broadcast address */
+  /** @brief L3 broadcast address */
   static inet::ModuleIdAddress unspecified_address;
+  /** @brief The maximum delay a packet can undergo when queueing at 
+   * networ layer */
+  omnetpp::simtime_t max_bcast_delay;
   /** @brief The current status of nodes running the infection app */
   Status status;
   /** @brief The probability of recovery of an infection */

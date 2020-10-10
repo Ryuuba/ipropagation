@@ -30,6 +30,7 @@ void InfectionObserver::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
     epsilon = par("epsilon");
     round_num = par("roundNumber").intValue();
+    max_bcast_delay = par("maxBcastDelay");
     trial_num = par("lambda");
     unit_time = par("unitTime");
     round_time = unit_time * trial_num;
@@ -130,7 +131,10 @@ void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
     emit(rho_stat, rho);
     EV_INFO << "Number of infected nodes: " << infected_num << '\n';
     EV_INFO << "Expected infection density: " << rho << '\n';
-    scheduleAt(omnetpp::simTime() + round_time, round_timer);
+    if (omnetpp::simTime() == getSimulation()->getWarmupPeriod())
+      scheduleAt(omnetpp::simTime() + round_time + max_bcast_delay, msg);
+    else
+      scheduleAt(omnetpp::simTime() + round_time, msg);
     // bool stop_condition = (round_counter > round_num) || (rho == 0.0);
     if (round_counter > round_num || rho == 0.0)
       endSimulation();

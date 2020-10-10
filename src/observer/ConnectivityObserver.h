@@ -51,6 +51,8 @@ protected:
   int trial_num;
   // @brief The time between transmissions
   omnetpp::simtime_t unit_time;
+  // @brief The maximum delay a broadcast undergoes
+  omnetpp::simtime_t max_bcast_delay;
   // @brief The duration of a round
   omnetpp::simtime_t round_time;
   // @brief Timer

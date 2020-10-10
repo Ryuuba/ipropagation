@@ -19,6 +19,7 @@ import informationpropagation.contract.IApp;
 simple InformationPropagationBase like IApp{
     parameters:
         @display("i=block/infection_app");
+        double maxBcastDelay @unit(s);
         double unitTime @unit(s);
         double recoveryProbability;  //a.k.a. mu
         int lambda;          //a.k.a. lambda

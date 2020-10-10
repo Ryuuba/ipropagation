@@ -32,7 +32,8 @@ omnetpp::simsignal_t InformationPropagationBase::src_set_signal
   = registerSignal("srcSet");
 
 InformationPropagationBase::InformationPropagationBase()
-  : mu(0.0)
+  : max_bcast_delay(0.0)
+  , mu(0.0)
   , lambda(0)
   , round_num(0)
   , unit_time(0.0)
@@ -67,6 +68,7 @@ void InformationPropagationBase::initialize(int stage) {
     transmission_timer = new omnetpp::cMessage("transmission timer");
     src_set = std::make_shared<std::set<int>>();
     netw_protocol = &inet::Protocol::probabilistic;
+    max_bcast_delay = par("maxBcastDelay");
     mu = par("recoveryProbability");
     lambda = par("lambda").intValue();
     unit_time = par("unitTime");

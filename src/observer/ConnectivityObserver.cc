@@ -16,6 +16,7 @@ void ConnectivityObserver::initialize(int stage) {
     c_matrix = std::make_unique<SquareMatrix<uint64_t>>(host_number, 0);
     trial_num = par("lambda");
     unit_time = par("unitTime");
+    max_bcast_delay = par("maxBcastDelay");
     round_time = unit_time * trial_num;
     getSimulation()->getSystemModule()->subscribe(
       forwarding_list_signal,
@@ -38,7 +39,10 @@ void ConnectivityObserver::handleMessage(omnetpp::cMessage* msg) {
     for (auto&& index : global_src_set)
       (*contact_cnt)[index]++;
     global_src_set.clear();
-    scheduleAt(omnetpp::simTime() + round_time, round_timer);
+    if (omnetpp::simTime() == getSimulation()->getWarmupPeriod())
+      scheduleAt(omnetpp::simTime() + round_time + max_bcast_delay, msg);
+    else
+      scheduleAt(omnetpp::simTime() + round_time, msg);
   }
   else
     throw omnetpp::cRuntimeError(
@@ -78,7 +82,7 @@ void ConnectivityObserver::receiveSignal(
 
 void ConnectivityObserver::finish() {
   std::string result_file {
-    omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${seedset}")
+    omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}_${beta}-${mu}-${seedset}")
   };
   std::ofstream ofs( result_file + "-rij" + ".mat" );
   //Computes the number of attempts of transmissions per node
@@ -109,7 +113,8 @@ void ConnectivityObserver::finish() {
         r_ij = ((*contact_cnt)[i] == 0) 
              ? 0.0 
              : double((*c_matrix)(i, j))/(*contact_cnt)[i];
-        ofs << std::fixed << std::setprecision(2) << r_ij << ' ';
+        // ofs << std::fixed << std::setprecision(2) << r_ij << ' ';
+        ofs << std::fixed << std::setprecision(2) << double((*c_matrix)(i, j)) << '/' << (*contact_cnt)[i] << ' ';
         }
       ofs << '\n';
     }

@@ -48,12 +48,15 @@ network SmallGrid
         @display("bgb=250,160;bgg=,,grey10");
         double unitTime @unit(s);
         int lambda;
+        double maxBroadcastDelay @unit(s);
     submodules:
         node[16]: WirelessBroadcastNode {
             @display("p=200,200;is=s");
             mobility.numHosts = 16;
+            net.np.maxFirstBcastBackoff = maxBroadcastDelay;
             app.unitTime = unitTime;
             app.lambda = lambda;
+            app.maxBcastDelay = maxBroadcastDelay;
         }
         radioMedium: <> like IRadioMedium {
             @display("p=200,20;is=s");
@@ -63,12 +66,14 @@ network SmallGrid
             hostNumber = 16;
             unitTime = unitTime;
             lambda = lambda;
+            maxBcastDelay = maxBroadcastDelay;
         }
         infectionobserver: InfectionObserver {
             @display("p=200,100;is=s");
             hostNumber = 16;
             unitTime = unitTime;
             lambda = lambda;
+            maxBcastDelay = maxBroadcastDelay;
         }
     connections allowunconnected:
 }

@@ -31,4 +31,5 @@ simple ConnectivityObserver
         int hostNumber;
         int lambda; //Number of trials per round
         double unitTime @unit(s); //the duration of a round
+        double maxBcastDelay @unit(s); //The duration of the maximum transmission delay
 }

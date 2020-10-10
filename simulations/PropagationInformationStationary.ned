@@ -25,33 +25,40 @@ import slaw.map.SelfSimilarWaypointMap;
 network PropagationInformationStationary
 {
     parameters:
-        @display("bgb=700,700;bgg=,,grey10");
+        @display("bgb=500,500;bgg=,,grey10");
         int hostNumber = default(2);
+        int lambda;
         bool hasSelfSimilarMap = default(false);
         double unitTime @unit(s);
-        int lambda;
+        double maxBroadcastDelay @unit(s);
     submodules:
         radioMedium: <> like IRadioMedium {
-            @display("p=640,20;is=s");
+            @display("p=480,20;is=s");
         }
         node[hostNumber]: WirelessBroadcastNode {
             @display("p=250,250;is=s");
             mobility.numHosts = hostNumber;
+            net.np.maxFirstBcastBackoff = maxBroadcastDelay;
             app.unitTime = unitTime;
             app.lambda = lambda;
+            app.maxBcastDelay = maxBroadcastDelay;
         }
         connectivityobserver: ConnectivityObserver {
-            @display("p=640,80;is=s");
+            @display("p=480,80;is=s");
             hostNumber = hostNumber;
+            lambda = lambda;
+            unitTime = unitTime;
+            maxBcastDelay = maxBroadcastDelay;
         }
         infectionobserver: InfectionObserver {
-            @display("p=640,140;is=s");
+            @display("p=480,140;is=s");
             hostNumber = hostNumber;
-            unitTime = unitTime;
             lambda = lambda;
+            unitTime = unitTime;
+            maxBcastDelay = maxBroadcastDelay;
         }
         map: SelfSimilarWaypointMap if hasSelfSimilarMap {
-            @display("p=640,200;is=s");
+            @display("p=480,200;is=s");
         }
     connections allowunconnected:
 }

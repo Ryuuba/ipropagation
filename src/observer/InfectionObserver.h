@@ -34,6 +34,8 @@ class InfectionObserver
 protected:
   // @brief The number of rounds to be observed
   long long round_num;
+  // @brief The maximum time a msg is queueing before broadcasting
+  omnetpp::simtime_t max_bcast_delay;
   // @brief The error
   double epsilon;
   // @brief The expected infection density
@@ -79,6 +81,7 @@ public:
   // @brief Default constructor
   InfectionObserver()
     : round_num(0)
+    , max_bcast_delay(0.0)
     , epsilon(0.0)
     , rho(0.0)
     , beta(0.0)

@@ -28,6 +28,7 @@ simple InfectionObserver
     int lambda; //Number of trials per round
     double unitTime @unit(s); //the duration of a round
     double epsilon = default(0.001);
+    double maxBcastDelay @unit(s); //The duration of the maximum transmission delay
     @display("i=observer/infection_observer");
     @signal[infectedNodes](type = unsigned long);
     @statistic[infectedNodes](
