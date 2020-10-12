@@ -57,7 +57,10 @@ protected:
   // @brief Data structure to store the ID of received messages
   typedef std::set<long> MsgIdSet;
   // @brief Data structure to store pairs <time, msg>
-  typedef std::multimap<omnetpp::simtime_t, std::unique_ptr<inet::Packet> > TimeMsgMap;
+  typedef std::multimap<
+    omnetpp::simtime_t,
+    std::unique_ptr<inet::Packet>
+  > TimeMsgMap;
 protected:
   // @brief Enables L3 forwading
   bool forwarding;
@@ -83,7 +86,7 @@ protected:
   // @brief rings when it's time to perform broadcast
   omnetpp::cMessage* broadcast_timer;
   // @brief The list of possible forwarding nodes
-  std::shared_ptr<DestinationList> forwarding_list;
+  // std::shared_ptr<DestinationList> forwarding_list;
   // @brief A pointer to access the neighbor cache
   NeighborCache* cache;
   // @brief Stores the ID of received messages
@@ -174,10 +177,10 @@ protected:
   virtual void handleCrashOperation(inet::LifecycleOperation*) override {}
   // @brief Initializes the parameters of this module
   virtual void initialize(int) override;
-  /** @brief Computes de size of the set of possible forwarding neighbors */
-  virtual void compute_forwarding_list();
+  /** @brief Computes a new set of possible forwarding neighbors */
+  virtual std::shared_ptr<DestinationList> compute_forwarding_list();
   /** @brief Draws randomly neighbors from the neighbor cache */
-  virtual void draw_neighbor(size_t);
+  virtual void draw_neighbor(size_t, std::shared_ptr<DestinationList>);
   //** TODO: Drops packet */
   // virtual void drop_packet(inet::Packet*);
 public:

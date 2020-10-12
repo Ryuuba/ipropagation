@@ -39,7 +39,6 @@ ProbabilisticCast::ProbabilisticCast()
   , max_first_bcast_backoff(0.0)
   , src_address(nullptr)
   , broadcast_timer(nullptr)
-  , forwarding_list(std::make_shared<DestinationList>())
   , cache(nullptr)
   , recv_pkt_num(0)
   , sent_pkt_num(0)
@@ -208,17 +207,14 @@ void ProbabilisticCast::handleSelfMessage(omnetpp::cMessage *msg)
   if (msg == broadcast_timer) {
     auto packet = pop_msg();
     if (bernoulli(beta)) {
+      auto netwHeader = packet->peekAtFront<inet::ProbabilisticCastHeader>();
       EV_INFO << "ProbabilisticCast: at " << omnetpp::simTime() << " host " 
               << *src_address << " passes the Bernoulli test." << endl;
-      compute_forwarding_list();
-      if (!forwarding_list->empty()) {
-        ForwardingListNotification notification(forwarding_list);
-        emit(forwarding_list_signal, &notification);
+      if (!netwHeader->getForwardingList()->empty()) {
         EV_INFO << "Destination(s): ";
-        for (auto& id : *forwarding_list)
+        for (auto& id : *(netwHeader->getForwardingList()))
           EV_INFO << id << ' ';
         EV_INFO << '\n';
-        auto netwHeader = packet->peekAtFront<inet::ProbabilisticCastHeader>();
         if (netwHeader->getHopCount() == 0)
           fwd_pkt_num++;
         else
@@ -297,13 +293,17 @@ inet::Packet* ProbabilisticCast::pop_msg( )
   return pkt;
 }
 
+
 void ProbabilisticCast::encapsulate(inet::Packet *packet)
 {
   auto netw_header = inet::makeShared<inet::ProbabilisticCastHeader>();
   cObject *controlInfo = packet->removeControlInfo();
+  std::shared_ptr<DestinationList> fwd_list = compute_forwarding_list();
+  ForwardingListNotification ntf(fwd_list);
+  emit(forwarding_list_signal, &ntf); // notification
   netw_header->setInitialSrcAddr(*src_address);
   netw_header->setSourceAddress(*src_address);
-  netw_header->setForwardingList(forwarding_list);
+  netw_header->setForwardingList(fwd_list);
   netw_header->setId(getNextID());
   netw_header->setHopCount(0);
   netw_header->setChunkLength(inet::B(header_length));
@@ -353,38 +353,40 @@ void ProbabilisticCast::set_ctrl_info(
 }
 
 
-void ProbabilisticCast::compute_forwarding_list() {
+std::shared_ptr<DestinationList> ProbabilisticCast::compute_forwarding_list() {
+  std::shared_ptr<DestinationList> destination_list = std::make_shared<DestinationList>();
   auto cache_size = cache->size();
   if (cache_size > 0) {
     if (communication_mode == BROADCAST) {
-      draw_neighbor(cache_size); //Effectively, it modifies the fwd list
+      draw_neighbor(cache_size, destination_list); // Modifies the dest list
     }
     else if (communication_mode == MULTICAST) {
       size_t list_size 
         = cache->size() == 1 ? 1
         : intuniform(1, cache_size);
-      draw_neighbor(list_size); //Effectively, it modifies the fwd list
+      draw_neighbor(list_size, destination_list); // Modifies the fwd list
     }
     else 
-      draw_neighbor(1); //Effectively, it modifies the fwd list
+      draw_neighbor(1, destination_list); // Modifies the fwd list
   }
-  else 
-    forwarding_list->clear();
+  return destination_list;
 }
 
-void ProbabilisticCast::draw_neighbor(size_t max) {
-  forwarding_list->clear();
+void ProbabilisticCast::draw_neighbor(
+  size_t max, 
+  std::shared_ptr<DestinationList> destination_list
+) {
   if (max > 0) {
     std::list<cache_register> neighborhood = *(cache->get());
     if (max < neighborhood.size())
-      while (forwarding_list->size() < max) {
+      while (destination_list->size() < max) {
         auto it = neighborhood.begin();
         std::advance(it, intuniform(0, neighborhood.size() - 1));
-        forwarding_list->push_back( it->netw_address );
+        destination_list->push_back( it->netw_address );
         neighborhood.erase(it);
       }
     else
       for (auto&& entry : neighborhood)
-        forwarding_list->push_back(entry.netw_address);
+        destination_list->push_back(entry.netw_address);
   }
 }

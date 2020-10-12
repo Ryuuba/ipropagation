@@ -5,8 +5,8 @@ Define_Module(ConnectivityObserver);
 
 omnetpp::simsignal_t ConnectivityObserver::forwarding_list_signal
   = registerSignal("fwdList");
-omnetpp::simsignal_t ConnectivityObserver::src_set_signal
-  = registerSignal("srcSet");
+omnetpp::simsignal_t ConnectivityObserver::contact_list_signal
+  = registerSignal("contactList");
 
 void ConnectivityObserver::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
@@ -14,41 +14,22 @@ void ConnectivityObserver::initialize(int stage) {
     contact_cnt = std::make_unique<std::vector<uint64_t>>(host_number, 0);
     r_matrix = std::make_unique<SquareMatrix<uint64_t>>(host_number, 0);
     c_matrix = std::make_unique<SquareMatrix<uint64_t>>(host_number, 0);
-    trial_num = par("lambda");
-    unit_time = par("unitTime");
-    max_bcast_delay = par("maxBcastDelay");
-    round_time = unit_time * trial_num;
     getSimulation()->getSystemModule()->subscribe(
       forwarding_list_signal,
       this
     );
     getSimulation()->getSystemModule()->subscribe(
-      src_set_signal,
+      contact_list_signal,
       this
     );
-    round_timer = new omnetpp::cMessage("Round timer");
-    // Nodes emit their status before the observer compute probabilities
-    round_timer->setSchedulingPriority(10);
-    auto t1 = omnetpp::simTime() + getSimulation()->getWarmupPeriod() + round_time;
-    scheduleAt(t1, round_timer);
   }
 }
 
 void ConnectivityObserver::handleMessage(omnetpp::cMessage* msg) {
-  if (msg->isSelfMessage()) {
-    for (auto&& index : global_src_set)
-      (*contact_cnt)[index]++;
-    global_src_set.clear();
-    if (omnetpp::simTime() == getSimulation()->getWarmupPeriod())
-      scheduleAt(omnetpp::simTime() + round_time + max_bcast_delay, msg);
-    else
-      scheduleAt(omnetpp::simTime() + round_time, msg);
-  }
-  else
-    throw omnetpp::cRuntimeError(
-      "ConnectivityObserver: This module does not receive any messages\
-      (name = %s)\n", msg->getName()
-    );
+  throw omnetpp::cRuntimeError(
+    "ConnectivityObserver: This module does not receive any messages\
+    (name = %s)\n", msg->getName()
+  );
 }
 
 // The random process the network layer performs determines r_ij
@@ -69,14 +50,13 @@ void ConnectivityObserver::receiveSignal(
       (*r_matrix)(host_id, j-1)++; // decrement j because netw addresses start at 1
     }
   }
-  else if(id == src_set_signal) {
-    Enter_Method("Receiving source set from host[%d]", host_id);
-    auto notification_ptr = dynamic_cast<SourceNotification*>(obj);
-    auto src_set = notification_ptr->src_set;
-    for(auto&& src_id : *src_set) {
-      (*c_matrix)(src_id - 1, host_id)++; //decrement src_id to match node index
-      global_src_set.insert(src_id - 1);
-    }
+  else if (id == contact_list_signal) {
+    Enter_Method("Receiving destination set from host[%d]", host_id);
+    auto notification_ptr = dynamic_cast<DestinationNotification*>(obj);
+    auto contact_list = notification_ptr->contact_list;
+    (*contact_cnt)[host_id]++;
+    for(auto&& dest_id : *contact_list)
+      (*c_matrix)(host_id, dest_id.first)++; //decrement src_id
   }
 }
 
@@ -113,8 +93,7 @@ void ConnectivityObserver::finish() {
         r_ij = ((*contact_cnt)[i] == 0) 
              ? 0.0 
              : double((*c_matrix)(i, j))/(*contact_cnt)[i];
-        // ofs << std::fixed << std::setprecision(2) << r_ij << ' ';
-        ofs << std::fixed << std::setprecision(2) << double((*c_matrix)(i, j)) << '/' << (*contact_cnt)[i] << ' ';
+        ofs << std::fixed << std::setprecision(2) << r_ij << ' ';
         }
       ofs << '\n';
     }

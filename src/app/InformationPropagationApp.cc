@@ -55,9 +55,11 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
               << " is " << status_to_string(status) 
               << " at round " << round_num << '\n';
       emit(last_status_signal, status);
-      SourceNotification notification(src_set);
-      emit(src_set_signal, &notification);
-      src_set->clear();
+      if (!contact_list->empty()) {
+        DestinationNotification notification(contact_list);
+        emit(contact_list_signal, &notification);
+        contact_list->clear();
+      }
       // It's assumed the maximum delay is constrained
       if (omnetpp::simTime() == getSimulation()->getWarmupPeriod())
         scheduleAt(omnetpp::simTime() + step_time + max_bcast_delay, msg);
@@ -138,8 +140,6 @@ void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)
   else 
     EV_INFO << "App: Host " << src_address->getId()
             << " is already infected\n";
-  int src_id = pkt->getSrc().toModuleId().getId();
-  src_set->insert(src_id);
   emit(recv_msg_signal, ++recv_msg);
 }
 

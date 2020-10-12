@@ -46,9 +46,6 @@ network PropagationInformationStationary
         connectivityobserver: ConnectivityObserver {
             @display("p=480,80;is=s");
             hostNumber = hostNumber;
-            lambda = lambda;
-            unitTime = unitTime;
-            maxBcastDelay = maxBroadcastDelay;
         }
         infectionobserver: InfectionObserver {
             @display("p=480,140;is=s");

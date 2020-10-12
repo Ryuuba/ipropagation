@@ -28,8 +28,8 @@ omnetpp::simsignal_t InformationPropagationBase::last_status_signal
   = registerSignal("lastStatus");
 omnetpp::simsignal_t InformationPropagationBase::infection_time_signal
   = registerSignal("infectionTime");
-omnetpp::simsignal_t InformationPropagationBase::src_set_signal
-  = registerSignal("srcSet");
+omnetpp::simsignal_t InformationPropagationBase::contact_list_signal
+  = registerSignal("contactList");
 
 InformationPropagationBase::InformationPropagationBase()
   : max_bcast_delay(0.0)
@@ -43,7 +43,7 @@ InformationPropagationBase::InformationPropagationBase()
   , recv_msg(0)
   , recovery_timer(nullptr)
   , stat_timer(nullptr)
-  , src_set(nullptr)
+  , contact_list(nullptr)
 {
   
 }
@@ -53,6 +53,10 @@ InformationPropagationBase::~InformationPropagationBase()
   cancelAndDelete(recovery_timer);
   cancelAndDelete(stat_timer);
   cancelAndDelete(transmission_timer);
+  getParentModule()->unsubscribe(
+    forwarding_list_signal,
+    this
+  );
   if (socket) {
     delete socket;
     socket = nullptr;
@@ -61,18 +65,23 @@ InformationPropagationBase::~InformationPropagationBase()
 
 void InformationPropagationBase::initialize(int stage) {
   if (stage == inet::INITSTAGE_LOCAL) {
+    module_index = getParentModule()->getIndex();
     input_gate_id = gate("inputSocket")->getId();
     output_gate_id = gate("outputSocket")->getId();
     recovery_timer = new omnetpp::cMessage("recovery timer");
     stat_timer = new omnetpp::cMessage("stat timer");
     transmission_timer = new omnetpp::cMessage("transmission timer");
-    src_set = std::make_shared<std::set<int>>();
+    contact_list = std::make_shared<std::unordered_map<int, bool>>();
     netw_protocol = &inet::Protocol::probabilistic;
     max_bcast_delay = par("maxBcastDelay");
     mu = par("recoveryProbability");
     lambda = par("lambda").intValue();
     unit_time = par("unitTime");
     step_time = lambda * unit_time;
+    getParentModule()->subscribe (
+      forwarding_list_signal,
+      this
+    );
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
     auto id = inet::getContainingNode(this)->getIndex() + 1; //unicast address
@@ -149,4 +158,17 @@ void InformationPropagationBase::compute_initial_state() {
       status = InformationPropagationBase::NOT_INFECTED;
     EV_INFO << "Initial status of host " << src_address->getId() 
             << " is " << status << '\n';
+}
+
+void InformationPropagationBase::receiveSignal(
+  omnetpp::cComponent* src,   //@param the module emitting the signal 
+  omnetpp::simsignal_t id,    //@param the signal id
+  omnetpp::cObject* obj,      //@param the object carried by the signal
+  omnetpp::cObject* details   //@param details about the object
+) {
+  Enter_Method("Receiving forwarding list from network layer");
+  auto notification_ptr = dynamic_cast<ForwardingListNotification*>(obj);
+  auto forwarding_list = notification_ptr->forwarding_list;
+  for (auto&& id : *forwarding_list)
+    (*contact_list)[id.toModuleId().getId() - 1] = true;
 }

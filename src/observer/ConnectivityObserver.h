@@ -24,11 +24,10 @@
 #include <string>
 #include <iomanip>
 #include <cstdint>
-#include <set>
 #include "inet/common/INETDefs.h"
 #include "../common/SquareMatrix.h"
 #include "../signal/ForwardingListNotification.h"
-#include "../signal/SourceNotification.h"
+#include "../signal/DestinationNotification.h"
 #include "../common/ConnectivityObserverCell.h"
 
 class ConnectivityObserver
@@ -45,22 +44,10 @@ protected:
   std::unique_ptr<SquareMatrix<uint64_t>> r_matrix;
   /** @brief This matrix records the number of times node i contacts node j */
   std::unique_ptr<SquareMatrix<uint64_t>> c_matrix;
-  /** @brief The IDs of source node in a round */
-  std::set<int> global_src_set;
-  // @brief The number of transmission trials per round
-  int trial_num;
-  // @brief The time between transmissions
-  omnetpp::simtime_t unit_time;
-  // @brief The maximum delay a broadcast undergoes
-  omnetpp::simtime_t max_bcast_delay;
-  // @brief The duration of a round
-  omnetpp::simtime_t round_time;
-  // @brief Timer
-  omnetpp::cMessage* round_timer;
-  /** @brief This signal carries the ID of neighbors being contacted in a round */
+  /** @brief the signal carrying the destination list from the netw. layer */
   static omnetpp::simsignal_t forwarding_list_signal;
   /** @brief This signal carries the source of app-layer received messages */
-  static omnetpp::simsignal_t src_set_signal;
+  static omnetpp::simsignal_t contact_list_signal;
 protected:
   /** @brief Writes the adjacency matrix when finish is invoked at the end of a 
    * simulation*/
@@ -75,7 +62,6 @@ public:
     , contact_cnt(nullptr)
     , r_matrix(nullptr)
     , c_matrix(nullptr)
-    , round_timer(nullptr)
   { }
   ~ConnectivityObserver() 
   { 
@@ -84,10 +70,9 @@ public:
       this
     );
     getSimulation()->getSystemModule()->unsubscribe(
-      src_set_signal,
+      contact_list_signal,
       this
     );
-    cancelAndDelete(round_timer);
   }
   /** @brief Initializes the module state */
   virtual void initialize(int) override;

@@ -64,9 +64,6 @@ network SmallGrid
         connectivityobserver: ConnectivityObserver {
             @display("p=200,60;is=s");
             hostNumber = 16;
-            unitTime = unitTime;
-            lambda = lambda;
-            maxBcastDelay = maxBroadcastDelay;
         }
         infectionobserver: InfectionObserver {
             @display("p=200,100;is=s");

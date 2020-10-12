@@ -13,25 +13,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#if !defined(SOURCE_NOTIFICATION_H)
-#define SOURCE_NOTIFICATION_H
+#if !defined(DESTINATION_NOTIFICATION_H)
+#define DESTINATION_NOTIFICATION_H
 
 #include <memory>
 #include <omnetpp.h>
+#include <unordered_map>
 
-class SourceNotification
+class DestinationNotification
   : public omnetpp::cObject
   , omnetpp::noncopyable
 {
 public:
-  std::shared_ptr<const std::set<int>> src_set;
+  std::shared_ptr<const std::unordered_map<int, bool>> contact_list;
 public:
-  SourceNotification() : src_set(nullptr) {}
-  SourceNotification(
-    const std::shared_ptr<const std::set<int>> src_set_
+  DestinationNotification() : contact_list(nullptr) {}
+  DestinationNotification(
+    const std::shared_ptr<const std::unordered_map<int, bool>> cl
   )
-    : src_set(src_set_)
+    : contact_list(cl)
   { }
 };
 
-#endif // SOURCE_NOTIFICATION_H
+#endif // DESTINATION_NOTIFICATION_H

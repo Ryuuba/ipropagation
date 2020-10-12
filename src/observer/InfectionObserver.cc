@@ -76,7 +76,7 @@ void InfectionObserver::receiveSignal(
   unsigned host_id = src->getParentModule()->getIndex();
   InformationPropagationApp::Status status =  
     static_cast<InformationPropagationApp::Status>(value);
-  p->at(host_id) = status;
+  (*p)[host_id] = status;
   
   Enter_Method(
     "Receiving status %s from host[%d]", InformationPropagationApp::status_to_string(status),
@@ -96,7 +96,7 @@ void InfectionObserver::receiveSignal(
   unsigned host_id = src->getParentModule()->getParentModule()->getIndex();
   auto notification_ptr = dynamic_cast<NeighborhoodNotificacion*>(obj);
   auto neighborhood = notification_ptr->neighborhood;
-  adjacency_matrix->at(host_id) = neighborhood;
+  (*adjacency_matrix)[host_id] = neighborhood;
   Enter_Method("Receiving neighborhood from host[%d]", host_id);
 }
 
@@ -106,7 +106,7 @@ double InfectionObserver::compute_rho() {
 
   for (size_t i = 0; i < host_num; i++) {
     (*q)[i] = 1.0; //not infected by a neighbor
-    for (auto&& entry : *(adjacency_matrix->at(i)))
+    for (auto&& entry : *((*adjacency_matrix)[i]))
       (*q)[i] *= (1 - beta * (*p)[entry.node_index]);
     (*next_p)[i]                         //p(t+1)
       = (1 - (*q)[i]) * (1 - (*p)[i])    //infected by nbr & not infected

@@ -19,11 +19,13 @@
 #include <omnetpp.h>
 #include <set>
 #include <memory>
+#include <unordered_map>
 #include "../contract/IApp.h"
-#include "../signal/SourceNotification.h"
+#include "../signal/DestinationNotification.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "../signal/ForwardingListNotification.h"
 
 class InformationPropagationBase : public IApp
 {
@@ -72,8 +74,8 @@ protected:
   omnetpp::cMessage* recovery_timer;
   /** @brief Timer to trigger the send of statistics */
   omnetpp::cMessage* stat_timer;
-  /** @brief The netw address of nodes contacting this one */
-  std::shared_ptr<std::set<int>> src_set;
+  /** @brief The destinations the network layer contact in a round */
+  std::shared_ptr<std::unordered_map<int, bool>> contact_list;
 protected: //App signals that carry statistics
   /** @brief 1) Signal carrying the number of sent messages 
    *         2) Signal carrying the number of received messages
@@ -83,7 +85,7 @@ protected: //App signals that carry statistics
                               sent_message_signal,
                               last_status_signal,
                               infection_time_signal,
-                              src_set_signal;
+                              contact_list_signal;
 protected:
   /** @brief Computes whether this node starts infected or not */
   virtual void compute_initial_state();
@@ -101,6 +103,9 @@ protected: //Member functions inherited from INetworkSocket::ICallBack
   virtual void socketDataArrived(inet::L3Socket*, inet::Packet*) override;
   /** @brief This callback is execute when the socket is closed */
   virtual void socketClosed(inet::L3Socket*) override;
+    /** @brief Receives the forwarding list the routing protocol computes. */
+  virtual void receiveSignal(omnetpp::cComponent*, omnetpp::simsignal_t,  
+    omnetpp::cObject*, omnetpp::cObject*) override;
 public:
   /** @brief Default constructor, initializes all attributes */
   InformationPropagationBase();
