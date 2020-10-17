@@ -136,7 +136,7 @@ void InfectionObserver::handleMessage(omnetpp::cMessage* msg) {
     else
       scheduleAt(omnetpp::simTime() + round_time, msg);
     // bool stop_condition = (round_counter > round_num) || (rho == 0.0);
-    if (round_counter > round_num || rho == 0.0)
+    if (round_counter >= round_num || rho == 0.0)
       endSimulation();
   }
   else 

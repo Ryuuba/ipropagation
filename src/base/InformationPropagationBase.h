@@ -34,7 +34,8 @@ public:
    *  be extended if the first you override it */
   enum Status {
     NOT_INFECTED = 0, //Nodes listen to the wireless channel
-    INFECTED          //Nodes broadcasted infectious messages to its neighbors
+    INFECTED,         //Nodes broadcasted infectious messages to its neighbors
+    PASSIVE_INFECTED, //Nodes currently infected, they don't transmit until the next round
   };
   /** @brief the sort of timers this app reacts */
   enum TimerKind {

@@ -11,12 +11,13 @@ import glob
 
 def main():
     result_dir = sys.argv[1]
+    prefix = sys.argv[2]
     try:
-        plt_name = sys.argv[2]
+        plt_name = sys.argv[3]
     except IndexError:
         plt_name = ''
     print('Reading files from', result_dir)
-    file_set = glob.glob(result_dir + '/*.txt')
+    file_set = glob.glob(result_dir + '/' + prefix + '*.txt')
     accum = []
     i = 0
     for file in file_set:
@@ -30,7 +31,7 @@ def main():
                 j += 1
         i += 1
     avg = []
-    rho_file = open('rho.txt', 'w')
+    rho_file = open(prefix + '_avg', 'w')
     for val in accum:
         rho = val / len(file_set)
         rho_file.write(str(rho) + '\n')

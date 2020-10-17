@@ -19,11 +19,11 @@ void InformationPropagationApp::initialize(int stage)
     stat_timer->setSchedulingPriority(3);
     WATCH(sent_msg);
     WATCH(recv_msg); //from IApp
-    WATCH(status);;
+    WATCH(status);
   }
   else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
     auto t0 = omnetpp::simTime() + getSimulation()->getWarmupPeriod();
-    auto t1 = t0 + step_time;
+    auto t1 = t0 + unit_time * (lambda / 2);
     scheduleAt(t0 + unit_time, transmission_timer);
     scheduleAt(t1, recovery_timer);
     scheduleAt(t0, stat_timer);
@@ -36,20 +36,23 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
     if (msg->getKind() == RECOVERY) {
       if (hasGUI())
         getParentModule()->bubble("Recovery");
-      if (status == INFECTED)
+      if (status == INFECTED || status == PASSIVE_INFECTED)
         try_recovery();
       scheduleAt(omnetpp::simTime() + step_time, msg);
     }
     else if (msg->getKind() == TRANSMISSION) {
-      if (hasGUI())
-        getParentModule()->bubble("Transmission");
-      if (status == INFECTED)
+      if (status == INFECTED) {
+        if (hasGUI())
+          getParentModule()->bubble("Transmission");
         send_message(msg);
+      }
       scheduleAt(omnetpp::simTime() + unit_time, msg);
     }
     else if (msg->getKind() == SEND_STATS) {
       if (hasGUI())
         getParentModule()->bubble("Send stats");
+      if (status == PASSIVE_INFECTED)
+        status = INFECTED;
       round_num++;
       EV_INFO << "The status of host " << src_address->getId() 
               << " is " << status_to_string(status) 
@@ -131,9 +134,9 @@ void InformationPropagationApp::process_packet(inet::Ptr<inet::InfoPacket> pkt)
             << " received an infectious message from " 
             << pkt->getSrc() << "\n";
     infection_time = omnetpp::simTime() - infection_time;
-    status = InformationPropagationBase::INFECTED;
+    status = InformationPropagationBase::PASSIVE_INFECTED;
     emit(infection_time_signal, infection_time);
-    emit(last_status_signal, status);
+    emit(last_status_signal, INFECTED);
     if (hasGUI())
       getParentModule()->bubble("Get infected!");
   }
@@ -147,7 +150,7 @@ void InformationPropagationApp::refreshDisplay() const
 {
   auto parent_module = getParentModule();
   omnetpp::cDisplayString& display_str = parent_module->getDisplayString();
-  if (status == InformationPropagationBase::INFECTED)
+  if (status == INFECTED || status == PASSIVE_INFECTED)
     display_str.setTagArg("i", 1, "red");
   else 
     display_str.setTagArg("i", 1, "");
