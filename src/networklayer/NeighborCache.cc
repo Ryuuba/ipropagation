@@ -10,10 +10,8 @@ omnetpp::simsignal_t NeighborCache::neighborhood_signal =
 
 std::ostream& operator<<(std::ostream& os, const NeighborCache& cache) {
   for (auto&& neighbor : cache)
-    std::cout << neighbor.netw_address.getId() << ' '
-              << neighbor.mac_address  << ' '
-              << neighbor.last_contact_time
-              << '\n';
+    os << neighbor.node_index << ' ';
+  os << '\n';
   return os;
 }
 
@@ -47,8 +45,8 @@ void NeighborCache::push_register(CacheRegister&& entry) {
   if (it == cache->end()) {
     cache->push_back(entry);
     EV_INFO <<  "NeighborCache: entry: <" << entry.netw_address.getId() << ", " 
-             << entry.mac_address << ", "
-             << entry.last_contact_time << "> is pushed back\n";
+            << entry.mac_address << ", "
+            << entry.last_contact_time << "> is pushed back\n";
   }
   else
     EV_INFO <<  "NeighborCache: a host "
@@ -144,8 +142,12 @@ void NeighborCache::flush_cache() {
   Enter_Method_Silent();
   auto it = cache->begin();
   while (it != cache->end()) {
-    if (!it->still_connected)
+    if (!it->still_connected) {
+      EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex()
+              << "] detects that node[" << it->node_index
+              << "] is unreachable\n";
       it = cache->erase(it);
+    }
     else
       ++it;
   }

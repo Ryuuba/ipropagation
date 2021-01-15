@@ -114,7 +114,9 @@ public:
     return cache->end();
   }
   virtual void emit();
-  /** @brief Allows a WATCH macro to display the neighbor cache of a node */
+  /** @brief Prints the node index of N(x)
+   * Allows a WATCH macro to display the neighbor cache of a node.
+   */
   friend std::ostream& operator<<(std::ostream&, const NeighborCache&);
 };
 

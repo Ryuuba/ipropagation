@@ -40,16 +40,18 @@ namespace inet {
  * {
  *     REQ = 0;
  *     REP = 1;
+ *     ADV = 2;
  * }
  * </pre>
  */
 enum HelloPacketType {
     REQ = 0,
-    REP = 1
+    REP = 1,
+    ADV = 2
 };
 
 /**
- * Class generated from <tt>msg/HelloPacket.msg:33</tt> by nedtool.
+ * Class generated from <tt>msg/HelloPacket.msg:34</tt> by nedtool.
  * <pre>
  * class HelloPacket extends FieldsChunk
  * {

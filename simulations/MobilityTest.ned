@@ -15,25 +15,42 @@
 
 package informationpropagation.simulations;
 import informationpropagation.node.WirelessBroadcastNode;
+import informationpropagation.observer.ConnectivityObserver;
+import informationpropagation.observer.InfectionObserver;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
-import slaw.tripmanager.TripManager;
+import slaw.mobility.SlawMobility;
 
 network MobilityTest
 {
     parameters:
-        int hostNumber;
-        @display("bgb=2000,2000;bgg=100,2,grey50");
+        @display("bgb=300,300;bgg=,,grey10");
+        int hostNumber = default(2);
+        int lambda;
+        bool isSLAW = default(false);
+        double unitTime @unit(s);
+        double maxBroadcastDelay @unit(s);
     submodules:
         radioMedium: <> like IRadioMedium {
-            @display("p=200,250;is=s");
-        }
-        tripmanager: TripManager {
-            @display("p=200,450;is=s");
-            walkermodel.numOfWalker = hostNumber;
-            walkermodel.hurstParameter = 0.75; //?
+            @display("p=480,20;is=s");
         }
         node[hostNumber]: WirelessBroadcastNode {
-            @display("p=1000,500;is=s");
+            @display("p=250,250;is=s");
+            mobility.numHosts = hostNumber;
+            net.np.maxFirstBcastBackoff = maxBroadcastDelay;
+            app.unitTime = unitTime;
+            app.lambda = lambda;
+            app.maxBcastDelay = maxBroadcastDelay;
+        }
+        connectivityobserver: ConnectivityObserver {
+            @display("p=480,80;is=s");
+            hostNumber = hostNumber;
+        }
+        infectionobserver: InfectionObserver {
+            @display("p=480,140;is=s");
+            hostNumber = hostNumber;
+            lambda = lambda;
+            unitTime = unitTime;
+            maxBcastDelay = maxBroadcastDelay;
         }
     connections allowunconnected:
 }

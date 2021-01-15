@@ -1,4 +1,4 @@
 #!/bin/zsh
 cd `dirname $0`
-../src/ipropagation_dbg -n .:../src:../../inet4/src/inet -f ./omnetpp.ini -c InformationPropagationAppTest -u Cmdenv -l ../../inet4/src/INET $*
+../src/ipropagation -n .:../src:../../inet4/src/inet -f ./omnetpp.ini -l ../../inet4/src/INET $*
 # for shared lib, use: opp_run -l ../src/oppnet -n .:../src $*

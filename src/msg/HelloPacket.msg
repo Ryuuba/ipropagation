@@ -27,6 +27,7 @@ enum HelloPacketType
 {
     REQ = 0;
     REP = 1;
+    ADV = 2;
 }
 
 class HelloPacket extends FieldsChunk

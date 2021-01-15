@@ -212,6 +212,7 @@ EXECUTE_ON_STARTUP(
     if (!e) omnetpp::enums.getInstance()->add(e = new omnetpp::cEnum("inet::HelloPacketType"));
     e->insert(REQ, "REQ");
     e->insert(REP, "REP");
+    e->insert(ADV, "ADV");
 )
 
 Register_Class(HelloPacket)

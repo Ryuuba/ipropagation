@@ -14,8 +14,9 @@
 // 
 
 package informationpropagation.simulations;
-import informationpropagation.node.WirelessBroadcastNode;
-import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
+import informationpropagation.node.HelloNode;
+import inet.physicallayer.contract.packetlevel.IRadioMedium;
+import slaw.map.SelfSimilarWaypointMap;
 //
 // 
 //
@@ -24,13 +25,17 @@ network HelloTest
     parameters:
         @display("bgb=200,200;bgg=,,grey10");
         int hostNumber = default(2);
+        bool hasSelfSimilarMap = default(false);
+        double unitTime @unit(s);
+        double maxBroadcastDelay @unit(s);
     submodules:
-        radioMedium: UnitDiskRadioMedium {
-            parameters:
-                @display("p=53,24;is=s");
+        radioMedium: <> like IRadioMedium {
+            @display("p=200,200;is=s");
         }
-        node[hostNumber]: WirelessBroadcastNode {
-            @display("p=100,100");
+        node[hostNumber]: HelloNode {
+            @display("p=150,150;is=s");
+            mobility.numHosts = hostNumber;
+            net.np.maxFirstBcastBackoff = maxBroadcastDelay;
         }
     connections allowunconnected:
 }

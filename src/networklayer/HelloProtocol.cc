@@ -6,7 +6,12 @@ Define_Module(HelloProtocol);
 void HelloProtocol::initialize(int stage) {
   NeighborDiscoveryProtocolBase::initialize(stage);
   if (stage == inet::INITSTAGE_LOCAL) {
-    is_mobile_node = par("isMobileNode").boolValue();
+    is_one_way = par("isOneWay").boolValue();
+    if (is_one_way)
+      pkt_type = inet::HelloPacketType::ADV;
+    else
+      pkt_type = inet::HelloPacketType::REP;
+    is_static_network = par("isStaticNetwork").boolValue();
     bcast_delay_max = par("maximumBcastDelay");
     max_attemps = par("maxAttemptNumber").intValue();
     flush_delay = par("flushDelay");
@@ -25,31 +30,42 @@ void HelloProtocol::initialize(int stage) {
     }
     scheduleAt(omnetpp::simTime(), discovery_timer);
     flush_timer = new omnetpp::cMessage("flushtimer", TimerKind::FLUSH);
+    scheduleAt(omnetpp::simTime() + flush_delay, flush_timer);
+    WATCH(*neighbor_cache);
   }
 }
 
 void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
   if (
-    !is_mobile_node && omnetpp::simTime() > getSimulation()->getWarmupPeriod()
+    !is_static_network && omnetpp::simTime() > getSimulation()->getWarmupPeriod()
   )
     return;
   if (msg->isSelfMessage()) {
     switch (msg->getKind()) {
       case TimerKind::DISCOVERY :
-        scheduleAt(omnetpp::simTime() + flush_delay, flush_timer);
         scheduleAt(omnetpp::simTime() + discovery_time, discovery_timer);
         neighbor_cache->invalid_cache();
-        if (bcast_delay_max > 0.0)
+        if (bcast_delay_max > 0.0) {
+          EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex()
+                  << "] schedules BACKOFF timer\n";
           scheduleAt(omnetpp::simTime() + backoff(), backoff_timer);
-        else
-          send_hello_packet(inet::HelloPacketType::REQ); //Says hello
+        }
+        else {
+          EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex()
+          << "] sends hello\n";
+          scheduleAt(omnetpp::simTime() + backoff(), backoff_timer);
+        }
+          send_hello_packet(pkt_type); //Says hello
         break;
       case TimerKind::BACKOFF :
-        send_hello_packet(inet::HelloPacketType::REQ); //Says hello
+        EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex()
+        << "] sends hello\n";
+        send_hello_packet(pkt_type); //Says hello
         break;
       case TimerKind::FLUSH :
         neighbor_cache->emit();
         neighbor_cache->flush_cache();
+        scheduleAt(omnetpp::simTime() + flush_delay, flush_timer);
         break;
       default:
         throw omnetpp::cRuntimeError(
@@ -96,10 +112,11 @@ void HelloProtocol::process_hello_packet(omnetpp::cMessage* msg) {
     inet::dynamicPtrCast<inet::HelloPacket>(
       hello_pkt->popAtFront<inet::HelloPacket>()->dupShared()
     );//
-  EV_INFO << "Receive hello packet from " 
-          << hello_header->getNodeIndex() << ' '
-          << hello_header->getSrcMacAddress() << ' '
-          << hello_header->getSrcNetwAddress().toModuleId() << ' '
+  EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex() << ']'
+          << " receives hello packet from:\n" 
+          << "index: " << hello_header->getNodeIndex() << '\n'
+          << "mac: " << hello_header->getSrcMacAddress() << '\n'
+          << "module ID: " << hello_header->getSrcNetwAddress().toModuleId()
           << '\n';
   cache_register cache_reg;
   cache_reg.start_time = omnetpp::simTime();

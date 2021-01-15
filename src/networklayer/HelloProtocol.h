@@ -26,10 +26,14 @@ protected:
     BACKOFF,
     FLUSH
   };
+  /** @brief Sets this protocol to work in one-way mode */
+  bool is_one_way;
+  /** @brief The default message kind */
+  inet::HelloPacketType pkt_type;
   /** @brief Allows the exchanges of hello messages after the warm-up time. 
    *  this is useful in mobile environments
    */
-  bool is_mobile_node;
+  bool is_static_network;
   /** @brief Maximum number of attempts a node must perform to consider a
    * a neighbor is out of range */
   int max_attemps;
@@ -51,8 +55,9 @@ protected:
 public:
   /** @brief Default constructor */
   HelloProtocol()
-    : NeighborDiscoveryProtocolBase()
-    , is_mobile_node(false)
+    : is_one_way(false)
+    , NeighborDiscoveryProtocolBase()
+    , is_static_network(false)
     , max_attemps(0)
     , bcast_delay_max(0.0)
     , flush_delay(0.0)
