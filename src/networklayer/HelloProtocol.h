@@ -39,12 +39,10 @@ protected:
   int max_attemps;
   /** @brief Maximum delay before broadcasting a hello packet */
   omnetpp::simtime_t bcast_delay_max;
-  /** @brief Delay to flush stale entries in the neighbor cache */
-  omnetpp::simtime_t flush_delay;
+  /** @brief Time period between flushimg stale entries in the neighbor cache */
+  omnetpp::simtime_t flush_time;
   /** @brief Timer to trigger the emision of a hello message */
   omnetpp::cMessage* backoff_timer;
-  /** @brief Timer to flush the neighbor cache */
-  omnetpp::cMessage* flush_timer;
 protected:
   /** @brief Sends a hello packet */
   virtual void send_hello_packet(inet::HelloPacketType) override;
@@ -60,15 +58,13 @@ public:
     , is_static_network(false)
     , max_attemps(0)
     , bcast_delay_max(0.0)
-    , flush_delay(0.0)
+    , flush_time(0.0)
     , backoff_timer(nullptr)
-    , flush_timer(nullptr)
   { }
   /** @brief Default desconstructor: cancels and deletes the hello timer */
   virtual ~HelloProtocol() {
     cancelAndDelete(discovery_timer);
     cancelAndDelete(backoff_timer);
-    cancelAndDelete(flush_timer);
   }
   /** @brief Initializes the module state from a NED file */
   virtual void initialize(int) override;

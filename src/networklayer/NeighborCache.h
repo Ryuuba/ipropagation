@@ -84,7 +84,7 @@ public:
   /** @brief Sets value is_updated of all entries to false */
   virtual void invalid_cache();
   /** @brief Flushes stale entries */
-  virtual void flush_cache();
+  virtual void flush_cache(omnetpp::simtime_t);
   /** @brief Returns the numbers of entries in the cache */
   virtual size_t size() {
     return cache->size();

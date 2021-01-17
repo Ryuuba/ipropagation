@@ -138,11 +138,11 @@ void NeighborCache::invalid_cache() {
     entry.still_connected = false;
 }
 
-void NeighborCache::flush_cache() {
+void NeighborCache::flush_cache(omnetpp::simtime_t flush_time) {
   Enter_Method_Silent();
   auto it = cache->begin();
   while (it != cache->end()) {
-    if (!it->still_connected) {
+    if ((omnetpp::simTime() - it->last_contact_time) > flush_time) {
       EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex()
               << "] detects that node[" << it->node_index
               << "] is unreachable\n";

@@ -29,8 +29,8 @@ simple HelloProtocol extends NeighborDiscoveryProtocolBase
         int maxAttemptNumber;
         // backoff time to send a hello message
         double maximumBcastDelay @unit(s);
-        // delay to flush the neighbor cache before emitting a hello msg
-        double flushDelay @unit(s) = default(2*discoveryTime);
+        // The amount of time from which a node is considered unreachable
+        double flushTime @unit(s) = default(2*discoveryTime);
         // Allows the module to emit hello message after the warm-up period
         bool isStaticNetwork = default(false);
         // Sets this protocol to work as a one-way protocol
