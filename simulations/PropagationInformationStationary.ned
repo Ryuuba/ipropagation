@@ -25,7 +25,7 @@ import slaw.map.SelfSimilarWaypointMap;
 network PropagationInformationStationary
 {
     parameters:
-        @display("bgb=500,500;bgg=,,grey10");
+        @display("bgb=600,600;bgg=,,grey10");
         int hostNumber = default(2);
         int lambda;
         bool hasSelfSimilarMap = default(false);
@@ -33,7 +33,7 @@ network PropagationInformationStationary
         double maxBroadcastDelay @unit(s);
     submodules:
         radioMedium: <> like IRadioMedium {
-            @display("p=480,20;is=s");
+            @display("p=580,20;is=s");
         }
         node[hostNumber]: WirelessBroadcastNode {
             @display("p=250,250;is=s");
@@ -44,18 +44,18 @@ network PropagationInformationStationary
             app.maxBcastDelay = maxBroadcastDelay;
         }
         connectivityobserver: ConnectivityObserver {
-            @display("p=480,80;is=s");
+            @display("p=580,80;is=s");
             hostNumber = hostNumber;
         }
         infectionobserver: InfectionObserver {
-            @display("p=480,140;is=s");
+            @display("p=580,140;is=s");
             hostNumber = hostNumber;
             lambda = lambda;
             unitTime = unitTime;
             maxBcastDelay = maxBroadcastDelay;
         }
         map: SelfSimilarWaypointMap if hasSelfSimilarMap {
-            @display("p=480,200;is=s");
+            @display("p=580,200;is=s");
         }
     connections allowunconnected:
 }

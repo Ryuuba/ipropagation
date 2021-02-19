@@ -62,7 +62,7 @@ void ConnectivityObserver::receiveSignal(
 
 void ConnectivityObserver::finish() {
   std::string result_file {
-    omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}_${beta}-${mu}-${seedset}")
+    omnetpp::getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}_${seedset}")
   };
   std::ofstream ofs( result_file + "-rij" + ".mat" );
   //Computes the number of attempts of transmissions per node
@@ -74,9 +74,12 @@ void ConnectivityObserver::finish() {
   //Writes rij (attempt)
   try {
     for (size_t i = 0; i < r_matrix->size(); i++) {
+      std::cout << "Connectivity Observer: Transmitted messages of node[" 
+                << i << "]: " << msg_tx[i] << '\n'; 
       for (size_t j = 0; j < r_matrix->size(); j++) {
-        r_ij = (msg_tx[i] == 0) ? 0.0 : double((*r_matrix)(i, j))/msg_tx[i];
-        ofs << std::fixed << std::setprecision(2) << r_ij <<  ' ';
+        r_ij = (msg_tx[i] == 0) ? 0.0 : double((*r_matrix)(i, j));
+        // ofs << std::fixed << std::setprecision(2) << r_ij <<  ' ';
+        ofs << r_ij <<  ' ';
         }
       ofs << '\n';
     }

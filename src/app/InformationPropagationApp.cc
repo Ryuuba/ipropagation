@@ -64,6 +64,7 @@ void InformationPropagationApp::handleMessage(omnetpp::cMessage* msg)
         contact_list->clear();
       }
       // It's assumed the maximum delay is constrained
+      // ?????
       if (omnetpp::simTime() == getSimulation()->getWarmupPeriod())
         scheduleAt(omnetpp::simTime() + step_time + max_bcast_delay, msg);
       else

@@ -19,26 +19,26 @@ import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import slaw.tripmanager.TripManager;
 import informationpropagation.observer.ConnectivityObserver;
 
-network ObserverTest
+network ConnectivityObserverTest
 {
     parameters:
+        bool isSlaw = default(false);
         int hostNumber;
-        @display("bgb=2000,2000;bgg=100,2,grey50");
+        connectivityobserver.hostNumber = hostNumber;
+        node[*].mobility.numHosts = hostNumber;
+        @display("bgb=200,200;bgg=100,2,grey50");
     submodules:
         radioMedium: <> like IRadioMedium{
-            @display("p=200,250;is=s");
-        }
-        tripmanager: TripManager {
-            @display("p=200,450;is=s");
-            walkermodel.numOfWalker = hostNumber;
-            walkermodel.hurstParameter = 0.75; //?
-        }
-        node[hostNumber]: WirelessBroadcastNode {
-            @display("p=1000,500;is=s");
+            @display("p=200,50;is=s");
         }
         connectivityobserver: ConnectivityObserver {
-            @display("p=200,650;is=s");
-            hostNumber = hostNumber;
+            @display("p=200,100;is=s");
+        }
+        node[hostNumber]: WirelessBroadcastNode {
+            @display("p=100,100;is=s");
+        }
+        tripmanager: TripManager if isSlaw {
+            @display("p=200,;is=s");
         }
     connections allowunconnected:
 }

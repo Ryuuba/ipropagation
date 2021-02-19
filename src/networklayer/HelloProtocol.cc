@@ -44,9 +44,8 @@ void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
     switch (msg->getKind()) {
       case TimerKind::DISCOVERY :
         scheduleAt(omnetpp::simTime() + discovery_time, discovery_timer);
-        // neighbor_cache->invalid_cache();
         neighbor_cache->flush_cache(flush_time);
-        // neighbor_cache->emit();
+        neighbor_cache->emit();
         if (bcast_delay_max > 0.0) {
           EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex()
                   << "] schedules BACKOFF timer\n";
@@ -55,7 +54,6 @@ void HelloProtocol::handleMessage(omnetpp::cMessage* msg) {
         else {
           EV_INFO << "Node[" << getParentModule()->getParentModule()->getIndex()
           << "] sends hello\n";
-         // scheduleAt(omnetpp::simTime() + backoff(), backoff_timer);
           send_hello_packet(pkt_type); //Says hello
         }
         break;

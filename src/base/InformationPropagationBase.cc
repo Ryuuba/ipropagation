@@ -131,17 +131,13 @@ const char* InformationPropagationBase::status_to_string(Status s) {
   {
   case INFECTED:
     return "INFECTED";
-    break;
   case NOT_INFECTED:
     return "NOT_INFECTED";
-    break;
   case PASSIVE_INFECTED:
     return "INFECTED";
-    break;
   default:
     throw omnetpp::cRuntimeError(
       "InformationPropagationBase: invalid conversion to string from status %d", s);
-    break;
   } 
 }
 
